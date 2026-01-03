@@ -57,11 +57,13 @@ function App() {
         method: 'POST',
         credentials: 'same-origin'
       });
+      setCurrentUser(null);
+      window.location.href = '/';
     } catch (error) {
       console.error('Logout error:', error);
+      setCurrentUser(null);
+      window.location.href = '/';
     }
-    setCurrentUser(null);
-    window.location.reload();
   };
 
   const handleSaveMealPlan = async () => {
