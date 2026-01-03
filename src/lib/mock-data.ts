@@ -43,6 +43,13 @@ export function generateMockMealPlan(): MealPlan {
             cost: {
               meal_cost_eur: 2.40,
             },
+            cooking_instructions: [
+              'Place Greek yogurt in a serving bowl',
+              'Rinse the mixed berries and pat them dry',
+              'Top the yogurt with fresh berries',
+              'Sprinkle granola evenly over the top',
+              'Serve immediately for best texture'
+            ],
             ingredients: [
               {
                 ingredient_id: crypto.randomUUID(),
@@ -80,6 +87,15 @@ export function generateMockMealPlan(): MealPlan {
             cost: {
               meal_cost_eur: 3.80,
             },
+            cooking_instructions: [
+              'Preheat oven to 200°C (400°F)',
+              'Cook quinoa according to package instructions',
+              'Dice bell peppers and zucchini into bite-sized pieces',
+              'Toss vegetables with olive oil, salt, and pepper, then roast for 20-25 minutes',
+              'Season chicken breast with salt, pepper, and herbs',
+              'Grill or pan-fry chicken for 6-7 minutes per side until cooked through',
+              'Slice chicken and arrange over quinoa with roasted vegetables'
+            ],
             ingredients: [
               {
                 ingredient_id: crypto.randomUUID(),
@@ -131,6 +147,14 @@ export function generateMockMealPlan(): MealPlan {
             cost: {
               meal_cost_eur: 5.30,
             },
+            cooking_instructions: [
+              'Preheat oven to 200°C (400°F)',
+              'Pierce sweet potato with fork and bake for 45 minutes until tender',
+              'Season salmon fillet with salt, pepper, and lemon juice',
+              'Bake salmon at 180°C (350°F) for 12-15 minutes until flaky',
+              'Steam broccoli for 5-7 minutes until bright green and tender-crisp',
+              'Drizzle vegetables with olive oil before serving'
+            ],
             ingredients: [
               {
                 ingredient_id: crypto.randomUUID(),
@@ -188,6 +212,14 @@ export function generateMockMealPlan(): MealPlan {
             cost: {
               meal_cost_eur: 2.80,
             },
+            cooking_instructions: [
+              'Toast whole grain bread until golden brown',
+              'Crack eggs into a bowl and whisk with a pinch of salt and pepper',
+              'Heat a non-stick pan over medium heat with a small amount of butter',
+              'Pour in eggs and gently stir with a spatula until softly scrambled',
+              'Slice avocado and arrange on toast',
+              'Serve scrambled eggs alongside avocado toast'
+            ],
             ingredients: [
               {
                 ingredient_id: crypto.randomUUID(),
@@ -225,6 +257,14 @@ export function generateMockMealPlan(): MealPlan {
             cost: {
               meal_cost_eur: 2.90,
             },
+            cooking_instructions: [
+              'Drain and rinse chickpeas thoroughly',
+              'Dice cucumber and halve cherry tomatoes',
+              'Crumble feta cheese into small pieces',
+              'Combine all vegetables and chickpeas in a large bowl',
+              'Drizzle with olive oil and toss to combine',
+              'Season with salt, pepper, and fresh herbs if desired'
+            ],
             ingredients: [
               {
                 ingredient_id: crypto.randomUUID(),
@@ -276,6 +316,15 @@ export function generateMockMealPlan(): MealPlan {
             cost: {
               meal_cost_eur: 3.20,
             },
+            cooking_instructions: [
+              'Bring a large pot of salted water to boil for pasta',
+              'Dice onion finely and sauté in olive oil until translucent',
+              'Add ground turkey and cook until browned, breaking it up with a spoon',
+              'Stir in tomato sauce and simmer for 15-20 minutes',
+              'Cook whole wheat pasta according to package instructions',
+              'Drain pasta and toss with the turkey bolognese sauce',
+              'Serve hot with optional parmesan cheese'
+            ],
             ingredients: [
               {
                 ingredient_id: crypto.randomUUID(),
@@ -340,6 +389,13 @@ export function generateMockMealPlan(): MealPlan {
             cost: {
               meal_cost_eur: 2.20,
             },
+            cooking_instructions: [
+              'Peel and slice banana into chunks',
+              'Add banana, protein powder, oats, and almond milk to a blender',
+              'Blend on high speed for 30-60 seconds until smooth',
+              'Add ice cubes if desired for a thicker consistency',
+              'Pour into a glass and enjoy immediately'
+            ],
             ingredients: [
               {
                 ingredient_id: crypto.randomUUID(),
@@ -384,6 +440,14 @@ export function generateMockMealPlan(): MealPlan {
             cost: {
               meal_cost_eur: 3.10,
             },
+            cooking_instructions: [
+              'Drain canned tuna and white beans',
+              'Wash and dry mixed greens and cherry tomatoes',
+              'Halve cherry tomatoes',
+              'Combine greens, tuna, white beans, and tomatoes in a large bowl',
+              'Drizzle with olive oil and toss gently',
+              'Season with salt, pepper, and lemon juice if desired'
+            ],
             ingredients: [
               {
                 ingredient_id: crypto.randomUUID(),
@@ -435,6 +499,15 @@ export function generateMockMealPlan(): MealPlan {
             cost: {
               meal_cost_eur: 4.10,
             },
+            cooking_instructions: [
+              'Cook brown rice according to package instructions',
+              'Slice beef sirloin into thin strips against the grain',
+              'Heat sesame oil in a wok or large pan over high heat',
+              'Stir-fry beef for 2-3 minutes until browned, then remove from pan',
+              'Add mixed vegetables to the pan and stir-fry for 4-5 minutes',
+              'Return beef to pan, add soy sauce, and toss everything together',
+              'Serve stir-fry over brown rice'
+            ],
             ingredients: [
               {
                 ingredient_id: crypto.randomUUID(),
@@ -499,6 +572,14 @@ export function generateMockMealPlan(): MealPlan {
             cost: {
               meal_cost_eur: 2.60,
             },
+            cooking_instructions: [
+              'Mix cottage cheese, flour, and eggs in a bowl until smooth batter forms',
+              'Heat a non-stick pan over medium heat',
+              'Pour batter to form small pancakes (about 8cm diameter)',
+              'Cook for 2-3 minutes per side until golden brown',
+              'Wash and slice strawberries',
+              'Serve pancakes warm topped with fresh strawberries'
+            ],
             ingredients: [
               {
                 ingredient_id: crypto.randomUUID(),
@@ -543,6 +624,14 @@ export function generateMockMealPlan(): MealPlan {
             cost: {
               meal_cost_eur: 2.80,
             },
+            cooking_instructions: [
+              'Dice carrots, celery, and onion',
+              'Heat olive oil in a large pot and sauté vegetables until softened',
+              'Add red lentils and cover with water or vegetable broth',
+              'Bring to a boil, then reduce heat and simmer for 25-30 minutes',
+              'Season with salt, pepper, and herbs',
+              'Serve hot with crusty whole grain bread on the side'
+            ],
             ingredients: [
               {
                 ingredient_id: crypto.randomUUID(),
@@ -601,6 +690,15 @@ export function generateMockMealPlan(): MealPlan {
             cost: {
               meal_cost_eur: 4.20,
             },
+            cooking_instructions: [
+              'Preheat oven to 200°C (400°F)',
+              'Cut potatoes into wedges and toss with olive oil, salt, and pepper',
+              'Roast potatoes for 30-35 minutes until golden and crispy',
+              'Season cod fillet with salt, pepper, and lemon',
+              'Bake cod at 180°C (350°F) for 12-15 minutes until flaky',
+              'Steam green beans for 5-7 minutes',
+              'Serve cod with roasted potatoes and green beans'
+            ],
             ingredients: [
               {
                 ingredient_id: crypto.randomUUID(),
@@ -658,6 +756,15 @@ export function generateMockMealPlan(): MealPlan {
             cost: {
               meal_cost_eur: 2.50,
             },
+            cooking_instructions: [
+              'Toast whole grain bread until golden',
+              'Dice spinach, mushrooms, and cherry tomatoes',
+              'Beat eggs with salt and pepper',
+              'Heat a non-stick pan and sauté vegetables for 2-3 minutes',
+              'Pour beaten eggs over vegetables and cook until edges set',
+              'Fold omelet in half and cook until fully set',
+              'Serve with whole grain toast'
+            ],
             ingredients: [
               {
                 ingredient_id: crypto.randomUUID(),
@@ -709,6 +816,15 @@ export function generateMockMealPlan(): MealPlan {
             cost: {
               meal_cost_eur: 3.40,
             },
+            cooking_instructions: [
+              'Season and grill chicken breast until cooked through (165°F internal temp)',
+              'Let chicken rest for 5 minutes, then slice into strips',
+              'Wash and chop romaine lettuce',
+              'Warm tortilla slightly for easier rolling',
+              'Layer lettuce, chicken strips, parmesan, and Caesar dressing on tortilla',
+              'Roll tortilla tightly, tucking in the sides',
+              'Cut in half and serve with extra salad on the side'
+            ],
             ingredients: [
               {
                 ingredient_id: crypto.randomUUID(),
@@ -760,6 +876,15 @@ export function generateMockMealPlan(): MealPlan {
             cost: {
               meal_cost_eur: 2.95,
             },
+            cooking_instructions: [
+              'Dice bell peppers and onion',
+              'Sauté onion and peppers in a large pot until softened',
+              'Drain and rinse kidney beans and black beans',
+              'Add beans and tomato sauce to pot',
+              'Season with chili powder, cumin, salt, and pepper',
+              'Simmer for 20-25 minutes, stirring occasionally',
+              'Warm cornbread in oven and serve alongside chili'
+            ],
             ingredients: [
               {
                 ingredient_id: crypto.randomUUID(),

@@ -169,32 +169,48 @@ function MealCard({ meal, language, t }: { meal: Meal; language: Language; t: an
               <span className="tabular-nums">{meal.nutrition.fats_g}g F</span>
             </div>
 
-            <div className="space-y-2">
-              <h4 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-3">
-                {t.ingredients}
-              </h4>
-              {meal.ingredients.map((ingredient) => (
-                <div
-                  key={ingredient.ingredient_id}
-                  className="grid grid-cols-12 gap-4 py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors"
-                >
-                  <div className="col-span-4 md:col-span-3 font-medium">
-                    {translateIngredient(ingredient.name, language)}
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <h4 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-3">
+                  {t.ingredients}
+                </h4>
+                {meal.ingredients.map((ingredient) => (
+                  <div
+                    key={ingredient.ingredient_id}
+                    className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-4">
+                      <span className="font-medium">
+                        {translateIngredient(ingredient.name, language)}
+                      </span>
+                      <span className="text-sm text-muted-foreground tabular-nums">
+                        {ingredient.quantity_g}g
+                      </span>
+                    </div>
+                    <div className="text-right font-medium text-accent tabular-nums">
+                      €{ingredient.cost_eur.toFixed(2)}
+                    </div>
                   </div>
-                  <div className="col-span-2 text-sm text-muted-foreground tabular-nums">
-                    {ingredient.quantity_g}g
-                  </div>
-                  <div className="col-span-4 md:col-span-5 text-sm text-muted-foreground hidden md:flex gap-3">
-                    <span className="tabular-nums">{ingredient.nutrition.calories} cal</span>
-                    <span className="tabular-nums">{ingredient.nutrition.protein_g}g P</span>
-                    <span className="tabular-nums">{ingredient.nutrition.carbohydrates_g}g C</span>
-                    <span className="tabular-nums">{ingredient.nutrition.fats_g}g F</span>
-                  </div>
-                  <div className="col-span-2 md:col-span-2 text-right font-medium text-accent tabular-nums">
-                    €{ingredient.cost_eur.toFixed(2)}
-                  </div>
+                ))}
+              </div>
+
+              {meal.cooking_instructions && meal.cooking_instructions.length > 0 && (
+                <div className="space-y-3">
+                  <h4 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">
+                    {t.cookingInstructions}
+                  </h4>
+                  <ol className="space-y-2">
+                    {meal.cooking_instructions.map((instruction, index) => (
+                      <li key={index} className="flex gap-3">
+                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
+                          {index + 1}
+                        </span>
+                        <span className="flex-1 text-sm leading-relaxed pt-0.5">{instruction}</span>
+                      </li>
+                    ))}
+                  </ol>
                 </div>
-              ))}
+              )}
             </div>
           </AccordionContent>
         </AccordionItem>

@@ -38,6 +38,7 @@ export interface Meal {
     meal_cost_eur: number;
   };
   ingredients: Ingredient[];
+  cooking_instructions?: string[];
 }
 
 export interface Day {
