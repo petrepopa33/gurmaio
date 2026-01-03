@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MonthlyProgressCard } from '@/components/monthly-progress-card';
+import { StreakCounter } from '@/components/streak-counter';
 import type { DayProgress, MonthlyProgress, Badge } from '@/types/domain';
 import { calculateMonthlyProgress, generateBadgeImage } from '@/lib/monthly-progress';
 import { toast } from 'sonner';
@@ -172,6 +173,8 @@ export function ProgressDialog({
                 </div>
               ) : (
                 <div className="space-y-4">
+                  <StreakCounter completedDays={dayProgress} />
+                  
                   {monthlyData.map((progress) => {
                     const badge = badges.find(
                       (b) => b.month === progress.month && b.year === progress.year

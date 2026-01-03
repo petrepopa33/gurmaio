@@ -23,6 +23,7 @@ import { EmailVerificationDialog } from '@/components/email-verification-dialog'
 import { EmailVerificationBanner } from '@/components/email-verification-banner';
 import { MealCalendar } from '@/components/meal-calendar';
 import { ProgressDialog } from '@/components/progress-dialog';
+import { StreakCounter } from '@/components/streak-counter';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Toaster } from '@/components/ui/sonner';
@@ -895,7 +896,7 @@ function App() {
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4">
               <h1 className="font-heading text-2xl font-bold text-primary">{t.appName}</h1>
               {mealPlan && (
                 <BudgetGauge
@@ -904,6 +905,9 @@ function App() {
                   isOverBudget={mealPlan.metadata.is_over_budget}
                   compact
                 />
+              )}
+              {(dayProgress?.length ?? 0) > 0 && (
+                <StreakCounter completedDays={dayProgress || []} compact />
               )}
             </div>
 
@@ -1277,6 +1281,8 @@ function App() {
                               View Progress & Badges
                             </Button>
                           </div>
+                          
+                          <StreakCounter completedDays={dayProgress || []} />
                           
                           <MealCalendar
                             mealPlan={mealPlan!}
