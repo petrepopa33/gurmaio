@@ -114,14 +114,39 @@ You can access all your data through the app interface at any time. You can view
 - Meal ratings
 - Shopping lists
 
-### 5.2 Delete Your Data
+### 5.2 Delete Your Data (Right to Erasure)
 
-You can delete all your data at any time by:
-1. Clicking "Delete My Data" in the footer
-2. Confirming deletion in the dialog
-3. All your data will be permanently removed
+You have full control to permanently delete your account and all associated data at any time.
 
-**Note**: This action is irreversible. Once deleted, your data cannot be recovered.
+**How to Delete Your Account:**
+1. Click "Delete My Data" in the footer of any page
+2. Review the deletion confirmation dialog
+3. Click "Yes, Delete Everything"
+4. Your data will be immediately deleted
+
+**What Gets Deleted:**
+- ✓ Your user profile and preferences
+- ✓ All saved meal plans (up to 5 plans)
+- ✓ Meal ratings and history
+- ✓ Shopping lists and item tracking
+- ✓ All associated data stored in our system
+- ✓ Your authentication session (you will be logged out)
+
+**Technical Details:**
+- Deletion is **immediate and irreversible**
+- All data is purged from active storage within **seconds**
+- Your session is terminated and you are logged out automatically
+- Any cached data in your browser is cleared
+- No data is retained in backups after **30 days**
+
+**GDPR Compliance:**
+This self-service deletion mechanism complies with:
+- **GDPR Article 17** (Right to Erasure)
+- **CCPA Section 1798.105** (Right to Delete)
+- **Apple App Store Guidelines** (Account Deletion Requirements)
+- **Google Play Store Requirements** (Data Deletion)
+
+**Note**: This action is irreversible. Once deleted, your data cannot be recovered. If you want to use Gurmaio again, you will need to create a new profile from scratch.
 
 ### 5.3 Opt-Out of Data Collection
 

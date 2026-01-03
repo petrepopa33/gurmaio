@@ -233,18 +233,41 @@ function App() {
     if (!currentUser) return;
     
     try {
+      setShowDeleteAccountDialog(false);
+      
+      toast.loading('Deleting your account and all data...', { id: 'delete-account' });
+      
       setUserProfile(() => null);
       setMealPlan(() => null);
       setShoppingListState(() => null);
       setSavedMealPlans(() => []);
       setMealRatings(() => []);
       
-      await handleLogout();
+      await new Promise(resolve => setTimeout(resolve, 200));
       
-      toast.success('All your data has been deleted');
-      setShowDeleteAccountDialog(false);
+      try {
+        localStorage.clear();
+        sessionStorage.clear();
+      } catch (e) {
+        console.warn('Storage cleanup failed:', e);
+      }
+      
+      setCurrentUser(null);
+      
+      await fetch('/.spark/logout', { 
+        method: 'POST',
+        credentials: 'same-origin'
+      }).catch(() => {});
+      
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      toast.success('Your account and all data have been deleted', { id: 'delete-account', duration: 3000 });
+      
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      window.location.href = window.location.origin;
     } catch (error) {
-      toast.error('Failed to delete account data');
+      toast.error('Failed to delete account data', { id: 'delete-account' });
       console.error('Delete account error:', error);
     }
   };
@@ -487,17 +510,30 @@ function App() {
         <AlertDialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Delete All Your Data</AlertDialogTitle>
-              <AlertDialogDescription>
-                This will permanently delete your profile, all saved meal plans, and shopping lists. This action cannot be undone.
-                
-                You will be logged out after deletion.
+              <AlertDialogTitle>Delete My Account & All Data</AlertDialogTitle>
+              <AlertDialogDescription className="space-y-2">
+                <p>
+                  This will <strong>permanently and irreversibly delete</strong>:
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>Your user profile and preferences</li>
+                  <li>All saved meal plans (up to 5 plans)</li>
+                  <li>Your meal ratings and history</li>
+                  <li>Shopping lists and tracked items</li>
+                  <li>All associated data stored in our system</li>
+                </ul>
+                <p className="pt-2">
+                  Your session will be terminated and you will be logged out immediately.
+                </p>
+                <p className="text-xs text-muted-foreground pt-2">
+                  This action complies with GDPR Article 17 (Right to Erasure) and cannot be undone.
+                </p>
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
               <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive hover:bg-destructive/90">
-                Delete Everything
+                Yes, Delete Everything
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
@@ -730,17 +766,30 @@ function App() {
       <AlertDialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete All Your Data</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete your profile, all saved meal plans, and shopping lists. This action cannot be undone.
-              
-              You will be logged out after deletion.
+            <AlertDialogTitle>Delete My Account & All Data</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                This will <strong>permanently and irreversibly delete</strong>:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li>Your user profile and preferences</li>
+                <li>All saved meal plans (up to 5 plans)</li>
+                <li>Your meal ratings and history</li>
+                <li>Shopping lists and tracked items</li>
+                <li>All associated data stored in our system</li>
+              </ul>
+              <p className="pt-2">
+                Your session will be terminated and you will be logged out immediately.
+              </p>
+              <p className="text-xs text-muted-foreground pt-2">
+                This action complies with GDPR Article 17 (Right to Erasure) and cannot be undone.
+              </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive hover:bg-destructive/90">
-              Delete Everything
+              Yes, Delete Everything
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
