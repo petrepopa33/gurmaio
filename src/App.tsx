@@ -23,7 +23,7 @@ import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Toaster } from '@/components/ui/sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, List, SignOut, FloppyDisk, Check, ShareNetwork, FilePdf, ChefHat } from '@phosphor-icons/react';
+import { Plus, List, SignOut, FloppyDisk, Check, ShareNetwork, FilePdf, ChefHat, GoogleLogo, AppleLogo, FacebookLogo, TwitterLogo } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/hooks/use-language';
 import { exportMealPlanToPDF } from '@/lib/export-meal-plan-pdf';
@@ -642,6 +642,47 @@ function App() {
                     >
                       {t.login}
                     </Button>
+                    
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-card px-2 text-muted-foreground">Or sign in with</span>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        onClick={() => window.location.href = '/.spark/login?provider=google'}
+                        size="lg"
+                        className="w-full bg-[#EA4335] hover:bg-[#D33426] text-white"
+                      >
+                        <GoogleLogo size={20} weight="bold" />
+                      </Button>
+                      <Button
+                        onClick={() => window.location.href = '/.spark/login?provider=apple'}
+                        size="lg"
+                        className="w-full bg-black hover:bg-gray-900 text-white"
+                      >
+                        <AppleLogo size={20} weight="fill" />
+                      </Button>
+                      <Button
+                        onClick={() => window.location.href = '/.spark/login?provider=facebook'}
+                        size="lg"
+                        className="w-full bg-[#1877F2] hover:bg-[#166FE5] text-white"
+                      >
+                        <FacebookLogo size={20} weight="fill" />
+                      </Button>
+                      <Button
+                        onClick={() => window.location.href = '/.spark/login?provider=twitter'}
+                        size="lg"
+                        className="w-full bg-[#1DA1F2] hover:bg-[#1A91DA] text-white"
+                      >
+                        <TwitterLogo size={20} weight="fill" />
+                      </Button>
+                    </div>
+
                     <div className="relative">
                       <div className="absolute inset-0 flex items-center">
                         <span className="w-full border-t" />

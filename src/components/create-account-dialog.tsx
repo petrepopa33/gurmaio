@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
-import { EnvelopeSimple, Warning, CheckCircle, Check, X, Eye, EyeSlash, GoogleLogo, AppleLogo } from '@phosphor-icons/react';
+import { EnvelopeSimple, Warning, CheckCircle, Check, X, Eye, EyeSlash, GoogleLogo, AppleLogo, FacebookLogo, TwitterLogo } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
 interface CreateAccountDialogProps {
@@ -122,6 +122,14 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
     window.location.href = '/.spark/login?provider=apple';
   };
 
+  const handleFacebookSignIn = () => {
+    window.location.href = '/.spark/login?provider=facebook';
+  };
+
+  const handleTwitterSignIn = () => {
+    window.location.href = '/.spark/login?provider=twitter';
+  };
+
   const handleClose = () => {
     if (!isCreating) {
       setEmail('');
@@ -152,25 +160,49 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
 
         <div className="space-y-4 py-4">
           <div className="space-y-3">
-            <Button
-              onClick={handleGoogleSignIn}
-              disabled={isCreating || success}
-              className="w-full h-12 text-base font-semibold bg-[#EA4335] hover:bg-[#D33426] text-white"
-              size="lg"
-            >
-              <GoogleLogo size={20} weight="bold" className="mr-2" />
-              Google
-            </Button>
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                onClick={handleGoogleSignIn}
+                disabled={isCreating || success}
+                className="w-full h-12 text-base font-semibold bg-[#EA4335] hover:bg-[#D33426] text-white"
+                size="lg"
+              >
+                <GoogleLogo size={20} weight="bold" className="mr-2" />
+                Google
+              </Button>
 
-            <Button
-              onClick={handleAppleSignIn}
-              disabled={isCreating || success}
-              className="w-full h-12 text-base font-semibold bg-black hover:bg-gray-900 text-white"
-              size="lg"
-            >
-              <AppleLogo size={20} weight="fill" className="mr-2" />
-              Apple
-            </Button>
+              <Button
+                onClick={handleAppleSignIn}
+                disabled={isCreating || success}
+                className="w-full h-12 text-base font-semibold bg-black hover:bg-gray-900 text-white"
+                size="lg"
+              >
+                <AppleLogo size={20} weight="fill" className="mr-2" />
+                Apple
+              </Button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                onClick={handleFacebookSignIn}
+                disabled={isCreating || success}
+                className="w-full h-12 text-base font-semibold bg-[#1877F2] hover:bg-[#166FE5] text-white"
+                size="lg"
+              >
+                <FacebookLogo size={20} weight="fill" className="mr-2" />
+                Facebook
+              </Button>
+
+              <Button
+                onClick={handleTwitterSignIn}
+                disabled={isCreating || success}
+                className="w-full h-12 text-base font-semibold bg-[#1DA1F2] hover:bg-[#1A91DA] text-white"
+                size="lg"
+              >
+                <TwitterLogo size={20} weight="fill" className="mr-2" />
+                Twitter
+              </Button>
+            </div>
           </div>
 
           <div className="relative">
