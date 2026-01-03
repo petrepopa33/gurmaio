@@ -7,7 +7,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { MealPlan } from '@/types/domain';
-import { Calendar, CurrencyDollar, FireSimple, Barbell, Trash, Eye } from '@phosphor-icons/react';
+import { Calendar, CurrencyDollar, FireSimple, Barbell, Trash, Eye, ShareNetwork } from '@phosphor-icons/react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface SavedPlansDialogProps {
@@ -16,6 +16,7 @@ interface SavedPlansDialogProps {
   savedPlans: MealPlan[];
   onLoadPlan: (plan: MealPlan) => void;
   onDeletePlan: (planId: string) => void;
+  onSharePlan?: (plan: MealPlan) => void;
 }
 
 export function SavedPlansDialog({ 
@@ -23,13 +24,21 @@ export function SavedPlansDialog({
   onOpenChange, 
   savedPlans, 
   onLoadPlan,
-  onDeletePlan 
+  onDeletePlan,
+  onSharePlan 
 }: SavedPlansDialogProps) {
   const [planToDelete, setPlanToDelete] = useState<string | null>(null);
 
   const handleDeleteClick = (planId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setPlanToDelete(planId);
+  };
+
+  const handleShareClick = (plan: MealPlan, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onSharePlan) {
+      onSharePlan(plan);
+    }
   };
 
   const handleConfirmDelete = () => {
@@ -90,6 +99,7 @@ export function SavedPlansDialog({
                       onOpenChange(false);
                     }}
                     onDelete={(e) => handleDeleteClick(plan.plan_id, e)}
+                    onShare={(e) => handleShareClick(plan, e)}
                   />
                 ))}
               </div>
@@ -122,9 +132,10 @@ interface SavedPlanCardProps {
   plan: MealPlan;
   onLoad: () => void;
   onDelete: (e: React.MouseEvent) => void;
+  onShare: (e: React.MouseEvent) => void;
 }
 
-function SavedPlanCard({ plan, onLoad, onDelete }: SavedPlanCardProps) {
+function SavedPlanCard({ plan, onLoad, onDelete, onShare }: SavedPlanCardProps) {
   const generatedDate = new Date(plan.generated_at);
   const isOverBudget = plan.metadata.is_over_budget;
 
@@ -212,6 +223,14 @@ function SavedPlanCard({ plan, onLoad, onDelete }: SavedPlanCardProps) {
             >
               <Eye className="mr-2" />
               Load
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onShare}
+              className="opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+              <ShareNetwork />
             </Button>
             <Button
               variant="ghost"

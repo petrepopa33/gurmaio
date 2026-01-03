@@ -8,11 +8,12 @@ import { ShoppingListSheet } from '@/components/shopping-list-sheet';
 import { BudgetGauge } from '@/components/budget-gauge';
 import { SavedPlansDialog } from '@/components/saved-plans-dialog';
 import { LanguageSwitcher } from '@/components/language-switcher';
+import { ShareMealPlanDialog } from '@/components/share-meal-plan-dialog';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Toaster } from '@/components/ui/sonner';
-import { Plus, List, Gear, SignOut, FloppyDisk, Check, ClockClockwise } from '@phosphor-icons/react';
+import { Plus, List, Gear, SignOut, FloppyDisk, Check, ClockClockwise, ShareNetwork } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/hooks/use-language';
 
@@ -34,6 +35,7 @@ function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [shoppingListOpen, setShoppingListOpen] = useState(false);
   const [savedPlansOpen, setSavedPlansOpen] = useState(false);
+  const [shareMealPlanOpen, setShareMealPlanOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserInfo | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
@@ -186,6 +188,11 @@ function App() {
       return plans.filter(p => p.plan_id !== planId);
     });
     toast.success('Meal plan deleted');
+  };
+
+  const handleShareSavedPlan = (plan: MealPlan) => {
+    setMealPlan(() => plan);
+    setShareMealPlanOpen(true);
   };
 
   const handleLanguageChange = async (newLanguage: string) => {
@@ -463,10 +470,19 @@ function App() {
                   {mealPlan!.metadata.days}-{t.day} plan • Generated {new Date(mealPlan!.generated_at).toLocaleDateString()}
                 </p>
               </div>
-              <Button onClick={handleGeneratePlan} disabled={isGenerating}>
-                <Plus className="mr-2" />
-                {isGenerating ? t.generating : t.regenerate}
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => setShareMealPlanOpen(true)}
+                  variant="outline"
+                >
+                  <ShareNetwork className="mr-2" />
+                  {t.sharePlan}
+                </Button>
+                <Button onClick={handleGeneratePlan} disabled={isGenerating}>
+                  <Plus className="mr-2" />
+                  {isGenerating ? t.generating : t.regenerate}
+                </Button>
+              </div>
             </div>
 
             <MealPlanView mealPlan={mealPlan!} />
@@ -497,7 +513,18 @@ function App() {
         savedPlans={savedMealPlans || []}
         onLoadPlan={handleLoadSavedPlan}
         onDeletePlan={handleDeleteSavedPlan}
+        onSharePlan={handleShareSavedPlan}
       />
+
+      {mealPlan && (
+        <ShareMealPlanDialog
+          open={shareMealPlanOpen}
+          onOpenChange={setShareMealPlanOpen}
+          mealPlan={mealPlan}
+          language={language}
+          t={t}
+        />
+      )}
 
       <Toaster />
     </div>
