@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useKV } from '@github/spark/hooks';
-import type { MealPlan, UserProfile, ShoppingList, MealRating, Meal } from '@/types/domain';
+import type { MealPlan, UserProfile, ShoppingList, MealRating, Meal, MealPrepPlan } from '@/types/domain';
 import { generateMealPlan, generateShoppingList } from '@/lib/mock-data';
 import { generateMealSubstitution } from '@/lib/meal-substitution';
+import { generateMealPrepPlan } from '@/lib/meal-prep-generator';
 import { OnboardingDialog } from '@/components/onboarding-dialog';
 import { MealPlanView } from '@/components/meal-plan-view';
+import { MealPrepView } from '@/components/meal-prep-view';
 import { ShoppingListSheet } from '@/components/shopping-list-sheet';
 import { BudgetGauge } from '@/components/budget-gauge';
 import { SavedPlansDialog } from '@/components/saved-plans-dialog';
@@ -18,7 +20,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Toaster } from '@/components/ui/sonner';
-import { Plus, List, UserCircleGear, SignOut, FloppyDisk, Check, ClockClockwise, ShareNetwork, FilePdf } from '@phosphor-icons/react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, List, UserCircleGear, SignOut, FloppyDisk, Check, ClockClockwise, ShareNetwork, FilePdf, ChefHat } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/hooks/use-language';
 import { exportMealPlanToPDF } from '@/lib/export-meal-plan-pdf';
@@ -36,11 +39,13 @@ function App() {
   const { language, setLanguage, t } = useLanguage();
   const [userProfile, setUserProfile] = useKV<UserProfile | null>('user_profile', null);
   const [mealPlan, setMealPlan] = useKV<MealPlan | null>('current_meal_plan', null);
+  const [mealPrepPlan, setMealPrepPlan] = useKV<MealPrepPlan | null>('current_meal_prep_plan', null);
   const [shoppingListState, setShoppingListState] = useKV<ShoppingList | null>('shopping_list_state', null);
   const [savedMealPlans, setSavedMealPlans] = useKV<MealPlan[]>('saved_meal_plans', []);
   const [mealRatings, setMealRatings] = useKV<MealRating[]>('meal_ratings', []);
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingPrep, setIsGeneratingPrep] = useState(false);
   const [shoppingListOpen, setShoppingListOpen] = useState(false);
   const [savedPlansOpen, setSavedPlansOpen] = useState(false);
   const [shareMealPlanOpen, setShareMealPlanOpen] = useState(false);
@@ -49,6 +54,7 @@ function App() {
   const [justSaved, setJustSaved] = useState(false);
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
   const [showAnimatedDemo, setShowAnimatedDemo] = useState(true);
+  const [activeTab, setActiveTab] = useState<'meals' | 'prep'>('meals');
 
   const hasProfile = userProfile !== null;
   const hasMealPlan = mealPlan !== null;
@@ -152,6 +158,7 @@ function App() {
       const newPlan = await generateMealPlan(userProfile);
       setMealPlan(() => newPlan);
       setShoppingListState(() => null);
+      setMealPrepPlan(() => null);
       
       toast.success('Meal plan generated successfully!');
     } catch (error) {
@@ -159,6 +166,28 @@ function App() {
       toast.error('Failed to generate meal plan. Please try again.');
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleGeneratePrepPlan = async () => {
+    if (!mealPlan) {
+      toast.error('Please generate a meal plan first');
+      return;
+    }
+
+    setIsGeneratingPrep(true);
+    
+    try {
+      const newPrepPlan = await generateMealPrepPlan(mealPlan);
+      setMealPrepPlan(() => newPrepPlan);
+      
+      toast.success('Meal prep plan generated!');
+      setActiveTab('prep');
+    } catch (error) {
+      console.error('Error generating prep plan:', error);
+      toast.error('Failed to generate prep plan. Please try again.');
+    } finally {
+      setIsGeneratingPrep(false);
     }
   };
 
@@ -197,6 +226,7 @@ function App() {
   const handleLoadSavedPlan = (plan: MealPlan) => {
     setMealPlan(() => plan);
     setShoppingListState(() => null);
+    setMealPrepPlan(() => null);
     toast.success('Meal plan loaded successfully');
   };
 
@@ -737,6 +767,16 @@ function App() {
                 </p>
               </div>
               <div className="flex gap-2">
+                {!mealPrepPlan && (
+                  <Button
+                    onClick={handleGeneratePrepPlan}
+                    disabled={isGeneratingPrep}
+                    variant="outline"
+                  >
+                    <ChefHat className="mr-2" />
+                    {isGeneratingPrep ? 'Generating...' : 'Generate Prep Plan'}
+                  </Button>
+                )}
                 <Button
                   onClick={handleExportToPDF}
                   variant="outline"
@@ -758,7 +798,29 @@ function App() {
               </div>
             </div>
 
-            <MealPlanView mealPlan={mealPlan!} onSwapMeal={handleSwapMeal} onRateMeal={handleRateMeal} mealRatings={mealRatingsMap} />
+            <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'meals' | 'prep')}>
+              <TabsList className="grid w-full max-w-md grid-cols-2">
+                <TabsTrigger value="meals">Meal Plan</TabsTrigger>
+                <TabsTrigger value="prep" disabled={!mealPrepPlan}>
+                  Meal Prep {mealPrepPlan && '✓'}
+                </TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="meals" className="mt-6">
+                <MealPlanView mealPlan={mealPlan!} onSwapMeal={handleSwapMeal} onRateMeal={handleRateMeal} mealRatings={mealRatingsMap} />
+              </TabsContent>
+              
+              <TabsContent value="prep" className="mt-6">
+                {mealPrepPlan ? (
+                  <MealPrepView prepPlan={mealPrepPlan} />
+                ) : (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <ChefHat size={48} className="mx-auto mb-4 opacity-50" />
+                    <p>Generate a meal prep plan to see batch cooking recommendations</p>
+                  </div>
+                )}
+              </TabsContent>
+            </Tabs>
           </div>
         )}
       </main>

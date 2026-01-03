@@ -83,6 +83,13 @@ This is a commercial-grade product requiring multiple sophisticated engines (nut
 - **Progression**: View meal plan → Expand meal card → Rate meal 1-5 stars (optional) → Click "Swap Meal" → AI generates alternative meal using rating history to prefer liked ingredients/styles and avoid disliked ones → Meal replaced in plan → Plan totals recalculated → Shopping list reset → Success confirmation
 - **Success criteria**: New meal respects remaining daily budget, macro targets maintained (±10%), meal type remains consistent, all nutrition and cost totals recalculate accurately, substitution stays within original meal's budget constraints, shopping list regenerates on next view, highly-rated meals influence future substitutions (preferred ingredients appear more often), low-rated meals/ingredients are avoided in future generations, rating feedback confirms user action
 
+### Weekly Meal Prep Planning
+- **Functionality**: Generate comprehensive meal prep schedules with batch cooking recommendations, task breakdowns, time estimates, and storage instructions to optimize weekly meal preparation
+- **Purpose**: Help users efficiently prepare multiple meals at once, save time and money through batch cooking, provide actionable prep schedules, reduce food waste, and lower cooking overhead
+- **Trigger**: User clicks "Generate Prep Plan" button from active meal plan view
+- **Progression**: View meal plan → Click "Generate Prep Plan" → System identifies duplicate recipes and batch opportunities → Calculates efficiency savings → Generates 1-2 prep day schedules → Displays prep plan tab with batch cooking groups, task breakdowns, time estimates, storage requirements, and tips
+- **Success criteria**: Identifies all recipes that appear 2+ times in the plan, calculates accurate time savings from batch cooking (30-40% reduction), generates realistic prep day schedules (Sunday and Wednesday for 7-day plans), breaks down tasks by category (chopping, cooking, portioning, storage), provides storage and reheating instructions for each batch, displays container requirements and space needs, shows efficiency savings in both time and cost, tasks are ordered logically by dependency, prep times are realistic and achievable
+
 ### Account Management
 - **Functionality**: Delete all user data (GDPR compliant)
 - **Purpose**: Comply with data protection regulations and user privacy rights
@@ -118,6 +125,9 @@ This is a commercial-grade product requiring multiple sophisticated engines (nut
 - **Manual vs Auto Calorie Toggle** - Preserve both manual entry and calculated values when switching modes, prevent data loss on accidental toggles
 - **Language Fallback** - If a translation key is missing, fallback to English version to prevent broken UI
 - **Browser Language Detection** - On first visit, detect browser language and auto-select if supported, otherwise default to English
+- **No Batch Cooking Opportunities** - When no recipes repeat in meal plan, show prep schedule without batch groups, focus on sequential task breakdown
+- **Single Day Meal Plans** - Skip multi-session prep scheduling for plans under 3 days, provide single-session prep guide instead
+- **Missing Prep Plan on Tab Switch** - Disable prep tab when no prep plan exists, show helpful message prompting user to generate one
 - **Meal Substitution Failure** - If AI fails to generate valid alternative, show error toast and keep original meal intact
 - **Substitution Budget Violation** - If generated meal exceeds remaining budget, reject and retry with stricter cost constraints
 - **Substitution Network Error** - Show user-friendly error, allow retry, preserve original meal plan state

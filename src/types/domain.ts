@@ -112,3 +112,58 @@ export interface MealRating {
 export interface MealRatingHistory {
   ratings: MealRating[];
 }
+
+export interface PrepTask {
+  task_id: string;
+  task_name: string;
+  meal_ids: string[];
+  recipe_names: string[];
+  prep_time_minutes: number;
+  category: 'chopping' | 'marinating' | 'cooking' | 'portioning' | 'storage';
+  ingredients: string[];
+  instructions: string[];
+}
+
+export interface PrepDay {
+  prep_day: string;
+  total_time_minutes: number;
+  tasks: PrepTask[];
+  meals_prepared: number;
+  tips: string[];
+}
+
+export interface BatchCookingGroup {
+  group_id: string;
+  recipe_type: string;
+  meal_ids: string[];
+  recipe_names: string[];
+  batch_servings: number;
+  total_prep_time_minutes: number;
+  total_cook_time_minutes: number;
+  storage_instructions: string;
+  reheating_instructions: string;
+  shared_ingredients: Ingredient[];
+  efficiency_savings: {
+    time_saved_minutes: number;
+    cost_saved_eur: number;
+  };
+}
+
+export interface MealPrepPlan {
+  plan_id: string;
+  meal_plan_id: string;
+  generated_at: string;
+  prep_schedule: PrepDay[];
+  batch_cooking_groups: BatchCookingGroup[];
+  total_prep_time_minutes: number;
+  total_efficiency_savings: {
+    time_saved_minutes: number;
+    cost_saved_eur: number;
+  };
+  storage_requirements: {
+    containers_needed: number;
+    fridge_space: 'small' | 'medium' | 'large';
+    freezer_space: 'none' | 'small' | 'medium' | 'large';
+  };
+  tips: string[];
+}
