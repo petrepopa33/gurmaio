@@ -188,12 +188,18 @@ function App() {
     toast.success('Meal plan deleted');
   };
 
+  const handleLanguageChange = async (newLanguage: string) => {
+    setLanguage(() => newLanguage as any);
+    await new Promise(resolve => setTimeout(resolve, 100));
+    window.location.reload();
+  };
+
   if (!hasProfile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
         <div className="max-w-2xl w-full text-center space-y-8">
           <div className="flex items-center justify-end gap-2">
-            <LanguageSwitcher currentLanguage={language} onLanguageChange={setLanguage} />
+            <LanguageSwitcher currentLanguage={language} onLanguageChange={handleLanguageChange} />
             {currentUser && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -327,7 +333,7 @@ function App() {
             </div>
 
             <div className="flex items-center gap-2">
-              <LanguageSwitcher currentLanguage={language} onLanguageChange={setLanguage} />
+              <LanguageSwitcher currentLanguage={language} onLanguageChange={handleLanguageChange} />
               {hasMealPlan && currentUser && (
                 <Button
                   variant={justSaved ? "default" : "outline"}
