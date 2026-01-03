@@ -170,6 +170,25 @@ function MealCard({ meal, language, t }: { meal: Meal; language: Language; t: an
             </div>
 
             <div className="space-y-6">
+              {meal.cooking_instructions && meal.cooking_instructions.length > 0 && (
+                <div className="space-y-3 bg-primary/5 rounded-xl p-4 border border-primary/10">
+                  <h4 className="font-heading font-semibold text-base text-primary flex items-center gap-2">
+                    <span className="text-xl">👨‍🍳</span>
+                    {t.cookingInstructions}
+                  </h4>
+                  <ol className="space-y-3">
+                    {meal.cooking_instructions.map((instruction, index) => (
+                      <li key={index} className="flex gap-3">
+                        <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold shadow-sm">
+                          {index + 1}
+                        </span>
+                        <span className="flex-1 text-sm leading-relaxed pt-1">{instruction}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+
               <div className="space-y-2">
                 <h4 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-3">
                   {t.ingredients}
@@ -193,24 +212,6 @@ function MealCard({ meal, language, t }: { meal: Meal; language: Language; t: an
                   </div>
                 ))}
               </div>
-
-              {meal.cooking_instructions && meal.cooking_instructions.length > 0 && (
-                <div className="space-y-3">
-                  <h4 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-                    {t.cookingInstructions}
-                  </h4>
-                  <ol className="space-y-2">
-                    {meal.cooking_instructions.map((instruction, index) => (
-                      <li key={index} className="flex gap-3">
-                        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-semibold">
-                          {index + 1}
-                        </span>
-                        <span className="flex-1 text-sm leading-relaxed pt-0.5">{instruction}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              )}
             </div>
           </AccordionContent>
         </AccordionItem>
