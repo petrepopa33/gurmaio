@@ -677,9 +677,9 @@ function App() {
               <Button
                 variant="outline"
                 onClick={() => setIsOnboarding(true)}
-                title={t.profile}
               >
-                <UserCircleGear />
+                <UserCircleGear className="mr-2" />
+                {t.profile}
               </Button>
               
               {currentUser ? (
