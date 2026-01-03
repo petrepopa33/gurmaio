@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useKV } from '@github/spark/hooks';
 import { AnimatePresence, motion } from 'framer-motion';
-import type { MealPlan, UserProfile, ShoppingList, MealRating, Meal, MealPrepPlan, DayProgress, Badge, CompletedMeal } from '@/types/domain';
+import type { MealPlan, UserProfile, ShoppingList, MealRating, Meal, MealPrepPlan, DayProgress, Badge, CompletedMeal, ScheduledDay } from '@/types/domain';
 import { generateMealPlan, generateShoppingList } from '@/lib/mock-data';
 import { generateMealSubstitution } from '@/lib/meal-substitution';
 import { generateMealPrepPlan } from '@/lib/meal-prep-generator';
@@ -51,6 +51,7 @@ function App() {
   const [shoppingListState, setShoppingListState] = useKV<ShoppingList | null>('shopping_list_state', null);
   const [savedMealPlans, setSavedMealPlans] = useKV<MealPlan[]>('saved_meal_plans', []);
   const [mealRatings, setMealRatings] = useKV<MealRating[]>('meal_ratings', []);
+  const [scheduledDays, setScheduledDays] = useKV<ScheduledDay[]>('scheduled_days', []);
   const [dayProgress, setDayProgress] = useKV<DayProgress[]>('day_progress', []);
   const [badges, setBadges] = useKV<Badge[]>('earned_badges', []);
   const [isOnboarding, setIsOnboarding] = useState(false);
@@ -137,6 +138,7 @@ function App() {
       setMealPlan(() => null);
       setMealPrepPlan(() => null);
       setShoppingListState(() => null);
+      setScheduledDays(() => []);
       setDayProgress(() => []);
       setBadges(() => []);
       setIsDemoMode(false);
@@ -146,7 +148,7 @@ function App() {
       try {
         const storageKeys = await window.spark.kv.keys();
         for (const key of storageKeys) {
-          if (key.startsWith('user_') || key.startsWith('current_') || key.startsWith('shopping_') || key.startsWith('saved_') || key.startsWith('meal_') || key.startsWith('email_verification_') || key.startsWith('day_progress') || key.startsWith('earned_badges')) {
+          if (key.startsWith('user_') || key.startsWith('current_') || key.startsWith('shopping_') || key.startsWith('saved_') || key.startsWith('meal_') || key.startsWith('email_verification_') || key.startsWith('scheduled_') || key.startsWith('day_progress') || key.startsWith('earned_badges')) {
             await window.spark.kv.delete(key);
           }
         }
@@ -279,6 +281,7 @@ function App() {
       setMealPlan(() => null);
       setShoppingListState(() => null);
       setMealPrepPlan(() => null);
+      setScheduledDays(() => []);
       setActiveTab('meals');
       
       await new Promise(resolve => setTimeout(resolve, 400));
@@ -403,6 +406,7 @@ function App() {
       setSavedMealPlans(() => []);
       setMealRatings(() => []);
       setMealPrepPlan(() => null);
+      setScheduledDays(() => []);
       setDayProgress(() => []);
       setBadges(() => []);
       
@@ -559,9 +563,9 @@ function App() {
     }
   };
 
-  const handleToggleDayComplete = (day: any, isComplete: boolean, selectedDate: string) => {
+  const handleScheduleDay = (day: any, selectedDate: string) => {
     if (isDemoMode) {
-      toast.error('Demo mode: Create an account to track progress', {
+      toast.error('Demo mode: Create an account to schedule days', {
         action: {
           label: 'Create Account',
           onClick: () => setShowCreateAccountDialog(true)
@@ -571,7 +575,7 @@ function App() {
     }
 
     if (!currentUser || !isVerified) {
-      toast.error('Please verify your email to track progress', {
+      toast.error('Please verify your email to schedule days', {
         action: {
           label: 'Verify Now',
           onClick: () => setShowEmailVerificationDialog(true)
@@ -580,47 +584,72 @@ function App() {
       return;
     }
 
-    setDayProgress((current) => {
-      const progressList = current || [];
+    setScheduledDays((current) => {
+      const scheduled = current || [];
       
-      if (isComplete) {
-        const existingDay = progressList.find(p => p.date === selectedDate);
-        if (existingDay) {
-          toast.error('This date is already marked for another day');
-          return progressList;
-        }
+      const existingDate = scheduled.find(s => s.date === selectedDate);
+      if (existingDate) {
+        toast.error('This date is already scheduled for another day');
+        return scheduled;
+      }
 
-        const completedMeals: CompletedMeal[] = day.meals.map((meal: any) => ({
+      const newScheduledDay: ScheduledDay = {
+        date: selectedDate,
+        day_number: day.day_number,
+        plan_id: mealPlan?.plan_id || '',
+        scheduled_at: new Date().toISOString(),
+        meals: day.meals.map((meal: any) => ({
           meal_id: meal.meal_id,
-          plan_id: mealPlan?.plan_id || '',
-          completed_at: new Date().toISOString(),
-          date: selectedDate,
           meal_type: meal.meal_type,
           recipe_name: meal.recipe_name,
           nutrition: meal.nutrition,
           cost_eur: meal.cost.meal_cost_eur,
-        }));
+        })),
+        total_nutrition: day.totals,
+        total_cost: day.totals.cost_eur,
+        meals_count: day.meals.length,
+        is_completed: false,
+      };
 
-        const newDayProgress: DayProgress = {
-          date: selectedDate,
-          completed_meals: completedMeals,
-          total_nutrition: day.totals,
-          total_cost: day.totals.cost_eur,
-          meals_count: day.meals.length,
-        };
+      toast.success(`Day ${day.day_number} scheduled for ${new Date(selectedDate).toLocaleDateString()}! 📅`);
+      return [...scheduled, newScheduledDay];
+    });
+  };
 
-        toast.success(`Day ${day.day_number} scheduled for ${new Date(selectedDate).toLocaleDateString()}! 🎉`);
-        return [...progressList, newDayProgress];
-      } else {
-        toast.info(`Day ${day.day_number} unmarked`);
-        return progressList.filter(p => p.date !== selectedDate);
+  const handleUnscheduleDay = (date: string) => {
+    if (isDemoMode) {
+      toast.error('Demo mode: Create an account to modify schedule', {
+        action: {
+          label: 'Create Account',
+          onClick: () => setShowCreateAccountDialog(true)
+        }
+      });
+      return;
+    }
+
+    if (!currentUser || !isVerified) {
+      toast.error('Please verify your email to modify schedule', {
+        action: {
+          label: 'Verify Now',
+          onClick: () => setShowEmailVerificationDialog(true)
+        }
+      });
+      return;
+    }
+
+    setScheduledDays((current) => {
+      const scheduled = current || [];
+      const removed = scheduled.find(s => s.date === date);
+      if (removed) {
+        toast.info(`Day ${removed.day_number} removed from schedule`);
       }
+      return scheduled.filter(s => s.date !== date);
     });
   };
 
   const handleChangeDayDate = (oldDate: string, newDate: string, dayNumber: number) => {
     if (isDemoMode) {
-      toast.error('Demo mode: Create an account to track progress', {
+      toast.error('Demo mode: Create an account to modify schedule', {
         action: {
           label: 'Create Account',
           onClick: () => setShowCreateAccountDialog(true)
@@ -630,7 +659,7 @@ function App() {
     }
 
     if (!currentUser || !isVerified) {
-      toast.error('Please verify your email to track progress', {
+      toast.error('Please verify your email to modify schedule', {
         action: {
           label: 'Verify Now',
           onClick: () => setShowEmailVerificationDialog(true)
@@ -639,29 +668,23 @@ function App() {
       return;
     }
 
-    setDayProgress((current) => {
-      const progressList = current || [];
+    setScheduledDays((current) => {
+      const scheduled = current || [];
       
-      const existingNewDate = progressList.find(p => p.date === newDate);
+      const existingNewDate = scheduled.find(s => s.date === newDate);
       if (existingNewDate) {
-        toast.error('This date is already marked for another day');
-        return progressList;
+        toast.error('This date is already scheduled for another day');
+        return scheduled;
       }
 
-      const updatedList = progressList.map(p => {
-        if (p.date === oldDate) {
-          const updatedMeals = p.completed_meals.map(meal => ({
-            ...meal,
-            date: newDate,
-          }));
-          
+      const updatedList = scheduled.map(s => {
+        if (s.date === oldDate) {
           return {
-            ...p,
+            ...s,
             date: newDate,
-            completed_meals: updatedMeals,
           };
         }
-        return p;
+        return s;
       });
 
       toast.success(`Day ${dayNumber} rescheduled to ${new Date(newDate).toLocaleDateString()}! 📅`);
@@ -669,9 +692,9 @@ function App() {
     });
   };
 
-  const handleCopyWeek = (sourceDates: string[], targetStartDate: string) => {
+  const handleToggleComplete = (date: string, isComplete: boolean) => {
     if (isDemoMode) {
-      toast.error('Demo mode: Create an account to track progress', {
+      toast.error('Demo mode: Create an account to track completion', {
         action: {
           label: 'Create Account',
           onClick: () => setShowCreateAccountDialog(true)
@@ -681,7 +704,7 @@ function App() {
     }
 
     if (!currentUser || !isVerified) {
-      toast.error('Please verify your email to track progress', {
+      toast.error('Please verify your email to track completion', {
         action: {
           label: 'Verify Now',
           onClick: () => setShowEmailVerificationDialog(true)
@@ -690,52 +713,135 @@ function App() {
       return;
     }
 
-    setDayProgress((current) => {
-      const progressList = current || [];
-      const newProgressItems: DayProgress[] = [];
+    setScheduledDays((current) => {
+      const scheduled = current || [];
+      
+      const updatedList = scheduled.map(s => {
+        if (s.date === date) {
+          const wasPreviouslyComplete = s.is_completed;
+          
+          if (!wasPreviouslyComplete && isComplete) {
+            const completedMeals: CompletedMeal[] = s.meals.map(meal => ({
+              meal_id: meal.meal_id,
+              plan_id: s.plan_id,
+              completed_at: new Date().toISOString(),
+              date: s.date,
+              meal_type: meal.meal_type,
+              recipe_name: meal.recipe_name,
+              nutrition: meal.nutrition,
+              cost_eur: meal.cost_eur,
+            }));
+
+            const dayProgress: DayProgress = {
+              date: s.date,
+              completed_meals: completedMeals,
+              total_nutrition: s.total_nutrition,
+              total_cost: s.total_cost,
+              meals_count: s.meals_count,
+            };
+
+            setDayProgress((currentProgress) => {
+              const progress = currentProgress || [];
+              const existingIndex = progress.findIndex(p => p.date === date);
+              
+              if (existingIndex >= 0) {
+                const updated = [...progress];
+                updated[existingIndex] = dayProgress;
+                return updated;
+              }
+              
+              return [...progress, dayProgress];
+            });
+            
+            toast.success(`Day ${s.day_number} marked as complete! 🎉`);
+          } else if (wasPreviouslyComplete && !isComplete) {
+            setDayProgress((currentProgress) => {
+              const progress = currentProgress || [];
+              return progress.filter(p => p.date !== date);
+            });
+            
+            toast.info(`Day ${s.day_number} marked as incomplete`);
+          }
+          
+          return {
+            ...s,
+            is_completed: isComplete,
+          };
+        }
+        return s;
+      });
+
+      return updatedList;
+    });
+  };
+
+  const handleCopyWeek = (sourceDates: string[], targetStartDate: string) => {
+    if (isDemoMode) {
+      toast.error('Demo mode: Create an account to copy schedule', {
+        action: {
+          label: 'Create Account',
+          onClick: () => setShowCreateAccountDialog(true)
+        }
+      });
+      return;
+    }
+
+    if (!currentUser || !isVerified) {
+      toast.error('Please verify your email to copy schedule', {
+        action: {
+          label: 'Verify Now',
+          onClick: () => setShowEmailVerificationDialog(true)
+        }
+      });
+      return;
+    }
+
+    setScheduledDays((current) => {
+      const scheduled = current || [];
+      const newScheduledDays: ScheduledDay[] = [];
       
       sourceDates.forEach((sourceDate, index) => {
-        const sourceDayProgress = progressList.find(p => p.date === sourceDate);
-        if (!sourceDayProgress) return;
+        const sourceScheduled = scheduled.find(s => s.date === sourceDate);
+        if (!sourceScheduled) return;
         
         const targetDate = new Date(targetStartDate);
         targetDate.setDate(targetDate.getDate() + index);
         const targetDateStr = targetDate.toISOString().split('T')[0];
         
-        const existingTarget = progressList.find(p => p.date === targetDateStr);
+        const existingTarget = scheduled.find(s => s.date === targetDateStr);
         if (existingTarget) {
           toast.error(`Date ${new Date(targetDateStr).toLocaleDateString()} is already scheduled`);
           return;
         }
         
-        const copiedMeals: CompletedMeal[] = sourceDayProgress.completed_meals.map(meal => ({
-          ...meal,
-          meal_id: `${meal.meal_id}_copy_${Date.now()}_${index}`,
-          completed_at: new Date().toISOString(),
+        const copiedScheduledDay: ScheduledDay = {
           date: targetDateStr,
-        }));
-        
-        const newDayProgress: DayProgress = {
-          date: targetDateStr,
-          completed_meals: copiedMeals,
-          total_nutrition: { ...sourceDayProgress.total_nutrition },
-          total_cost: sourceDayProgress.total_cost,
-          meals_count: sourceDayProgress.meals_count,
+          day_number: sourceScheduled.day_number,
+          plan_id: sourceScheduled.plan_id,
+          scheduled_at: new Date().toISOString(),
+          meals: sourceScheduled.meals.map(meal => ({
+            ...meal,
+            meal_id: `${meal.meal_id}_copy_${Date.now()}_${index}`,
+          })),
+          total_nutrition: { ...sourceScheduled.total_nutrition },
+          total_cost: sourceScheduled.total_cost,
+          meals_count: sourceScheduled.meals_count,
+          is_completed: false,
         };
         
-        newProgressItems.push(newDayProgress);
+        newScheduledDays.push(copiedScheduledDay);
       });
       
-      if (newProgressItems.length === 0) {
+      if (newScheduledDays.length === 0) {
         toast.error('Could not copy week - some dates are already scheduled');
-        return progressList;
+        return scheduled;
       }
       
-      toast.success(`Week copied! ${newProgressItems.length} day${newProgressItems.length !== 1 ? 's' : ''} scheduled 📅`, {
+      toast.success(`Week copied! ${newScheduledDays.length} day${newScheduledDays.length !== 1 ? 's' : ''} scheduled 📅`, {
         description: `Starting from ${new Date(targetStartDate).toLocaleDateString()}`
       });
       
-      return [...progressList, ...newProgressItems];
+      return [...scheduled, ...newScheduledDays];
     });
   };
 
@@ -1390,9 +1496,9 @@ function App() {
                         <div className="space-y-6">
                           <div className="flex items-center justify-between">
                             <div>
-                              <h3 className="text-lg font-semibold">Track Your Progress</h3>
+                              <h3 className="text-lg font-semibold">Schedule & Track Your Meals</h3>
                               <p className="text-sm text-muted-foreground">
-                                Mark days as complete and earn monthly badges
+                                Assign days to your calendar and optionally mark them as complete
                               </p>
                             </div>
                             <Button
@@ -1408,9 +1514,11 @@ function App() {
                           
                           <MealCalendar
                             mealPlan={mealPlan!}
-                            completedDays={dayProgress || []}
-                            onToggleDayComplete={handleToggleDayComplete}
+                            scheduledDays={scheduledDays || []}
+                            onScheduleDay={handleScheduleDay}
+                            onUnscheduleDay={handleUnscheduleDay}
                             onChangeDayDate={handleChangeDayDate}
+                            onToggleComplete={handleToggleComplete}
                             onCopyWeek={handleCopyWeek}
                           />
                         </div>

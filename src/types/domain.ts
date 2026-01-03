@@ -168,6 +168,24 @@ export interface MealPrepPlan {
   tips: string[];
 }
 
+export interface ScheduledDay {
+  date: string;
+  day_number: number;
+  plan_id: string;
+  scheduled_at: string;
+  meals: {
+    meal_id: string;
+    meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+    recipe_name: string;
+    nutrition: IngredientNutrition;
+    cost_eur: number;
+  }[];
+  total_nutrition: IngredientNutrition;
+  total_cost: number;
+  meals_count: number;
+  is_completed: boolean;
+}
+
 export interface CompletedMeal {
   meal_id: string;
   plan_id: string;
