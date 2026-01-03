@@ -4,19 +4,27 @@ import { Card } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Button } from '@/components/ui/button';
 import type { MealPlan, Meal } from '@/types/domain';
 import { Barbell, FireSimple, ChartBar, CurrencyDollar } from '@phosphor-icons/react';
 import { useLanguage } from '@/hooks/use-language';
 import { translateMeal, translateIngredient } from '@/lib/i18n/content-translations';
 import type { Language } from '@/lib/i18n/translations';
+import { InfoTooltip } from '@/components/info-tooltip';
+import { DISCLAIMERS, INFO_LABELS, VIEW_MODES, getViewModeContext } from '@/lib/disclaimers';
 
 interface MealPlanViewProps {
   mealPlan: MealPlan;
 }
 
+type ViewMode = 'total' | 'average';
+
 export function MealPlanView({ mealPlan }: MealPlanViewProps) {
   const { language, t } = useLanguage();
   const [selectedDay, setSelectedDay] = useState(mealPlan.days[0]?.day_number.toString() || '1');
+  const [viewMode, setViewMode] = useState<ViewMode>('average');
+
+  const days = mealPlan.metadata.days;
 
   const totalCaloriesFromMacros = (mealPlan.plan_totals.protein_g * 4) + 
                                   (mealPlan.plan_totals.carbohydrates_g * 4) + 
@@ -26,9 +34,66 @@ export function MealPlanView({ mealPlan }: MealPlanViewProps) {
   const carbsPercentage = Math.round((mealPlan.plan_totals.carbohydrates_g * 4 / totalCaloriesFromMacros) * 100);
   const fatsPercentage = Math.round((mealPlan.plan_totals.fats_g * 9 / totalCaloriesFromMacros) * 100);
 
+  const displayValues = viewMode === 'total' 
+    ? {
+        calories: mealPlan.plan_totals.calories,
+        protein: mealPlan.plan_totals.protein_g,
+        carbs: mealPlan.plan_totals.carbohydrates_g,
+        fats: mealPlan.plan_totals.fats_g,
+        cost: mealPlan.plan_totals.total_cost_eur,
+      }
+    : {
+        calories: Math.round(mealPlan.plan_totals.calories / days),
+        protein: Math.round(mealPlan.plan_totals.protein_g / days),
+        carbs: Math.round(mealPlan.plan_totals.carbohydrates_g / days),
+        fats: Math.round(mealPlan.plan_totals.fats_g / days),
+        cost: mealPlan.plan_totals.total_cost_eur / days,
+      };
+
   return (
     <div className="space-y-6">
       <Card className="p-6">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <h3 className="font-heading text-lg font-semibold">Nutrition Summary</h3>
+            <InfoTooltip 
+              content={DISCLAIMERS.nutrition.full} 
+              ariaLabel={INFO_LABELS.nutritionInfo}
+            />
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">View:</span>
+            <div className="flex border rounded-lg overflow-hidden">
+              <Button
+                variant={viewMode === 'total' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('total')}
+                className="rounded-none"
+                aria-label={INFO_LABELS.viewToggle}
+              >
+                {VIEW_MODES.total}
+              </Button>
+              <Button
+                variant={viewMode === 'average' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('average')}
+                className="rounded-none"
+                aria-label={INFO_LABELS.viewToggle}
+              >
+                {VIEW_MODES.average}
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-xs text-muted-foreground mb-4 flex items-center gap-2">
+          <span className="font-medium">{getViewModeContext(viewMode, days)}</span>
+          <Badge variant="outline" className="text-xs">
+            {DISCLAIMERS.general.short}
+          </Badge>
+        </div>
+
         <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
@@ -36,9 +101,11 @@ export function MealPlanView({ mealPlan }: MealPlanViewProps) {
               <span>{t.calories}</span>
             </div>
             <div className="font-heading text-2xl font-bold tabular-nums">
-              {mealPlan.plan_totals.calories.toLocaleString()}
+              {displayValues.calories.toLocaleString()}
             </div>
-            <div className="text-xs text-muted-foreground">{t.total}</div>
+            <div className="text-xs text-muted-foreground">
+              {viewMode === 'total' ? `${days} ${t.days}` : 'per day'}
+            </div>
           </div>
 
           <div className="space-y-1">
@@ -47,7 +114,7 @@ export function MealPlanView({ mealPlan }: MealPlanViewProps) {
               <span>{t.protein}</span>
             </div>
             <div className="font-heading text-2xl font-bold tabular-nums">
-              {mealPlan.plan_totals.protein_g}g
+              {displayValues.protein}g
             </div>
             <div className="text-xs text-muted-foreground">{proteinPercentage}% of calories</div>
           </div>
@@ -58,7 +125,7 @@ export function MealPlanView({ mealPlan }: MealPlanViewProps) {
               <span>{t.carbs}</span>
             </div>
             <div className="font-heading text-2xl font-bold tabular-nums">
-              {mealPlan.plan_totals.carbohydrates_g}g
+              {displayValues.carbs}g
             </div>
             <div className="text-xs text-muted-foreground">{carbsPercentage}% of calories</div>
           </div>
@@ -69,7 +136,7 @@ export function MealPlanView({ mealPlan }: MealPlanViewProps) {
               <span>{t.fats}</span>
             </div>
             <div className="font-heading text-2xl font-bold tabular-nums">
-              {mealPlan.plan_totals.fats_g}g
+              {displayValues.fats}g
             </div>
             <div className="text-xs text-muted-foreground">{fatsPercentage}% of calories</div>
           </div>
@@ -78,12 +145,16 @@ export function MealPlanView({ mealPlan }: MealPlanViewProps) {
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
               <CurrencyDollar size={16} />
               <span>{t.totalCost}</span>
+              <InfoTooltip 
+                content={DISCLAIMERS.cost.full} 
+                ariaLabel={INFO_LABELS.costInfo}
+              />
             </div>
             <div className="font-heading text-2xl font-bold tabular-nums text-accent">
-              €{mealPlan.plan_totals.total_cost_eur.toFixed(2)}
+              €{displayValues.cost.toFixed(2)}
             </div>
             <div className="text-xs text-muted-foreground">
-              {mealPlan.metadata.days} {t.days}
+              {viewMode === 'total' ? `${days} ${t.days}` : 'per day'}
             </div>
           </div>
         </div>
@@ -235,27 +306,37 @@ function MealCard({ meal, language, t }: { meal: Meal; language: Language; t: an
               )}
 
               <div className="space-y-2">
-                <h4 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-3">
+                <h4 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
                   {t.ingredients}
+                  <InfoTooltip 
+                    content="Ingredient quantities and nutrition values are calculated based on the recipe. Actual values may vary based on product brands and measurements."
+                    ariaLabel={INFO_LABELS.ingredientBreakdown}
+                  />
                 </h4>
-                {meal.ingredients.map((ingredient) => (
-                  <div
-                    key={ingredient.ingredient_id}
-                    className="flex items-center justify-between py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <span className="font-medium">
+                <div className="space-y-1">
+                  {meal.ingredients.map((ingredient) => (
+                    <div
+                      key={ingredient.ingredient_id}
+                      className="grid grid-cols-1 md:grid-cols-12 gap-2 py-3 px-3 rounded-lg hover:bg-muted/50 transition-colors border border-transparent hover:border-border"
+                    >
+                      <div className="md:col-span-4 font-medium">
                         {translateIngredient(ingredient.name, language)}
-                      </span>
-                      <span className="text-sm text-muted-foreground tabular-nums">
+                      </div>
+                      <div className="md:col-span-2 text-sm text-muted-foreground tabular-nums">
                         {ingredient.quantity_g}g
-                      </span>
+                      </div>
+                      <div className="md:col-span-5 flex gap-3 text-xs text-muted-foreground">
+                        <span className="tabular-nums">{ingredient.nutrition.calories} cal</span>
+                        <span className="tabular-nums">{ingredient.nutrition.protein_g}g P</span>
+                        <span className="tabular-nums">{ingredient.nutrition.carbohydrates_g}g C</span>
+                        <span className="tabular-nums">{ingredient.nutrition.fats_g}g F</span>
+                      </div>
+                      <div className="md:col-span-1 text-right font-medium text-accent tabular-nums">
+                        €{ingredient.cost_eur.toFixed(2)}
+                      </div>
                     </div>
-                    <div className="text-right font-medium text-accent tabular-nums">
-                      €{ingredient.cost_eur.toFixed(2)}
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
           </AccordionContent>

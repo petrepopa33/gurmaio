@@ -9,14 +9,17 @@ import { BudgetGauge } from '@/components/budget-gauge';
 import { SavedPlansDialog } from '@/components/saved-plans-dialog';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { ShareMealPlanDialog } from '@/components/share-meal-plan-dialog';
+import { AppFooter } from '@/components/app-footer';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Toaster } from '@/components/ui/sonner';
 import { Plus, List, UserCircleGear, SignOut, FloppyDisk, Check, ClockClockwise, ShareNetwork, FilePdf } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/hooks/use-language';
 import { exportMealPlanToPDF } from '@/lib/export-meal-plan-pdf';
+import { DISCLAIMERS, EMPTY_STATES } from '@/lib/disclaimers';
 
 interface UserInfo {
   avatarUrl: string;
@@ -40,6 +43,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState<UserInfo | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
+  const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
 
   const hasProfile = userProfile !== null;
   const hasMealPlan = mealPlan !== null;
@@ -218,6 +222,25 @@ function App() {
     window.location.reload();
   };
 
+  const handleDeleteAccount = async () => {
+    if (!currentUser) return;
+    
+    try {
+      setUserProfile(() => null);
+      setMealPlan(() => null);
+      setShoppingListState(() => null);
+      setSavedMealPlans(() => []);
+      
+      await handleLogout();
+      
+      toast.success('All your data has been deleted');
+      setShowDeleteAccountDialog(false);
+    } catch (error) {
+      toast.error('Failed to delete account data');
+      console.error('Delete account error:', error);
+    }
+  };
+
   if (!hasProfile) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
@@ -264,9 +287,12 @@ function App() {
 
           <div className="bg-card rounded-2xl p-8 border shadow-sm space-y-6">
             {!currentUser && (
-              <div className="bg-accent/10 border border-accent/30 rounded-lg p-4 mb-6">
-                <p className="text-sm text-accent-foreground">
-                  💡 <strong>Tip:</strong> Log in to save your meal plans and access them from any device
+              <div className="bg-primary/10 border border-primary/30 rounded-lg p-4 mb-6">
+                <p className="text-sm">
+                  <strong>✨ No login required to try Gurmaio</strong>
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {EMPTY_STATES.guestMode}
                 </p>
               </div>
             )}
@@ -335,6 +361,27 @@ function App() {
           onOpenChange={setIsOnboarding}
           onSave={handleSaveProfile}
         />
+
+        <AppFooter onDeleteAccount={currentUser ? () => setShowDeleteAccountDialog(true) : undefined} />
+
+        <AlertDialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete All Your Data</AlertDialogTitle>
+              <AlertDialogDescription>
+                This will permanently delete your profile, all saved meal plans, and shopping lists. This action cannot be undone.
+                
+                You will be logged out after deletion.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive hover:bg-destructive/90">
+                Delete Everything
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     );
   }
@@ -477,6 +524,13 @@ function App() {
               >
                 {isGenerating ? t.generating : t.generate}
               </Button>
+
+              <div className="pt-4 border-t">
+                <p className="text-xs text-muted-foreground flex items-center justify-center gap-2">
+                  <span>🤖</span>
+                  <span>{DISCLAIMERS.ai.short}</span>
+                </p>
+              </div>
             </div>
           </div>
         ) : (
@@ -550,6 +604,27 @@ function App() {
           t={t}
         />
       )}
+
+      <AppFooter onDeleteAccount={currentUser ? () => setShowDeleteAccountDialog(true) : undefined} />
+
+      <AlertDialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete All Your Data</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete your profile, all saved meal plans, and shopping lists. This action cannot be undone.
+              
+              You will be logged out after deletion.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteAccount} className="bg-destructive hover:bg-destructive/90">
+              Delete Everything
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Toaster />
     </div>

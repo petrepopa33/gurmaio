@@ -12,6 +12,8 @@ import { toast } from 'sonner';
 import { useState } from 'react';
 import { useLanguage } from '@/hooks/use-language';
 import { translateIngredient } from '@/lib/i18n/content-translations';
+import { InfoTooltip } from '@/components/info-tooltip';
+import { DISCLAIMERS, INFO_LABELS } from '@/lib/disclaimers';
 
 interface ShoppingListSheetProps {
   open: boolean;
@@ -85,6 +87,13 @@ export function ShoppingListSheet({ open, onOpenChange, shoppingList, onToggleOw
 
         <div className="mt-6 space-y-6">
           <Card className="p-4 bg-accent/10 border-accent/30">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="font-heading font-semibold">Cost Summary</h3>
+              <InfoTooltip 
+                content={DISCLAIMERS.cost.full} 
+                ariaLabel={INFO_LABELS.costInfo}
+              />
+            </div>
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
                 <div className="text-sm text-muted-foreground">{t.items}</div>

@@ -12,6 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { exportMealPlanToPDF } from '@/lib/export-meal-plan-pdf';
 import { useLanguage } from '@/hooks/use-language';
 import { toast } from 'sonner';
+import { EMPTY_STATES } from '@/lib/disclaimers';
 
 interface SavedPlansDialogProps {
   open: boolean;
@@ -98,8 +99,8 @@ export function SavedPlansDialog({
             <div className="py-12 text-center">
               <div className="text-6xl mb-4">🍽️</div>
               <h3 className="font-heading text-xl font-semibold mb-2">No saved plans yet</h3>
-              <p className="text-muted-foreground">
-                Generate a meal plan and click "Save Plan" to add it to your history
+              <p className="text-muted-foreground max-w-md mx-auto">
+                {EMPTY_STATES.noSavedPlans}
               </p>
             </div>
           ) : (

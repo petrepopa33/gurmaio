@@ -3,9 +3,10 @@
 A production-ready, cloud-native meal planning application that generates budget-aware, nutrition-accurate meal plans with explicit cost calculation at all levels.
 
 **Experience Qualities**:
-1. **Transparent** - Every cost and nutritional value is calculated deterministically and displayed clearly to build user trust
+1. **Transparent** - Every cost and nutritional value is calculated deterministically and displayed clearly to build user trust, with explicit disclaimers about estimates
 2. **Precise** - Budget calculations account for real-world shopping constraints (minimum quantities, unit conversions, rounding)
 3. **Efficient** - Edge-first architecture delivers sub-200ms response times globally with stateless, horizontally scalable design
+4. **Store-Ready** - Compliant with App Store and Google Play requirements including privacy policies, data deletion, and clear AI usage disclosure
 
 **Complexity Level**: Complex Application (advanced functionality, likely with multiple views)
 This is a commercial-grade product requiring multiple sophisticated engines (nutrition aggregation, cost calculation, shopping list generation), external service integrations (AI for meal composition, Supabase for persistence), strict separation of concerns (thin client, deterministic backend), and compliance with app store requirements and GDPR regulations.
@@ -219,3 +220,83 @@ Animations should reinforce the sense of precision and calculation. Use purposef
 - Reduce padding to 4 (16px) on mobile
 - Larger touch targets (min 44px) for all interactive elements
 - Sticky header with budget summary on scroll
+
+## UX Enhancements & Store Readiness
+
+### Transparency & Trust Features
+**Implemented to build user confidence and meet app store requirements**
+
+#### 1. Nutrition & Cost Disclaimers
+- **Info tooltips** next to nutrition and cost headers with full disclaimers
+- **Visual badges** indicating "All values are estimates"
+- **Contextual disclaimers** in shopping list and meal plan views
+- **Purpose**: Comply with app store requirements, set accurate expectations, build trust through honesty
+
+#### 2. Total vs Average View Toggle
+- **Functionality**: Toggle button to switch between "Total Plan" and "Daily Average" views
+- **Context labels**: "Total (5 days)" or "Average per day" shown clearly
+- **Applies to**: Calories, protein, carbs, fats, and cost
+- **Purpose**: Prevent user confusion between total plan values and daily averages
+
+#### 3. Enhanced Ingredient Transparency
+- **Per-ingredient nutrition display**: Shows calories, protein, carbs, fats for each ingredient
+- **Per-ingredient cost**: Clear cost breakdown at ingredient level
+- **Expandable meal cards**: Accordion-style details with cooking instructions
+- **Purpose**: Build trust by showing complete data transparency at all levels
+
+#### 4. Guest Access Clarity
+- **Prominent messaging**: "✨ No login required to try Gurmaio"
+- **Value explanation**: Clear description of guest vs authenticated features
+- **Visual indicators**: Banners explaining what guests can and cannot do
+- **Purpose**: Ensure app reviewers can access core functionality without authentication
+
+#### 5. Legal & Compliance Footer
+- **Links to**: Privacy Policy, Terms of Service, Contact Support
+- **Account deletion**: One-click access to data deletion flow
+- **Medical disclaimer**: Clear statement that app is not medical advice
+- **AI transparency**: Explanation of how AI is used (suggestions only, not calculations)
+- **Purpose**: Meet App Store and Google Play compliance requirements
+
+#### 6. Data Deletion Flow
+- **Functionality**: Complete user data deletion with confirmation dialog
+- **Scope**: Deletes profile, meal plans, shopping lists, and all saved data
+- **Confirmation**: Two-step process with clear warning about irreversibility
+- **Purpose**: GDPR compliance and app store requirements
+
+### User Experience Polish
+
+#### 7. Enhanced Empty States
+- **No saved plans**: Encouraging message with clear next steps
+- **Guest mode**: Informative banners explaining limitations and benefits
+- **Purpose**: Guide users through the app experience gracefully
+
+#### 8. Improved Information Architecture
+- **Hierarchical data display**: Ingredient → Meal → Day → Plan with visual hierarchy
+- **Tabular numbers**: All numeric values use tabular-nums for alignment
+- **Consistent iconography**: Phosphor icons used throughout for clarity
+- **Purpose**: Make complex nutritional data easy to scan and understand
+
+### Compliance Checklist
+
+✅ **Implemented**:
+- Disclaimers for nutrition estimates
+- Disclaimers for cost estimates
+- AI usage transparency
+- Medical advice disclaimer
+- Guest access without authentication
+- Account deletion flow
+- Footer with legal links
+- Info tooltips for contextual help
+- Total/Average toggle for clarity
+- Per-ingredient transparency
+
+⚠️ **Required for Launch** (not implemented in code):
+- Privacy Policy document (linked but not created)
+- Terms of Service document (linked but not created)
+- Actual backend data deletion API (currently frontend-only)
+
+💡 **Nice to Have** (post-launch):
+- Data export functionality (GDPR)
+- Regional pricing switches (€ / $ / £)
+- User feedback mechanism
+- Tutorial for first-time users
