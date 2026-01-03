@@ -97,6 +97,13 @@ This is a commercial-grade product requiring multiple sophisticated engines (nut
 - **Progression**: Settings → Delete Account → Confirmation dialog → API call → Data deleted → Logout
 - **Success criteria**: All user data removed from database, user logged out, cannot access app without re-registering
 
+### Email Verification (Social Sign-In)
+- **Functionality**: Verify email addresses for users who sign in through social providers (Google, Apple, Facebook, Twitter) to ensure account security and enable password recovery
+- **Purpose**: Enhance account security, enable account recovery mechanisms, prevent unauthorized access, comply with security best practices for social authentication
+- **Trigger**: Automatically triggered 2 seconds after successful social sign-in if email is not verified, or manually when user attempts to save meal plans without verification
+- **Progression**: Social sign-in → Account created → Verification dialog appears after 2s → Email entry (if not provided by OAuth) → Send code → User checks email → Enter 6-digit code → Verify → Email marked as verified → Full feature access unlocked
+- **Success criteria**: Email verified successfully, verification state persists across sessions, unverified users see prominent banner with verify CTA, save meal plan feature requires verification, users can skip verification temporarily but are reminded, verification can be completed later, verification status clears on logout/account deletion
+
 ### Interactive Demo & Preview
 - **Functionality**: Animated walkthrough showing app workflow with actual UI mockups, step-by-step feature showcase with smooth transitions, play/pause controls, and manual navigation
 - **Purpose**: Help new users understand app value proposition instantly, reduce onboarding friction, increase conversion by showing real functionality before signup
@@ -131,6 +138,11 @@ This is a commercial-grade product requiring multiple sophisticated engines (nut
 - **Meal Substitution Failure** - If AI fails to generate valid alternative, show error toast and keep original meal intact
 - **Substitution Budget Violation** - If generated meal exceeds remaining budget, reject and retry with stricter cost constraints
 - **Substitution Network Error** - Show user-friendly error, allow retry, preserve original meal plan state
+- **Email Verification Code Invalid** - Clear error message, allow resend with 60-second cooldown timer, highlight input field
+- **Email Verification Code Expired** - Automatic detection after 10 minutes, prompt to resend new code
+- **Missing Email from Social Provider** - Prompt user to manually enter email address before sending verification code
+- **Verification Skip** - Allow users to dismiss verification temporarily, show persistent banner until verified
+- **Multiple Verification Attempts** - Rate limit to prevent abuse (max 5 codes per hour per user)
 
 ## Calorie Calculation Algorithm
 

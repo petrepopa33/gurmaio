@@ -19,6 +19,8 @@ import { AnimatedAppDemo } from '@/components/animated-app-demo';
 import { ProfileDropdown } from '@/components/profile-dropdown';
 import { AccountSettingsDialog } from '@/components/account-settings-dialog';
 import { CreateAccountDialog } from '@/components/create-account-dialog';
+import { EmailVerificationDialog } from '@/components/email-verification-dialog';
+import { EmailVerificationBanner } from '@/components/email-verification-banner';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Toaster } from '@/components/ui/sonner';
@@ -26,6 +28,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, List, SignOut, FloppyDisk, Check, ShareNetwork, FilePdf, ChefHat, GoogleLogo, AppleLogo, FacebookLogo, TwitterLogo } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/hooks/use-language';
+import { useEmailVerification } from '@/hooks/use-email-verification';
 import { exportMealPlanToPDF } from '@/lib/export-meal-plan-pdf';
 import { DISCLAIMERS, EMPTY_STATES } from '@/lib/disclaimers';
 
@@ -60,6 +63,15 @@ function App() {
   const [showAccountSettings, setShowAccountSettings] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [showCreateAccountDialog, setShowCreateAccountDialog] = useState(false);
+  const [showEmailVerificationDialog, setShowEmailVerificationDialog] = useState(false);
+  
+  const {
+    needsVerification,
+    isVerified,
+    markAsVerified,
+    markAsSkipped,
+    resetVerification,
+  } = useEmailVerification(currentUser?.id);
 
   const hasProfile = userProfile !== null;
   const hasMealPlan = mealPlan !== null;
@@ -89,6 +101,16 @@ function App() {
     }
   }, []);
 
+  useEffect(() => {
+    if (currentUser && needsVerification && !isDemoMode) {
+      const timer = setTimeout(() => {
+        setShowEmailVerificationDialog(true);
+      }, 2000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [currentUser, needsVerification, isDemoMode]);
+
   const loadUser = async () => {
     try {
       const user = await window.spark.user();
@@ -111,10 +133,12 @@ function App() {
       setShoppingListState(() => null);
       setIsDemoMode(false);
       
+      resetVerification();
+      
       try {
         const storageKeys = await window.spark.kv.keys();
         for (const key of storageKeys) {
-          if (key.startsWith('user_') || key.startsWith('current_') || key.startsWith('shopping_') || key.startsWith('saved_') || key.startsWith('meal_')) {
+          if (key.startsWith('user_') || key.startsWith('current_') || key.startsWith('shopping_') || key.startsWith('saved_') || key.startsWith('meal_') || key.startsWith('email_verification_')) {
             await window.spark.kv.delete(key);
           }
         }
@@ -173,7 +197,23 @@ function App() {
       return;
     }
 
-    if (!mealPlan || !currentUser) {
+    if (!currentUser) {
+      toast.error('Please log in to save meal plans');
+      return;
+    }
+
+    if (!isVerified) {
+      toast.error('Please verify your email to save meal plans', {
+        description: 'Email verification is required to unlock this feature',
+        action: {
+          label: 'Verify Now',
+          onClick: () => setShowEmailVerificationDialog(true)
+        }
+      });
+      return;
+    }
+
+    if (!mealPlan) {
       toast.error('Please log in to save meal plans');
       return;
     }
@@ -355,6 +395,8 @@ function App() {
       setSavedMealPlans(() => []);
       setMealRatings(() => []);
       setMealPrepPlan(() => null);
+      
+      resetVerification();
       
       try {
         const storageKeys = await window.spark.kv.keys();
@@ -863,6 +905,15 @@ function App() {
       </header>
 
       <main className="container mx-auto px-6 py-8">
+        {currentUser && needsVerification && !isDemoMode && currentUser.email && (
+          <div className="mb-6">
+            <EmailVerificationBanner
+              email={currentUser.email}
+              onVerifyClick={() => setShowEmailVerificationDialog(true)}
+            />
+          </div>
+        )}
+
         {isDemoMode && (
           <div className="mb-6 bg-accent/10 border border-accent/30 rounded-xl p-4">
             <div className="flex items-start justify-between gap-4">
@@ -1179,6 +1230,20 @@ function App() {
         open={showCreateAccountDialog}
         onOpenChange={setShowCreateAccountDialog}
       />
+
+      {currentUser && (
+        <EmailVerificationDialog
+          open={showEmailVerificationDialog}
+          onOpenChange={setShowEmailVerificationDialog}
+          userEmail={currentUser.email}
+          requiresEmailEntry={!currentUser.email}
+          onVerificationComplete={() => {
+            if (currentUser.email) {
+              markAsVerified(currentUser.email);
+            }
+          }}
+        />
+      )}
 
       <AppFooter onDeleteAccount={currentUser ? () => setShowDeleteAccountDialog(true) : undefined} />
 
