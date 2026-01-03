@@ -61,6 +61,13 @@ This is a commercial-grade product requiring multiple sophisticated engines (nut
 - **Progression**: Generate meal plan → Click "Save Plan" → Plan saved to useKV storage → Visual confirmation (checkmark + "Saved" state) → Plan accessible in future sessions
 - **Success criteria**: Saved plans persist across sessions, duplicate saves update existing plan, visual feedback confirms save action, unauthenticated users see appropriate message
 
+### Saved Meal Plans History
+- **Functionality**: View, load, and delete previously saved meal plans with full nutrition and cost details
+- **Purpose**: Allow users to revisit past meal plans, compare different plans, and reload successful plans without regenerating
+- **Trigger**: User clicks "History" button in header (visible when logged in with saved plans)
+- **Progression**: Click "History" → Dialog opens with sorted list of saved plans → View plan summaries with key metrics → Click "Load" to activate a plan OR click delete icon to remove from history
+- **Success criteria**: Plans sorted newest first, load replaces current plan, delete removes from storage, empty state shown when no plans exist, visual indicators for over-budget plans
+
 ### Account Management
 - **Functionality**: Delete all user data (GDPR compliant)
 - **Purpose**: Comply with data protection regulations and user privacy rights
@@ -82,6 +89,8 @@ This is a commercial-grade product requiring multiple sophisticated engines (nut
 - **Unauthenticated Save Attempt** - Show informative toast message prompting user to log in, disable save button for guests
 - **Session Expiration** - Graceful handling of expired sessions with re-authentication prompt
 - **Avatar Load Failure** - Display fallback with user's initials in colored background
+- **Empty Saved Plans** - Show encouraging empty state with icon and call-to-action when no plans have been saved yet
+- **Deleted Current Plan** - If user deletes the currently active meal plan from history, plan remains in current view but is removed from saved list
 
 ## Design Direction
 

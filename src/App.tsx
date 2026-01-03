@@ -6,11 +6,12 @@ import { OnboardingDialog } from '@/components/onboarding-dialog';
 import { MealPlanView } from '@/components/meal-plan-view';
 import { ShoppingListSheet } from '@/components/shopping-list-sheet';
 import { BudgetGauge } from '@/components/budget-gauge';
+import { SavedPlansDialog } from '@/components/saved-plans-dialog';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Toaster } from '@/components/ui/sonner';
-import { Plus, List, Gear, SignOut, FloppyDisk, Check } from '@phosphor-icons/react';
+import { Plus, List, Gear, SignOut, FloppyDisk, Check, ClockClockwise } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 
 interface UserInfo {
@@ -29,6 +30,7 @@ function App() {
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [shoppingListOpen, setShoppingListOpen] = useState(false);
+  const [savedPlansOpen, setSavedPlansOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserInfo | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
@@ -150,6 +152,20 @@ function App() {
         )
       };
     });
+  };
+
+  const handleLoadSavedPlan = (plan: MealPlan) => {
+    setMealPlan(() => plan);
+    setShoppingListState(() => null);
+    toast.success('Meal plan loaded successfully');
+  };
+
+  const handleDeleteSavedPlan = (planId: string) => {
+    setSavedMealPlans((current) => {
+      const plans = current || [];
+      return plans.filter(p => p.plan_id !== planId);
+    });
+    toast.success('Meal plan deleted');
   };
 
   if (!hasProfile) {
@@ -309,6 +325,15 @@ function App() {
                   )}
                 </Button>
               )}
+              {currentUser && (savedMealPlans?.length ?? 0) > 0 && (
+                <Button
+                  variant="outline"
+                  onClick={() => setSavedPlansOpen(true)}
+                >
+                  <ClockClockwise className="mr-2" />
+                  History ({savedMealPlans?.length ?? 0})
+                </Button>
+              )}
               {hasMealPlan && (
                 <Button
                   variant="outline"
@@ -435,6 +460,14 @@ function App() {
           onDeleteItem={handleDeleteItem}
         />
       )}
+
+      <SavedPlansDialog
+        open={savedPlansOpen}
+        onOpenChange={setSavedPlansOpen}
+        savedPlans={savedMealPlans || []}
+        onLoadPlan={handleLoadSavedPlan}
+        onDeletePlan={handleDeleteSavedPlan}
+      />
 
       <Toaster />
     </div>
