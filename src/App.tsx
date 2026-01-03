@@ -18,6 +18,7 @@ import { DemoPreview } from '@/components/demo-preview';
 import { AnimatedAppDemo } from '@/components/animated-app-demo';
 import { ProfileDropdown } from '@/components/profile-dropdown';
 import { AccountSettingsDialog } from '@/components/account-settings-dialog';
+import { CreateAccountDialog } from '@/components/create-account-dialog';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Toaster } from '@/components/ui/sonner';
@@ -57,6 +58,8 @@ function App() {
   const [showAnimatedDemo, setShowAnimatedDemo] = useState(true);
   const [activeTab, setActiveTab] = useState<'meals' | 'prep'>('meals');
   const [showAccountSettings, setShowAccountSettings] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(false);
+  const [showCreateAccountDialog, setShowCreateAccountDialog] = useState(false);
 
   const hasProfile = userProfile !== null;
   const hasMealPlan = mealPlan !== null;
@@ -101,7 +104,23 @@ function App() {
     }
   };
 
+  const handleStartDemoMode = () => {
+    setIsDemoMode(true);
+    setIsOnboarding(true);
+  };
+
   const handleSaveMealPlan = async () => {
+    if (isDemoMode) {
+      toast.error('Demo mode: Please create an account to save meal plans', {
+        description: 'Your data will be lost on refresh in demo mode',
+        action: {
+          label: 'Create Account',
+          onClick: () => setShowCreateAccountDialog(true)
+        }
+      });
+      return;
+    }
+
     if (!mealPlan || !currentUser) {
       toast.error('Please log in to save meal plans');
       return;
@@ -508,13 +527,24 @@ function App() {
             </div>
 
             <div className="bg-card rounded-2xl p-8 border shadow-sm space-y-6 max-w-xl mx-auto">
-              {!currentUser && (
+              {isDemoMode && (
                 <div className="bg-accent/10 border border-accent/30 rounded-lg p-4">
-                  <p className="text-sm font-medium">
-                    ✨ No login required to try {t.appName}
+                  <p className="text-sm font-medium text-accent-foreground">
+                    🎭 Demo Mode Active
                   </p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    {EMPTY_STATES.guestMode}
+                    You can generate meal plans, but they won't be saved. Your data will be lost on refresh.
+                  </p>
+                </div>
+              )}
+
+              {!currentUser && !isDemoMode && (
+                <div className="bg-muted/50 border rounded-lg p-4">
+                  <p className="text-sm font-medium">
+                    ✨ Try {t.appName} without creating an account
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Demo mode lets you explore all features, but your data won't be saved
                   </p>
                 </div>
               )}
@@ -527,22 +557,38 @@ function App() {
               </div>
 
               <div className="flex flex-col gap-3 pt-2">
-                {!currentUser ? (
+                {!currentUser && !isDemoMode ? (
                   <>
+                    <Button
+                      onClick={() => setShowCreateAccountDialog(true)}
+                      size="lg"
+                      className="w-full"
+                    >
+                      Create Account
+                    </Button>
                     <Button
                       onClick={() => window.location.href = '/.spark/login'}
                       size="lg"
                       className="w-full"
+                      variant="outline"
                     >
                       {t.login}
                     </Button>
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-card px-2 text-muted-foreground">Or</span>
+                      </div>
+                    </div>
                     <Button
-                      onClick={() => setIsOnboarding(true)}
+                      onClick={handleStartDemoMode}
                       size="lg"
                       className="w-full"
-                      variant="outline"
+                      variant="secondary"
                     >
-                      {t.continueAsGuest}
+                      Try Demo Mode
                     </Button>
                   </>
                 ) : (
@@ -552,7 +598,7 @@ function App() {
                     className="w-full"
                   >
                     <Plus className="mr-2" />
-                    {t.getStarted}
+                    {isDemoMode ? 'Start Demo' : t.getStarted}
                   </Button>
                 )}
               </div>
@@ -564,6 +610,11 @@ function App() {
           open={isOnboarding}
           onOpenChange={setIsOnboarding}
           onSave={handleSaveProfile}
+        />
+
+        <CreateAccountDialog
+          open={showCreateAccountDialog}
+          onOpenChange={setShowCreateAccountDialog}
         />
 
         <AppFooter onDeleteAccount={currentUser ? () => setShowDeleteAccountDialog(true) : undefined} />
@@ -622,7 +673,23 @@ function App() {
 
             <div className="flex items-center gap-2">
               <LanguageSwitcher currentLanguage={language} onLanguageChange={handleLanguageChange} />
-              {hasMealPlan && currentUser && (
+              {hasMealPlan && (isDemoMode ? (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    toast.info('Demo mode: Create an account to save plans', {
+                      action: {
+                        label: 'Create Account',
+                        onClick: () => setShowCreateAccountDialog(true)
+                      }
+                    });
+                  }}
+                  title="Create an account to save meal plans"
+                >
+                  <FloppyDisk className="mr-2" />
+                  {t.savePlan} (Demo)
+                </Button>
+              ) : currentUser && (
                 <Button
                   variant={justSaved ? "default" : "outline"}
                   onClick={handleSaveMealPlan}
@@ -641,7 +708,7 @@ function App() {
                     </>
                   )}
                 </Button>
-              )}
+              ))}
               {hasMealPlan && (
                 <Button
                   variant="outline"
@@ -666,6 +733,13 @@ function App() {
                   logoutLabel={t.logout}
                   deleteAccountLabel="Delete Account"
                 />
+              ) : isDemoMode ? (
+                <Button
+                  variant="default"
+                  onClick={() => setShowCreateAccountDialog(true)}
+                >
+                  Create Account
+                </Button>
               ) : (
                 <Button
                   variant="default"
@@ -680,6 +754,29 @@ function App() {
       </header>
 
       <main className="container mx-auto px-6 py-8">
+        {isDemoMode && (
+          <div className="mb-6 bg-accent/10 border border-accent/30 rounded-xl p-4">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-accent-foreground flex items-center gap-2">
+                  <span>🎭</span>
+                  <span>Demo Mode: Your data is not saved</span>
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Create an account to save meal plans and preferences. Data will be lost on page refresh.
+                </p>
+              </div>
+              <Button
+                size="sm"
+                variant="default"
+                onClick={() => setShowCreateAccountDialog(true)}
+              >
+                Create Account
+              </Button>
+            </div>
+          </div>
+        )}
+        
         <AnimatePresence mode="wait">
           {!hasMealPlan ? (
             <motion.div
@@ -968,6 +1065,11 @@ function App() {
           }}
         />
       )}
+
+      <CreateAccountDialog
+        open={showCreateAccountDialog}
+        onOpenChange={setShowCreateAccountDialog}
+      />
 
       <AppFooter onDeleteAccount={currentUser ? () => setShowDeleteAccountDialog(true) : undefined} />
 
