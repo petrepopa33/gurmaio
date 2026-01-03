@@ -37,6 +37,8 @@ function App() {
 
   const hasProfile = userProfile !== null;
   const hasMealPlan = mealPlan !== null;
+  const canSaveMorePlans = (savedMealPlans?.length ?? 0) < 5;
+  const isCurrentPlanAlreadySaved = mealPlan ? (savedMealPlans || []).some(p => p.plan_id === mealPlan.plan_id) : false;
 
   const currentShoppingList = shoppingListState || (mealPlan ? generateShoppingList(mealPlan) : null);
 
@@ -80,22 +82,37 @@ function App() {
 
     setIsSaving(true);
     
-    setSavedMealPlans((current) => {
-      const plans = current || [];
-      const existingIndex = plans.findIndex(p => p.plan_id === mealPlan.plan_id);
-      if (existingIndex >= 0) {
-        const updated = [...plans];
-        updated[existingIndex] = mealPlan;
-        return updated;
-      }
-      return [...plans, mealPlan];
+    const result = await new Promise<boolean>((resolve) => {
+      setSavedMealPlans((current) => {
+        const plans = current || [];
+        const existingIndex = plans.findIndex(p => p.plan_id === mealPlan.plan_id);
+        
+        if (existingIndex >= 0) {
+          const updated = [...plans];
+          updated[existingIndex] = mealPlan;
+          resolve(true);
+          return updated;
+        }
+        
+        if (plans.length >= 5) {
+          resolve(false);
+          return plans;
+        }
+        
+        resolve(true);
+        return [...plans, mealPlan];
+      });
     });
 
     setIsSaving(false);
-    setJustSaved(true);
-    toast.success('Meal plan saved successfully!');
     
-    setTimeout(() => setJustSaved(false), 2000);
+    if (result) {
+      setJustSaved(true);
+      toast.success('Meal plan saved successfully!');
+      setTimeout(() => setJustSaved(false), 2000);
+    } else {
+      toast.error('Maximum 5 saved plans reached. Please delete an old plan first.');
+    }
   };
 
   const handleSaveProfile = (profile: UserProfile) => {
@@ -310,7 +327,8 @@ function App() {
                 <Button
                   variant={justSaved ? "default" : "outline"}
                   onClick={handleSaveMealPlan}
-                  disabled={isSaving}
+                  disabled={isSaving || (!canSaveMorePlans && !isCurrentPlanAlreadySaved)}
+                  title={!canSaveMorePlans && !isCurrentPlanAlreadySaved ? "Maximum 5 saved plans reached" : ""}
                 >
                   {justSaved ? (
                     <>
@@ -329,9 +347,10 @@ function App() {
                 <Button
                   variant="outline"
                   onClick={() => setSavedPlansOpen(true)}
+                  className="relative"
                 >
                   <ClockClockwise className="mr-2" />
-                  History ({savedMealPlans?.length ?? 0})
+                  History ({savedMealPlans?.length ?? 0}/5)
                 </Button>
               )}
               {hasMealPlan && (

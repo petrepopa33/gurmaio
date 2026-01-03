@@ -50,9 +50,25 @@ export function SavedPlansDialog({
           <DialogHeader>
             <DialogTitle className="font-heading text-2xl">Saved Meal Plans</DialogTitle>
             <DialogDescription>
-              View and manage your previously saved meal plans
+              View and manage your previously saved meal plans ({sortedPlans.length}/5)
             </DialogDescription>
           </DialogHeader>
+
+          {sortedPlans.length >= 5 && (
+            <Alert className="border-accent/50 bg-accent/10">
+              <AlertDescription className="text-sm">
+                <strong>Storage limit reached:</strong> You can save up to 5 meal plans. Delete an old plan to save a new one.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {sortedPlans.length >= 4 && sortedPlans.length < 5 && (
+            <Alert className="border-muted-foreground/30 bg-muted/50">
+              <AlertDescription className="text-sm">
+                You have {5 - sortedPlans.length} slot{5 - sortedPlans.length !== 1 ? 's' : ''} remaining.
+              </AlertDescription>
+            </Alert>
+          )}
 
           {sortedPlans.length === 0 ? (
             <div className="py-12 text-center">
