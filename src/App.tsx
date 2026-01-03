@@ -81,30 +81,15 @@ function App() {
       
       setCurrentUser(null);
       
-      try {
-        await fetch('/.spark/logout', { 
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-      } catch (fetchError) {
-        console.log('Logout endpoint error (continuing anyway):', fetchError);
-      }
+      await new Promise(resolve => setTimeout(resolve, 100));
       
-      toast.success('Logged out successfully', { id: 'logout', duration: 1000 });
-      
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
-      window.location.reload();
+      window.location.href = '/.spark/logout';
     } catch (error) {
       console.error('Logout error:', error);
-      toast.error('Logged out', { id: 'logout', duration: 1000 });
+      
       setCurrentUser(null);
       
-      await new Promise(resolve => setTimeout(resolve, 300));
-      window.location.reload();
+      window.location.href = '/.spark/logout';
     }
   };
 
@@ -271,28 +256,18 @@ function App() {
       
       setCurrentUser(null);
       
-      try {
-        await fetch('/.spark/logout', { 
-          method: 'POST',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        });
-      } catch (logoutError) {
-        console.log('Logout endpoint error during deletion (continuing):', logoutError);
-      }
-      
       await new Promise(resolve => setTimeout(resolve, 300));
       
       toast.success('Your account and all data have been deleted', { id: 'delete-account', duration: 2000 });
       
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      window.location.reload();
+      window.location.href = '/.spark/logout';
     } catch (error) {
       toast.error('Failed to delete account data', { id: 'delete-account' });
       console.error('Delete account error:', error);
+      
+      window.location.href = '/.spark/logout';
     }
   };
 
