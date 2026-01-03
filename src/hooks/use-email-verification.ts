@@ -6,9 +6,10 @@ interface EmailVerificationState {
   email?: string;
   verifiedAt?: string;
   provider?: string;
+  legacyAccount?: boolean;
 }
 
-export function useEmailVerification(userId?: string) {
+export function useEmailVerification(userId?: string, hasExistingProfile?: boolean) {
   const [verificationState, setVerificationState] = useKV<EmailVerificationState | null>(
     userId ? `email_verification_${userId}` : 'email_verification_guest',
     null
@@ -16,14 +17,21 @@ export function useEmailVerification(userId?: string) {
   const [needsVerification, setNeedsVerification] = useState(false);
 
   useEffect(() => {
-    if (userId && verificationState === null) {
+    if (userId && verificationState === null && hasExistingProfile) {
+      setVerificationState(() => ({
+        isVerified: true,
+        verifiedAt: new Date().toISOString(),
+        legacyAccount: true,
+      }));
+      setNeedsVerification(false);
+    } else if (userId && verificationState === null) {
       setNeedsVerification(true);
     } else if (verificationState && !verificationState.isVerified) {
       setNeedsVerification(true);
     } else {
       setNeedsVerification(false);
     }
-  }, [userId, verificationState]);
+  }, [userId, verificationState, hasExistingProfile]);
 
   const markAsVerified = (email: string, provider?: string) => {
     setVerificationState(() => ({

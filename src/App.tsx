@@ -71,16 +71,16 @@ function App() {
   const [showCreateAccountDialog, setShowCreateAccountDialog] = useState(false);
   const [showEmailVerificationDialog, setShowEmailVerificationDialog] = useState(false);
   
+  const hasProfile = userProfile !== null;
+  const hasMealPlan = mealPlan !== null;
+  
   const {
     needsVerification,
     isVerified,
     markAsVerified,
     markAsSkipped,
     resetVerification,
-  } = useEmailVerification(currentUser?.id);
-
-  const hasProfile = userProfile !== null;
-  const hasMealPlan = mealPlan !== null;
+  } = useEmailVerification(currentUser?.id, hasProfile);
   const canSaveMorePlans = (savedMealPlans?.length ?? 0) < 5;
   const isCurrentPlanAlreadySaved = mealPlan ? (savedMealPlans || []).some(p => p.plan_id === mealPlan.plan_id) : false;
 
