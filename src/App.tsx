@@ -17,6 +17,7 @@ import { AppFooter } from '@/components/app-footer';
 import { DemoPreview } from '@/components/demo-preview';
 import { AnimatedAppDemo } from '@/components/animated-app-demo';
 import { ProfileDropdown } from '@/components/profile-dropdown';
+import { AccountSettingsDialog } from '@/components/account-settings-dialog';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Toaster } from '@/components/ui/sonner';
@@ -55,6 +56,7 @@ function App() {
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
   const [showAnimatedDemo, setShowAnimatedDemo] = useState(true);
   const [activeTab, setActiveTab] = useState<'meals' | 'prep'>('meals');
+  const [showAccountSettings, setShowAccountSettings] = useState(false);
 
   const hasProfile = userProfile !== null;
   const hasMealPlan = mealPlan !== null;
@@ -656,6 +658,7 @@ function App() {
                   savedPlansCount={savedMealPlans?.length ?? 0}
                   onProfileClick={() => setIsOnboarding(true)}
                   onHistoryClick={() => setSavedPlansOpen(true)}
+                  onAccountSettingsClick={() => setShowAccountSettings(true)}
                   onLogoutClick={handleLogout}
                   onDeleteAccountClick={() => setShowDeleteAccountDialog(true)}
                   profileLabel={t.profile}
@@ -952,6 +955,17 @@ function App() {
           mealPlan={mealPlan}
           language={language}
           t={t}
+        />
+      )}
+
+      {currentUser && (
+        <AccountSettingsDialog
+          open={showAccountSettings}
+          onOpenChange={setShowAccountSettings}
+          currentUser={currentUser}
+          onUpdateSuccess={() => {
+            loadUser();
+          }}
         />
       )}
 
