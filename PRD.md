@@ -68,6 +68,13 @@ This is a commercial-grade product requiring multiple sophisticated engines (nut
 - **Progression**: Click "History" → Dialog opens with sorted list of saved plans → View plan summaries with key metrics → Click "Load" to activate a plan OR click delete icon to remove from history
 - **Success criteria**: Plans sorted newest first, load replaces current plan, delete removes from storage, empty state shown when no plans exist, visual indicators for over-budget plans
 
+### Multi-Language Support (i18n)
+- **Functionality**: Switch between EU languages (English, German, French, Spanish, Italian) with persistent language preference
+- **Purpose**: Make the app accessible to users across Europe in their native language
+- **Trigger**: User clicks language switcher button (globe icon) in header or welcome screen
+- **Progression**: Click language switcher → Dropdown menu shows available languages with flags → Select language → UI updates immediately → Preference saved to user storage
+- **Success criteria**: All UI text translates instantly, language preference persists across sessions, flag icons display correctly, translations maintain meaning and context
+
 ### Account Management
 - **Functionality**: Delete all user data (GDPR compliant)
 - **Purpose**: Comply with data protection regulations and user privacy rights
@@ -94,6 +101,8 @@ This is a commercial-grade product requiring multiple sophisticated engines (nut
 - **Incomplete Calorie Data** - When user hasn't filled all required fields for auto-calculation, system gracefully shows no calculated value and allows profile saving without target calories
 - **Invalid Biometric Data** - Validate weight (30-300kg), height (100-250cm), age (13-120) to prevent calculation errors and nonsensical results
 - **Manual vs Auto Calorie Toggle** - Preserve both manual entry and calculated values when switching modes, prevent data loss on accidental toggles
+- **Language Fallback** - If a translation key is missing, fallback to English version to prevent broken UI
+- **Browser Language Detection** - On first visit, detect browser language and auto-select if supported, otherwise default to English
 
 ## Calorie Calculation Algorithm
 

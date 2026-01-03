@@ -1,5 +1,6 @@
 import { Progress } from '@/components/ui/progress';
 import { CurrencyDollar } from '@phosphor-icons/react';
+import { useLanguage } from '@/hooks/use-language';
 
 interface BudgetGaugeProps {
   budget: number;
@@ -9,6 +10,7 @@ interface BudgetGaugeProps {
 }
 
 export function BudgetGauge({ budget, spent, isOverBudget, compact = false }: BudgetGaugeProps) {
+  const { t } = useLanguage();
   const remaining = budget - spent;
   const percentage = Math.min((spent / budget) * 100, 100);
 
@@ -22,7 +24,7 @@ export function BudgetGauge({ budget, spent, isOverBudget, compact = false }: Bu
           </span>
           {isOverBudget && (
             <span className="text-xs text-destructive font-medium">
-              Over Budget
+              {t.overBudget}
             </span>
           )}
         </div>
@@ -35,11 +37,11 @@ export function BudgetGauge({ budget, spent, isOverBudget, compact = false }: Bu
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <CurrencyDollar className="text-primary" size={24} />
-          <h3 className="font-heading text-lg font-semibold">Budget</h3>
+          <h3 className="font-heading text-lg font-semibold">{t.budget}</h3>
         </div>
         {isOverBudget && (
           <span className="px-3 py-1 bg-destructive/10 text-destructive rounded-full text-sm font-medium">
-            Over Budget
+            {t.overBudget}
           </span>
         )}
       </div>
@@ -50,13 +52,13 @@ export function BudgetGauge({ budget, spent, isOverBudget, compact = false }: Bu
             <div className="font-heading text-3xl font-bold tabular-nums">
               €{remaining.toFixed(2)}
             </div>
-            <div className="text-sm text-muted-foreground">remaining</div>
+            <div className="text-sm text-muted-foreground">{t.remaining}</div>
           </div>
           <div className="text-right">
             <div className="font-heading text-xl font-semibold tabular-nums text-muted-foreground">
               €{spent.toFixed(2)}
             </div>
-            <div className="text-xs text-muted-foreground">spent</div>
+            <div className="text-xs text-muted-foreground">{t.spent}</div>
           </div>
         </div>
 
@@ -67,7 +69,7 @@ export function BudgetGauge({ budget, spent, isOverBudget, compact = false }: Bu
 
         <div className="flex justify-between text-xs text-muted-foreground">
           <span>€0</span>
-          <span>€{budget.toFixed(2)} budget</span>
+          <span>€{budget.toFixed(2)} {t.budget.toLowerCase()}</span>
         </div>
       </div>
     </div>

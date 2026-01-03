@@ -7,12 +7,14 @@ import { MealPlanView } from '@/components/meal-plan-view';
 import { ShoppingListSheet } from '@/components/shopping-list-sheet';
 import { BudgetGauge } from '@/components/budget-gauge';
 import { SavedPlansDialog } from '@/components/saved-plans-dialog';
+import { LanguageSwitcher } from '@/components/language-switcher';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Toaster } from '@/components/ui/sonner';
 import { Plus, List, Gear, SignOut, FloppyDisk, Check, ClockClockwise } from '@phosphor-icons/react';
 import { toast } from 'sonner';
+import { useLanguage } from '@/hooks/use-language';
 
 interface UserInfo {
   avatarUrl: string;
@@ -23,6 +25,7 @@ interface UserInfo {
 }
 
 function App() {
+  const { language, setLanguage, t } = useLanguage();
   const [userProfile, setUserProfile] = useKV<UserProfile | null>('user_profile', null);
   const [mealPlan, setMealPlan] = useKV<MealPlan | null>('current_meal_plan', null);
   const [shoppingListState, setShoppingListState] = useKV<ShoppingList | null>('shopping_list_state', null);
@@ -189,8 +192,9 @@ function App() {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center p-6">
         <div className="max-w-2xl w-full text-center space-y-8">
-          {currentUser && (
-            <div className="flex items-center justify-end">
+          <div className="flex items-center justify-end gap-2">
+            <LanguageSwitcher currentLanguage={language} onLanguageChange={setLanguage} />
+            {currentUser && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -212,19 +216,19 @@ function App() {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <SignOut className="mr-2" />
-                    Log out
+                    {t.logout}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-            </div>
-          )}
+            )}
+          </div>
           
           <div className="space-y-4">
             <h1 className="font-heading text-5xl font-bold text-primary tracking-tight">
-              Gurmaio
+              {t.appName}
             </h1>
             <p className="text-xl text-muted-foreground">
-              Budget-aware meal planning with precision nutrition tracking
+              {t.tagline}
             </p>
           </div>
 
@@ -238,7 +242,7 @@ function App() {
             )}
             
             <div className="space-y-2">
-              <h2 className="font-heading text-2xl font-semibold">Welcome</h2>
+              <h2 className="font-heading text-2xl font-semibold">{t.welcome}</h2>
               <p className="text-muted-foreground">
                 Let's create your personalized meal plan based on your budget, dietary preferences, and nutrition goals.
               </p>
@@ -276,7 +280,7 @@ function App() {
                   className="w-full"
                   variant="default"
                 >
-                  Log in to Get Started
+                  {t.login}
                 </Button>
               )}
               <Button
@@ -286,7 +290,7 @@ function App() {
                 variant={currentUser ? "default" : "outline"}
               >
                 <Plus className="mr-2" />
-                {currentUser ? 'Get Started' : 'Continue as Guest'}
+                {currentUser ? t.getStarted : t.continueAsGuest}
               </Button>
             </div>
           </div>
@@ -311,7 +315,7 @@ function App() {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
-              <h1 className="font-heading text-2xl font-bold text-primary">Gurmaio</h1>
+              <h1 className="font-heading text-2xl font-bold text-primary">{t.appName}</h1>
               {mealPlan && (
                 <BudgetGauge
                   budget={mealPlan.metadata.period_budget_eur}
@@ -323,6 +327,7 @@ function App() {
             </div>
 
             <div className="flex items-center gap-2">
+              <LanguageSwitcher currentLanguage={language} onLanguageChange={setLanguage} />
               {hasMealPlan && currentUser && (
                 <Button
                   variant={justSaved ? "default" : "outline"}
@@ -333,12 +338,12 @@ function App() {
                   {justSaved ? (
                     <>
                       <Check className="mr-2" />
-                      Saved
+                      {t.saved}
                     </>
                   ) : (
                     <>
                       <FloppyDisk className="mr-2" />
-                      {isSaving ? 'Saving...' : 'Save Plan'}
+                      {isSaving ? t.saving : t.savePlan}
                     </>
                   )}
                 </Button>
@@ -350,7 +355,7 @@ function App() {
                   className="relative"
                 >
                   <ClockClockwise className="mr-2" />
-                  History ({savedMealPlans?.length ?? 0}/5)
+                  {t.history} ({savedMealPlans?.length ?? 0}/5)
                 </Button>
               )}
               {hasMealPlan && (
@@ -359,7 +364,7 @@ function App() {
                   onClick={() => setShoppingListOpen(true)}
                 >
                   <List className="mr-2" />
-                  Shopping List
+                  {t.shoppingList}
                 </Button>
               )}
               <Button
@@ -417,7 +422,7 @@ function App() {
                   Ready to generate your meal plan?
                 </h2>
                 <p className="text-muted-foreground">
-                  We'll create a {userProfile!.meal_plan_days}-day meal plan for €{userProfile!.budget_eur}
+                  We'll create a {userProfile!.meal_plan_days}-{t.day} meal plan for €{userProfile!.budget_eur}
                   {userProfile!.budget_period === 'daily' ? '/day' : '/week'} based on your preferences.
                 </p>
               </div>
@@ -439,7 +444,7 @@ function App() {
                 disabled={isGenerating}
                 className="w-full max-w-sm"
               >
-                {isGenerating ? 'Generating...' : 'Generate Meal Plan'}
+                {isGenerating ? t.generating : t.generate}
               </Button>
             </div>
           </div>
@@ -447,14 +452,14 @@ function App() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="font-heading text-3xl font-bold">Your Meal Plan</h2>
+                <h2 className="font-heading text-3xl font-bold">{t.yourMealPlan}</h2>
                 <p className="text-muted-foreground">
-                  {mealPlan!.metadata.days}-day plan • Generated {new Date(mealPlan!.generated_at).toLocaleDateString()}
+                  {mealPlan!.metadata.days}-{t.day} plan • Generated {new Date(mealPlan!.generated_at).toLocaleDateString()}
                 </p>
               </div>
               <Button onClick={handleGeneratePlan} disabled={isGenerating}>
                 <Plus className="mr-2" />
-                {isGenerating ? 'Regenerating...' : 'Regenerate'}
+                {isGenerating ? t.generating : t.regenerate}
               </Button>
             </div>
 
