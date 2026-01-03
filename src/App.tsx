@@ -8,6 +8,7 @@ import { generateMealPrepPlan } from '@/lib/meal-prep-generator';
 import { OnboardingDialog } from '@/components/onboarding-dialog';
 import { MealPlanView } from '@/components/meal-plan-view';
 import { MealPrepView } from '@/components/meal-prep-view';
+import { MealCalendar } from '@/components/meal-calendar';
 import { ShoppingListSheet } from '@/components/shopping-list-sheet';
 import { BudgetGauge } from '@/components/budget-gauge';
 import { SavedPlansDialog } from '@/components/saved-plans-dialog';
@@ -55,7 +56,7 @@ function App() {
   const [justSaved, setJustSaved] = useState(false);
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
   const [showAnimatedDemo, setShowAnimatedDemo] = useState(true);
-  const [activeTab, setActiveTab] = useState<'meals' | 'prep'>('meals');
+  const [activeTab, setActiveTab] = useState<'meals' | 'prep' | 'calendar'>('meals');
 
   const hasProfile = userProfile !== null;
   const hasMealPlan = mealPlan !== null;
@@ -876,11 +877,14 @@ function App() {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
                   >
-                    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'meals' | 'prep')}>
-                      <TabsList className="grid w-full max-w-md grid-cols-2">
+                    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'meals' | 'prep' | 'calendar')}>
+                      <TabsList className="grid w-full max-w-2xl grid-cols-3">
                         <TabsTrigger value="meals">Meal Plan</TabsTrigger>
                         <TabsTrigger value="prep" disabled={!mealPrepPlan}>
                           Meal Prep {mealPrepPlan && '✓'}
+                        </TabsTrigger>
+                        <TabsTrigger value="calendar">
+                          Calendar
                         </TabsTrigger>
                       </TabsList>
                       
@@ -954,6 +958,10 @@ function App() {
                             </motion.div>
                           )}
                         </AnimatePresence>
+                      </TabsContent>
+
+                      <TabsContent value="calendar" className="mt-6">
+                        <MealCalendar mealPlan={mealPlan!} />
                       </TabsContent>
                     </Tabs>
                   </motion.div>

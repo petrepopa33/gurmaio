@@ -167,3 +167,22 @@ export interface MealPrepPlan {
   };
   tips: string[];
 }
+
+export interface CompletedMeal {
+  meal_id: string;
+  plan_id: string;
+  completed_at: string;
+  date: string;
+  meal_type: 'breakfast' | 'lunch' | 'dinner' | 'snack';
+  recipe_name: string;
+  nutrition: IngredientNutrition;
+  cost_eur: number;
+}
+
+export interface DayProgress {
+  date: string;
+  completed_meals: CompletedMeal[];
+  total_nutrition: IngredientNutrition;
+  total_cost: number;
+  meals_count: number;
+}
