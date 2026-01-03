@@ -1,15 +1,30 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { EnvelopeSimple, Warning, CheckCircle } from '@phosphor-icons/react';
+import { Progress } from '@/components/ui/progress';
+import { EnvelopeSimple, Warning, CheckCircle, Check, X } from '@phosphor-icons/react';
+import { cn } from '@/lib/utils';
 
 interface CreateAccountDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+interface PasswordRequirement {
+  label: string;
+  test: (password: string) => boolean;
+}
+
+const passwordRequirements: PasswordRequirement[] = [
+  { label: 'At least 8 characters', test: (pwd) => pwd.length >= 8 },
+  { label: 'Contains uppercase letter', test: (pwd) => /[A-Z]/.test(pwd) },
+  { label: 'Contains lowercase letter', test: (pwd) => /[a-z]/.test(pwd) },
+  { label: 'Contains number', test: (pwd) => /[0-9]/.test(pwd) },
+  { label: 'Contains special character (!@#$%^&*)', test: (pwd) => /[!@#$%^&*(),.?":{}|<>]/.test(pwd) },
+];
 
 export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogProps) {
   const [email, setEmail] = useState('');
@@ -18,11 +33,36 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+
+  const passwordStrength = useMemo(() => {
+    if (!password) return { score: 0, label: '', color: '' };
+
+    const metRequirements = passwordRequirements.filter(req => req.test(password)).length;
+    const percentage = (metRequirements / passwordRequirements.length) * 100;
+
+    if (metRequirements <= 1) {
+      return { score: percentage, label: 'Weak', color: 'text-destructive' };
+    } else if (metRequirements <= 3) {
+      return { score: percentage, label: 'Fair', color: 'text-orange-500' };
+    } else if (metRequirements <= 4) {
+      return { score: percentage, label: 'Good', color: 'text-yellow-500' };
+    } else {
+      return { score: percentage, label: 'Strong', color: 'text-accent' };
+    }
+  }, [password]);
+
+  const requirementsMet = useMemo(() => {
+    return passwordRequirements.map(req => ({
+      ...req,
+      met: req.test(password)
+    }));
+  }, [password]);
 
   const handleCreateAccount = async () => {
     setError('');
@@ -38,8 +78,9 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
       return;
     }
 
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters long');
+    const unmetRequirements = passwordRequirements.filter(req => !req.test(password));
+    if (unmetRequirements.length > 0) {
+      setError('Password does not meet all requirements');
       return;
     }
 
@@ -71,13 +112,14 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
       setConfirmPassword('');
       setError('');
       setSuccess(false);
+      setShowPassword(false);
       onOpenChange(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <EnvelopeSimple size={24} className="text-primary" />
@@ -122,13 +164,50 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
             <Label htmlFor="password">Password</Label>
             <Input
               id="password"
-              type="password"
-              placeholder="At least 8 characters"
+              type={showPassword ? "text" : "password"}
+              placeholder="Create a strong password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isCreating || success}
               autoComplete="new-password"
             />
+            
+            {password && (
+              <div className="space-y-3 pt-2">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Password strength:</span>
+                    <span className={cn("font-medium", passwordStrength.color)}>
+                      {passwordStrength.label}
+                    </span>
+                  </div>
+                  <Progress 
+                    value={passwordStrength.score} 
+                    className="h-2"
+                  />
+                </div>
+
+                <div className="space-y-1.5 bg-muted/50 rounded-lg p-3 border">
+                  <p className="text-xs font-medium text-foreground mb-2">Password must contain:</p>
+                  {requirementsMet.map((req, index) => (
+                    <div 
+                      key={index}
+                      className={cn(
+                        "flex items-center gap-2 text-xs transition-colors",
+                        req.met ? "text-accent" : "text-muted-foreground"
+                      )}
+                    >
+                      {req.met ? (
+                        <Check size={14} weight="bold" className="text-accent" />
+                      ) : (
+                        <X size={14} className="text-muted-foreground" />
+                      )}
+                      <span>{req.label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -142,6 +221,18 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
               disabled={isCreating || success}
               autoComplete="new-password"
             />
+            {confirmPassword && password !== confirmPassword && (
+              <p className="text-xs text-destructive flex items-center gap-1">
+                <X size={14} weight="bold" />
+                Passwords do not match
+              </p>
+            )}
+            {confirmPassword && password === confirmPassword && (
+              <p className="text-xs text-accent flex items-center gap-1">
+                <Check size={14} weight="bold" />
+                Passwords match
+              </p>
+            )}
           </div>
 
           <p className="text-xs text-muted-foreground">
