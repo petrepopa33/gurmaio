@@ -3,8 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Clock, Package, Snowflake, CheckCircle, Flame, Timer, Lightbulb } from '@phosphor-icons/react';
-import { Progress } from '@/components/ui/progress';
+import { Clock, Package, CheckCircle, Flame, Timer, Lightbulb, Info } from '@phosphor-icons/react';
+import { InfoTooltip } from '@/components/info-tooltip';
 
 interface MealPrepViewProps {
   prepPlan: MealPrepPlan;
@@ -13,6 +13,8 @@ interface MealPrepViewProps {
 export function MealPrepView({ prepPlan }: MealPrepViewProps) {
   const totalTimeHours = Math.floor(prepPlan.total_prep_time_minutes / 60);
   const totalTimeMinutes = prepPlan.total_prep_time_minutes % 60;
+  const containersPerDay = Math.round((prepPlan.storage_requirements.containers_needed / prepPlan.prep_schedule.length) * 10) / 10;
+  const mealsPerSession = Math.round(prepPlan.prep_schedule.reduce((sum, day) => sum + day.meals_prepared, 0) / prepPlan.prep_schedule.length);
 
   return (
     <div className="space-y-6">
@@ -23,60 +25,62 @@ export function MealPrepView({ prepPlan }: MealPrepViewProps) {
             Weekly Meal Prep Plan
           </CardTitle>
           <CardDescription>
-            Batch cooking recommendations to save time and money
+            Cook in focused sessions to avoid daily prep. This approach helps streamline your week.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="flex items-center gap-3 p-4 rounded-lg bg-card border">
-              <Timer className="text-primary" size={28} weight="duotone" />
-              <div>
-                <p className="text-xs text-muted-foreground">Total Prep Time</p>
-                <p className="text-lg font-semibold">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-card border">
+              <Timer className="text-primary mt-1" size={28} weight="duotone" />
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-muted-foreground">Estimated Weekly Prep Time</p>
+                  <InfoTooltip content="This is the total time for one or two focused cooking sessions that replace daily cooking throughout the week. Actual time may vary based on kitchen setup and experience." />
+                </div>
+                <p className="text-lg font-semibold mt-1">
                   {totalTimeHours > 0 ? `${totalTimeHours}h ` : ''}{totalTimeMinutes}m
                 </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-4 rounded-lg bg-card border">
-              <Clock className="text-accent" size={28} weight="duotone" />
-              <div>
-                <p className="text-xs text-muted-foreground">Time Saved</p>
-                <p className="text-lg font-semibold text-accent">
-                  {Math.floor(prepPlan.total_efficiency_savings.time_saved_minutes / 60)}h {prepPlan.total_efficiency_savings.time_saved_minutes % 60}m
+                <p className="text-xs text-muted-foreground mt-1">
+                  Replaces cooking {mealsPerSession}+ meals individually
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-3 p-4 rounded-lg bg-card border">
-              <Package className="text-secondary-foreground" size={28} weight="duotone" />
-              <div>
-                <p className="text-xs text-muted-foreground">Containers Needed</p>
-                <p className="text-lg font-semibold">
-                  {prepPlan.storage_requirements.containers_needed}
+            <div className="flex items-start gap-3 p-4 rounded-lg bg-card border">
+              <Package className="text-secondary-foreground mt-1" size={28} weight="duotone" />
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-muted-foreground">Storage Containers</p>
+                  <InfoTooltip content="Total airtight containers needed for the full plan. Use containers that seal well and are microwave-safe for reheating." />
+                </div>
+                <p className="text-lg font-semibold mt-1">
+                  {prepPlan.storage_requirements.containers_needed} total
                 </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3 p-4 rounded-lg bg-card border">
-              <Snowflake className="text-blue-500" size={28} weight="duotone" />
-              <div>
-                <p className="text-xs text-muted-foreground">Cost Saved</p>
-                <p className="text-lg font-semibold text-accent">
-                  €{prepPlan.total_efficiency_savings.cost_saved_eur.toFixed(2)}
+                <p className="text-xs text-muted-foreground mt-1">
+                  ~{containersPerDay} per prep session
                 </p>
               </div>
             </div>
           </div>
 
+          <div className="bg-muted/50 border border-muted rounded-lg p-4">
+            <p className="text-sm text-muted-foreground flex items-start gap-2">
+              <Info className="mt-0.5 flex-shrink-0" size={16} />
+              <span>
+                <strong>Why meal prep?</strong> Batching similar tasks (chopping, cooking, storing) in one session is often more efficient than preparing meals individually. You'll spend focused time upfront to simplify your weekday routine.
+              </span>
+            </p>
+          </div>
+
           <div className="space-y-2">
             <h3 className="font-semibold flex items-center gap-2">
               <Lightbulb className="text-primary" weight="duotone" />
-              Pro Tips
+              Practical Tips
             </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               {prepPlan.tips.map((tip, idx) => (
                 <div key={idx} className="flex items-start gap-2 text-sm text-muted-foreground bg-muted/50 p-3 rounded-lg">
+                  <span className="text-primary mt-0.5">•</span>
                   <span>{tip}</span>
                 </div>
               ))}
@@ -93,7 +97,7 @@ export function MealPrepView({ prepPlan }: MealPrepViewProps) {
               Batch Cooking Opportunities
             </CardTitle>
             <CardDescription>
-              Cook these recipes in bulk to maximize efficiency
+              These recipes appear multiple times in your plan—cook them together to reduce repetitive tasks
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -102,19 +106,11 @@ export function MealPrepView({ prepPlan }: MealPrepViewProps) {
                 <Card key={group.group_id} className="border-accent/20">
                   <CardHeader>
                     <div className="flex items-start justify-between">
-                      <div>
+                      <div className="flex-1">
                         <CardTitle className="text-lg">{group.recipe_type}</CardTitle>
                         <CardDescription>
-                          {group.batch_servings} servings • {group.total_prep_time_minutes + group.total_cook_time_minutes} minutes total
+                          Make {group.batch_servings} servings at once • ~{group.total_prep_time_minutes + group.total_cook_time_minutes} minutes
                         </CardDescription>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-sm font-semibold text-accent">
-                          Save {Math.floor(group.efficiency_savings.time_saved_minutes / 60)}h {group.efficiency_savings.time_saved_minutes % 60}m
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          €{group.efficiency_savings.cost_saved_eur.toFixed(2)} saved
-                        </div>
                       </div>
                     </div>
                   </CardHeader>
@@ -169,10 +165,10 @@ export function MealPrepView({ prepPlan }: MealPrepViewProps) {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CheckCircle className="text-primary" weight="duotone" />
-            Prep Schedule
+            Your Prep Schedule
           </CardTitle>
           <CardDescription>
-            Recommended prep sessions throughout the week
+            Suggested timing for batch cooking sessions—adjust based on your schedule
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -293,22 +289,27 @@ export function MealPrepView({ prepPlan }: MealPrepViewProps) {
         <CardHeader>
           <CardTitle className="text-base flex items-center gap-2">
             <Package className="text-primary" weight="duotone" />
-            Storage Requirements
+            What You'll Need
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div>
-              <p className="text-muted-foreground mb-1">Containers</p>
-              <p className="font-semibold">{prepPlan.storage_requirements.containers_needed} airtight containers</p>
+              <p className="text-muted-foreground mb-1">Airtight Containers</p>
+              <p className="font-semibold">{prepPlan.storage_requirements.containers_needed} containers</p>
+              <p className="text-xs text-muted-foreground mt-1">For storing prepared meals</p>
             </div>
             <div>
               <p className="text-muted-foreground mb-1">Fridge Space</p>
               <p className="font-semibold capitalize">{prepPlan.storage_requirements.fridge_space}</p>
+              <p className="text-xs text-muted-foreground mt-1">Shelf space required</p>
             </div>
             <div>
               <p className="text-muted-foreground mb-1">Freezer Space</p>
               <p className="font-semibold capitalize">{prepPlan.storage_requirements.freezer_space}</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                {prepPlan.storage_requirements.freezer_space === 'none' ? 'Not required for this plan' : 'For longer storage'}
+              </p>
             </div>
           </div>
         </CardContent>

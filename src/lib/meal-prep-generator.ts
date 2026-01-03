@@ -308,21 +308,22 @@ function calculateStorageRequirements(
 
 function generatePrepTips(mealPlan: MealPlan, batchGroups: BatchCookingGroup[]): string[] {
   const tips = [
-    '🕐 Set aside 2-3 hours for meal prep sessions',
-    '📦 Invest in quality airtight containers',
-    '🏷️ Label everything with contents and date',
-    '❄️ Cool food completely before refrigerating',
-    '🔄 Use older meals first (FIFO method)',
+    'Prep all ingredients before you start cooking',
+    'Use multiple burners or appliances to work in parallel',
+    'Label containers with meal name and prep date',
+    'Let food cool completely before sealing containers',
+    'Store meals at the back of the fridge where it\'s coldest',
   ];
 
   if (batchGroups.length > 0) {
-    tips.push('🍳 Batch cooking saves 30-40% of total cooking time');
-    tips.push('💰 Buying ingredients in bulk reduces waste');
+    tips.push('Cook similar recipes together to minimize cleanup');
   }
 
   if (mealPlan.metadata.days >= 7) {
-    tips.push('🗓️ Split prep into two sessions (Sunday & Wednesday) for freshness');
+    tips.push('Consider splitting into two sessions for better freshness');
   }
+
+  tips.push('Check food quality before eating—when in doubt, throw it out');
 
   return tips;
 }
