@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
-import { EnvelopeSimple, Warning, CheckCircle, Check, X, Eye, EyeSlash } from '@phosphor-icons/react';
+import { EnvelopeSimple, Warning, CheckCircle, Check, X, Eye, EyeSlash, GoogleLogo, AppleLogo } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
 interface CreateAccountDialogProps {
@@ -114,6 +114,14 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
     }
   };
 
+  const handleGoogleSignIn = () => {
+    window.location.href = '/.spark/login?provider=google';
+  };
+
+  const handleAppleSignIn = () => {
+    window.location.href = '/.spark/login?provider=apple';
+  };
+
   const handleClose = () => {
     if (!isCreating) {
       setEmail('');
@@ -143,6 +151,37 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
         </DialogHeader>
 
         <div className="space-y-4 py-4">
+          <div className="space-y-3">
+            <Button
+              onClick={handleGoogleSignIn}
+              disabled={isCreating || success}
+              className="w-full h-12 text-base font-semibold bg-[#EA4335] hover:bg-[#D33426] text-white"
+              size="lg"
+            >
+              <GoogleLogo size={20} weight="bold" className="mr-2" />
+              Google
+            </Button>
+
+            <Button
+              onClick={handleAppleSignIn}
+              disabled={isCreating || success}
+              className="w-full h-12 text-base font-semibold bg-black hover:bg-gray-900 text-white"
+              size="lg"
+            >
+              <AppleLogo size={20} weight="fill" className="mr-2" />
+              Apple
+            </Button>
+          </div>
+
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background px-2 text-muted-foreground">or</span>
+            </div>
+          </div>
+
           {error && (
             <Alert variant="destructive">
               <Warning className="h-4 w-4" />
