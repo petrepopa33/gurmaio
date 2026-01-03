@@ -49,6 +49,27 @@ export function MealCalendar({
     const dateString = format(selectedDate, 'yyyy-MM-dd');
     const isCurrentlyComplete = isDayComplete(day.day_number);
     
+    if (day.day_number === 1 && !isCurrentlyComplete) {
+      const startDate = new Date(selectedDate);
+      
+      mealPlan.days.forEach((planDay) => {
+        const dayOffset = planDay.day_number - 1;
+        const dayDate = new Date(startDate);
+        dayDate.setDate(dayDate.getDate() + dayOffset);
+        const dayDateString = format(dayDate, 'yyyy-MM-dd');
+        
+        const updatedPlanDay = {
+          ...planDay,
+          date: dayDateString
+        };
+        
+        onToggleDayComplete(updatedPlanDay, true, dayDateString);
+      });
+      
+      setDatePickerOpen(null);
+      return;
+    }
+    
     const updatedDay = {
       ...day,
       date: dateString
@@ -66,7 +87,7 @@ export function MealCalendar({
     <div className="space-y-6">
       <div className="bg-muted/50 border rounded-lg p-4 mb-4">
         <p className="text-sm text-muted-foreground">
-          📅 <strong>Choose your start date:</strong> Click the calendar icon on each day to select when you want to follow that part of your meal plan. This lets you start today, tomorrow, or any future date.
+          📅 <strong>Quick Start:</strong> Click the calendar icon on Day 1 to choose your start date. All subsequent days will automatically be scheduled in order. You can also schedule individual days separately if needed.
         </p>
       </div>
 
