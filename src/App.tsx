@@ -53,16 +53,20 @@ function App() {
 
   const handleLogout = async () => {
     try {
+      setCurrentUser(null);
+      
       await fetch('/.spark/logout', { 
         method: 'POST',
         credentials: 'same-origin'
       });
-      setCurrentUser(null);
-      window.location.href = '/';
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      window.location.reload();
     } catch (error) {
       console.error('Logout error:', error);
       setCurrentUser(null);
-      window.location.href = '/';
+      window.location.reload();
     }
   };
 
