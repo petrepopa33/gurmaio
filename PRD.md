@@ -76,6 +76,13 @@ This is a commercial-grade product requiring multiple sophisticated engines (nut
 - **Progression**: Click language switcher → Dropdown menu shows available languages with flags → Select language → UI updates immediately → Preference saved to user storage
 - **Success criteria**: All UI text translates instantly, language preference persists across sessions, flag icons display correctly, translations maintain meaning and context
 
+### Meal Substitution
+- **Functionality**: Swap individual meals within a generated meal plan while maintaining budget and nutritional constraints
+- **Purpose**: Provide flexibility and variety without regenerating entire meal plan, accommodate taste preferences and ingredient availability
+- **Trigger**: User clicks "Swap Meal" button when viewing meal details in expanded accordion
+- **Progression**: View meal plan → Expand meal card → Click "Swap Meal" → AI generates alternative meal matching meal type, budget, and macro targets → Meal replaced in plan → Plan totals recalculated → Shopping list reset → Success confirmation
+- **Success criteria**: New meal respects remaining daily budget, macro targets maintained (±10%), meal type remains consistent, all nutrition and cost totals recalculate accurately, substitution stays within original meal's budget constraints, shopping list regenerates on next view
+
 ### Account Management
 - **Functionality**: Delete all user data (GDPR compliant)
 - **Purpose**: Comply with data protection regulations and user privacy rights
@@ -104,6 +111,9 @@ This is a commercial-grade product requiring multiple sophisticated engines (nut
 - **Manual vs Auto Calorie Toggle** - Preserve both manual entry and calculated values when switching modes, prevent data loss on accidental toggles
 - **Language Fallback** - If a translation key is missing, fallback to English version to prevent broken UI
 - **Browser Language Detection** - On first visit, detect browser language and auto-select if supported, otherwise default to English
+- **Meal Substitution Failure** - If AI fails to generate valid alternative, show error toast and keep original meal intact
+- **Substitution Budget Violation** - If generated meal exceeds remaining budget, reject and retry with stricter cost constraints
+- **Substitution Network Error** - Show user-friendly error, allow retry, preserve original meal plan state
 
 ## Calorie Calculation Algorithm
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useKV } from '@github/spark/hooks';
 import type { MealPlan, UserProfile, ShoppingList } from '@/types/domain';
 import { generateMealPlan, generateShoppingList } from '@/lib/mock-data';
+import { generateMealSubstitution } from '@/lib/meal-substitution';
 import { OnboardingDialog } from '@/components/onboarding-dialog';
 import { MealPlanView } from '@/components/meal-plan-view';
 import { ShoppingListSheet } from '@/components/shopping-list-sheet';
@@ -238,6 +239,89 @@ function App() {
     } catch (error) {
       toast.error('Failed to delete account data');
       console.error('Delete account error:', error);
+    }
+  };
+
+  const handleSwapMeal = async (mealId: string, dayNumber: number) => {
+    if (!mealPlan || !userProfile) {
+      toast.error(t.swapFailed);
+      return;
+    }
+
+    try {
+      const day = mealPlan.days.find(d => d.day_number === dayNumber);
+      if (!day) throw new Error('Day not found');
+
+      const currentMeal = day.meals.find(m => m.meal_id === mealId);
+      if (!currentMeal) throw new Error('Meal not found');
+
+      const newMeal = await generateMealSubstitution(
+        currentMeal,
+        dayNumber,
+        userProfile,
+        mealPlan
+      );
+
+      setMealPlan((currentPlan) => {
+        if (!currentPlan) return null;
+
+        const updatedDays = currentPlan.days.map(d => {
+          if (d.day_number !== dayNumber) return d;
+
+          const updatedMeals = d.meals.map(m => 
+            m.meal_id === mealId ? newMeal : m
+          );
+
+          const dayTotals = updatedMeals.reduce(
+            (acc, meal) => ({
+              calories: acc.calories + meal.nutrition.calories,
+              protein_g: acc.protein_g + meal.nutrition.protein_g,
+              carbohydrates_g: acc.carbohydrates_g + meal.nutrition.carbohydrates_g,
+              fats_g: acc.fats_g + meal.nutrition.fats_g,
+              cost_eur: acc.cost_eur + meal.cost.meal_cost_eur,
+            }),
+            { calories: 0, protein_g: 0, carbohydrates_g: 0, fats_g: 0, cost_eur: 0 }
+          );
+
+          return {
+            ...d,
+            meals: updatedMeals,
+            totals: dayTotals,
+          };
+        });
+
+        const planTotals = updatedDays.reduce(
+          (acc, day) => ({
+            calories: acc.calories + day.totals.calories,
+            protein_g: acc.protein_g + day.totals.protein_g,
+            carbohydrates_g: acc.carbohydrates_g + day.totals.carbohydrates_g,
+            fats_g: acc.fats_g + day.totals.fats_g,
+            total_cost_eur: acc.total_cost_eur + day.totals.cost_eur,
+          }),
+          { calories: 0, protein_g: 0, carbohydrates_g: 0, fats_g: 0, total_cost_eur: 0 }
+        );
+
+        const isOverBudget = planTotals.total_cost_eur > currentPlan.metadata.period_budget_eur;
+
+        return {
+          ...currentPlan,
+          days: updatedDays,
+          plan_totals: planTotals,
+          metadata: {
+            ...currentPlan.metadata,
+            period_cost_eur: planTotals.total_cost_eur,
+            budget_remaining_eur: currentPlan.metadata.period_budget_eur - planTotals.total_cost_eur,
+            is_over_budget: isOverBudget,
+          },
+        };
+      });
+
+      setShoppingListState(() => null);
+
+      toast.success(t.mealSwapped);
+    } catch (error) {
+      console.error('Error swapping meal:', error);
+      toast.error(t.swapFailed);
     }
   };
 
@@ -564,7 +648,7 @@ function App() {
               </div>
             </div>
 
-            <MealPlanView mealPlan={mealPlan!} />
+            <MealPlanView mealPlan={mealPlan!} onSwapMeal={handleSwapMeal} />
           </div>
         )}
       </main>

@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import type { MealPlan, Meal } from '@/types/domain';
-import { Barbell, FireSimple, ChartBar, CurrencyDollar } from '@phosphor-icons/react';
+import { Barbell, FireSimple, ChartBar, CurrencyDollar, Repeat } from '@phosphor-icons/react';
 import { useLanguage } from '@/hooks/use-language';
 import { translateMeal, translateIngredient } from '@/lib/i18n/content-translations';
 import type { Language } from '@/lib/i18n/translations';
@@ -15,11 +15,12 @@ import { DISCLAIMERS, INFO_LABELS, VIEW_MODES, getViewModeContext } from '@/lib/
 
 interface MealPlanViewProps {
   mealPlan: MealPlan;
+  onSwapMeal?: (mealId: string, dayNumber: number) => Promise<void>;
 }
 
 type ViewMode = 'total' | 'average';
 
-export function MealPlanView({ mealPlan }: MealPlanViewProps) {
+export function MealPlanView({ mealPlan, onSwapMeal }: MealPlanViewProps) {
   const { language, t } = useLanguage();
   const [selectedDay, setSelectedDay] = useState(mealPlan.days[0]?.day_number.toString() || '1');
   const [viewMode, setViewMode] = useState<ViewMode>('average');
@@ -235,7 +236,14 @@ export function MealPlanView({ mealPlan }: MealPlanViewProps) {
 
             <div className="space-y-3">
               {day.meals.map((meal) => (
-                <MealCard key={meal.meal_id} meal={meal} language={language} t={t} />
+                <MealCard 
+                  key={meal.meal_id} 
+                  meal={meal} 
+                  dayNumber={day.day_number}
+                  language={language} 
+                  t={t}
+                  onSwap={onSwapMeal}
+                />
               ))}
             </div>
           </TabsContent>
@@ -245,7 +253,32 @@ export function MealPlanView({ mealPlan }: MealPlanViewProps) {
   );
 }
 
-function MealCard({ meal, language, t }: { meal: Meal; language: Language; t: any }) {
+function MealCard({ 
+  meal, 
+  dayNumber,
+  language, 
+  t,
+  onSwap
+}: { 
+  meal: Meal; 
+  dayNumber: number;
+  language: Language; 
+  t: any;
+  onSwap?: (mealId: string, dayNumber: number) => Promise<void>;
+}) {
+  const [isSwapping, setIsSwapping] = useState(false);
+
+  const handleSwap = async () => {
+    if (!onSwap) return;
+    
+    setIsSwapping(true);
+    try {
+      await onSwap(meal.meal_id, dayNumber);
+    } finally {
+      setIsSwapping(false);
+    }
+  };
+
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
       <Accordion type="single" collapsible>
@@ -284,6 +317,21 @@ function MealCard({ meal, language, t }: { meal: Meal; language: Language; t: an
               <span className="tabular-nums">{meal.nutrition.carbohydrates_g}g C</span>
               <span className="tabular-nums">{meal.nutrition.fats_g}g F</span>
             </div>
+
+            {onSwap && (
+              <div className="mb-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSwap}
+                  disabled={isSwapping}
+                  className="w-full md:w-auto"
+                >
+                  <Repeat className="mr-2" />
+                  {isSwapping ? t.swapping : t.swapMeal}
+                </Button>
+              </div>
+            )}
 
             <div className="space-y-6">
               {meal.cooking_instructions && meal.cooking_instructions.length > 0 && (
