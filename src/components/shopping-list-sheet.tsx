@@ -9,6 +9,8 @@ import { ShoppingCart, CurrencyDollar, Export, Trash } from '@phosphor-icons/rea
 import { exportShoppingList, GROCERY_SERVICES, type GroceryService } from '@/lib/grocery-export';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { useLanguage } from '@/hooks/use-language';
+import { translateIngredient } from '@/lib/i18n/content-translations';
 
 interface ShoppingListSheetProps {
   open: boolean;
@@ -19,6 +21,7 @@ interface ShoppingListSheetProps {
 }
 
 export function ShoppingListSheet({ open, onOpenChange, shoppingList, onToggleOwned, onDeleteItem }: ShoppingListSheetProps) {
+  const { language, t } = useLanguage();
   const [showExportOptions, setShowExportOptions] = useState(false);
 
   const visibleItems = shoppingList.items.filter(item => !item.deleted);
@@ -48,10 +51,10 @@ export function ShoppingListSheet({ open, onOpenChange, shoppingList, onToggleOw
         <SheetHeader className="space-y-4">
           <div className="flex items-center gap-2">
             <ShoppingCart size={24} className="text-primary" />
-            <SheetTitle className="font-heading text-2xl">Shopping List</SheetTitle>
+            <SheetTitle className="font-heading text-2xl">{t.shoppingList}</SheetTitle>
           </div>
           <SheetDescription>
-            Aggregated ingredients for your {shoppingList.summary.total_items} item shopping trip
+            {shoppingList.summary.total_items} {t.items}
           </SheetDescription>
         </SheetHeader>
 
@@ -59,19 +62,19 @@ export function ShoppingListSheet({ open, onOpenChange, shoppingList, onToggleOw
           <Card className="p-4 bg-accent/10 border-accent/30">
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
-                <div className="text-sm text-muted-foreground">Items</div>
+                <div className="text-sm text-muted-foreground">{t.items}</div>
                 <div className="font-heading text-xl font-bold">
                   {visibleItems.length - ownedCount}/{visibleItems.length}
                 </div>
               </div>
               <div>
-                <div className="text-sm text-muted-foreground">Plan Cost</div>
+                <div className="text-sm text-muted-foreground">{t.planCost}</div>
                 <div className="font-heading text-xl font-bold tabular-nums">
                   €{shoppingList.summary.plan_cost_eur.toFixed(2)}
                 </div>
               </div>
               <div>
-                <div className="text-sm text-muted-foreground">To Buy</div>
+                <div className="text-sm text-muted-foreground">{t.toBuy}</div>
                 <div className="font-heading text-xl font-bold tabular-nums text-accent">
                   €{totalCostRemaining.toFixed(2)}
                 </div>
@@ -95,13 +98,13 @@ export function ShoppingListSheet({ open, onOpenChange, shoppingList, onToggleOw
               size="lg"
             >
               <Export className="mr-2" />
-              Export to Grocery Service
+              {t.exportToGrocery}
             </Button>
 
             {showExportOptions && (
               <div className="space-y-2 p-4 bg-muted/30 rounded-lg border">
                 <h4 className="font-heading font-semibold text-sm text-muted-foreground mb-3">
-                  Choose Export Format
+                  {t.chooseExportFormat}
                 </h4>
                 <div className="grid grid-cols-1 gap-2">
                   {(Object.entries(GROCERY_SERVICES) as [GroceryService, typeof GROCERY_SERVICES[GroceryService]][]).map(
@@ -124,7 +127,7 @@ export function ShoppingListSheet({ open, onOpenChange, shoppingList, onToggleOw
 
           <div className="space-y-2">
             <h3 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-              Your Shopping List
+              {t.yourShoppingList}
             </h3>
             {visibleItems.map((item) => (
               <div
@@ -148,7 +151,7 @@ export function ShoppingListSheet({ open, onOpenChange, shoppingList, onToggleOw
                       item.owned ? 'line-through text-muted-foreground' : ''
                     }`}
                   >
-                    {item.display_name}
+                    {translateIngredient(item.display_name, language)}
                   </label>
                   <div className="text-sm text-muted-foreground tabular-nums">
                     {item.total_quantity}{item.unit}
@@ -171,7 +174,7 @@ export function ShoppingListSheet({ open, onOpenChange, shoppingList, onToggleOw
                     className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                     onClick={() => {
                       onDeleteItem?.(item.ingredient_id);
-                      toast.success('Item removed from list');
+                      toast.success(t.itemRemoved);
                     }}
                   >
                     <Trash size={16} />
@@ -185,7 +188,7 @@ export function ShoppingListSheet({ open, onOpenChange, shoppingList, onToggleOw
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <CurrencyDollar size={20} className="text-primary" />
-                <span className="font-heading font-semibold">Total to Buy</span>
+                <span className="font-heading font-semibold">{t.totalToBuy}</span>
               </div>
               <div className="font-heading text-2xl font-bold text-primary tabular-nums">
                 €{totalCostRemaining.toFixed(2)}
@@ -193,7 +196,7 @@ export function ShoppingListSheet({ open, onOpenChange, shoppingList, onToggleOw
             </div>
             {ownedCount > 0 && (
               <div className="mt-2 text-sm text-muted-foreground text-center">
-                You already have {ownedCount} item{ownedCount !== 1 ? 's' : ''}
+                {t.alreadyHave} {ownedCount} {t.item}{ownedCount !== 1 ? 's' : ''}
               </div>
             )}
           </Card>

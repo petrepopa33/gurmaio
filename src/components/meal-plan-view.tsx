@@ -6,12 +6,16 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import type { MealPlan, Meal } from '@/types/domain';
 import { Barbell, FireSimple, ChartBar, CurrencyDollar } from '@phosphor-icons/react';
+import { useLanguage } from '@/hooks/use-language';
+import { translateMeal, translateIngredient } from '@/lib/i18n/content-translations';
+import type { Language } from '@/lib/i18n/translations';
 
 interface MealPlanViewProps {
   mealPlan: MealPlan;
 }
 
 export function MealPlanView({ mealPlan }: MealPlanViewProps) {
+  const { language, t } = useLanguage();
   const [selectedDay, setSelectedDay] = useState(mealPlan.days[0]?.day_number.toString() || '1');
 
   return (
@@ -21,57 +25,57 @@ export function MealPlanView({ mealPlan }: MealPlanViewProps) {
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
               <FireSimple size={16} />
-              <span>Calories</span>
+              <span>{t.calories}</span>
             </div>
             <div className="font-heading text-2xl font-bold tabular-nums">
               {mealPlan.plan_totals.calories.toLocaleString()}
             </div>
-            <div className="text-xs text-muted-foreground">total</div>
+            <div className="text-xs text-muted-foreground">{t.total}</div>
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
               <Barbell size={16} />
-              <span>Protein</span>
+              <span>{t.protein}</span>
             </div>
             <div className="font-heading text-2xl font-bold tabular-nums">
               {mealPlan.plan_totals.protein_g}g
             </div>
-            <div className="text-xs text-muted-foreground">total</div>
+            <div className="text-xs text-muted-foreground">{t.total}</div>
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
               <ChartBar size={16} />
-              <span>Carbs</span>
+              <span>{t.carbs}</span>
             </div>
             <div className="font-heading text-2xl font-bold tabular-nums">
               {mealPlan.plan_totals.carbohydrates_g}g
             </div>
-            <div className="text-xs text-muted-foreground">total</div>
+            <div className="text-xs text-muted-foreground">{t.total}</div>
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
               <ChartBar size={16} />
-              <span>Fats</span>
+              <span>{t.fats}</span>
             </div>
             <div className="font-heading text-2xl font-bold tabular-nums">
               {mealPlan.plan_totals.fats_g}g
             </div>
-            <div className="text-xs text-muted-foreground">total</div>
+            <div className="text-xs text-muted-foreground">{t.total}</div>
           </div>
 
           <div className="space-y-1">
             <div className="flex items-center gap-2 text-muted-foreground text-sm">
               <CurrencyDollar size={16} />
-              <span>Total Cost</span>
+              <span>{t.totalCost}</span>
             </div>
             <div className="font-heading text-2xl font-bold tabular-nums text-accent">
               €{mealPlan.plan_totals.total_cost_eur.toFixed(2)}
             </div>
             <div className="text-xs text-muted-foreground">
-              {mealPlan.metadata.days} days
+              {mealPlan.metadata.days} {t.days}
             </div>
           </div>
         </div>
@@ -81,7 +85,7 @@ export function MealPlanView({ mealPlan }: MealPlanViewProps) {
         <TabsList className="w-full grid" style={{ gridTemplateColumns: `repeat(${mealPlan.days.length}, 1fr)` }}>
           {mealPlan.days.map((day) => (
             <TabsTrigger key={day.day_number} value={day.day_number.toString()}>
-              Day {day.day_number}
+              {t.day} {day.day_number}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -91,23 +95,23 @@ export function MealPlanView({ mealPlan }: MealPlanViewProps) {
             <Card className="p-4 bg-muted/30">
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
                 <div>
-                  <div className="text-sm text-muted-foreground">Calories</div>
+                  <div className="text-sm text-muted-foreground">{t.calories}</div>
                   <div className="font-heading font-semibold tabular-nums">{day.totals.calories}</div>
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground">Protein</div>
+                  <div className="text-sm text-muted-foreground">{t.protein}</div>
                   <div className="font-heading font-semibold tabular-nums">{day.totals.protein_g}g</div>
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground">Carbs</div>
+                  <div className="text-sm text-muted-foreground">{t.carbs}</div>
                   <div className="font-heading font-semibold tabular-nums">{day.totals.carbohydrates_g}g</div>
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground">Fats</div>
+                  <div className="text-sm text-muted-foreground">{t.fats}</div>
                   <div className="font-heading font-semibold tabular-nums">{day.totals.fats_g}g</div>
                 </div>
                 <div>
-                  <div className="text-sm text-muted-foreground">Cost</div>
+                  <div className="text-sm text-muted-foreground">{t.cost}</div>
                   <div className="font-heading font-semibold tabular-nums text-accent">€{day.totals.cost_eur.toFixed(2)}</div>
                 </div>
               </div>
@@ -115,7 +119,7 @@ export function MealPlanView({ mealPlan }: MealPlanViewProps) {
 
             <div className="space-y-3">
               {day.meals.map((meal) => (
-                <MealCard key={meal.meal_id} meal={meal} />
+                <MealCard key={meal.meal_id} meal={meal} language={language} t={t} />
               ))}
             </div>
           </TabsContent>
@@ -125,7 +129,7 @@ export function MealPlanView({ mealPlan }: MealPlanViewProps) {
   );
 }
 
-function MealCard({ meal }: { meal: Meal }) {
+function MealCard({ meal, language, t }: { meal: Meal; language: Language; t: any }) {
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
       <Accordion type="single" collapsible>
@@ -134,10 +138,10 @@ function MealCard({ meal }: { meal: Meal }) {
             <div className="flex items-center justify-between w-full pr-4">
               <div className="flex items-center gap-4">
                 <Badge variant="outline" className="capitalize">
-                  {meal.meal_type}
+                  {t[meal.meal_type]}
                 </Badge>
                 <h3 className="font-heading text-lg font-semibold text-left">
-                  {meal.recipe_name}
+                  {translateMeal(meal.recipe_name, language)}
                 </h3>
               </div>
 
@@ -167,7 +171,7 @@ function MealCard({ meal }: { meal: Meal }) {
 
             <div className="space-y-2">
               <h4 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-3">
-                Ingredients
+                {t.ingredients}
               </h4>
               {meal.ingredients.map((ingredient) => (
                 <div
@@ -175,7 +179,7 @@ function MealCard({ meal }: { meal: Meal }) {
                   className="grid grid-cols-12 gap-4 py-2 px-3 rounded-lg hover:bg-muted/50 transition-colors"
                 >
                   <div className="col-span-4 md:col-span-3 font-medium">
-                    {ingredient.name}
+                    {translateIngredient(ingredient.name, language)}
                   </div>
                   <div className="col-span-2 text-sm text-muted-foreground tabular-nums">
                     {ingredient.quantity_g}g
