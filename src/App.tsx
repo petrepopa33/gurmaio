@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useKV } from '@github/spark/hooks';
 import { AnimatePresence, motion } from 'framer-motion';
-import type { MealPlan, UserProfile, ShoppingList, MealRating, Meal, MealPrepPlan } from '@/types/domain';
+import type { MealPlan, UserProfile, ShoppingList, MealRating, Meal, MealPrepPlan, CompletedMeal } from '@/types/domain';
 import { generateMealPlan, generateShoppingList } from '@/lib/mock-data';
 import { generateMealSubstitution } from '@/lib/meal-substitution';
 import { generateMealPrepPlan } from '@/lib/meal-prep-generator';
@@ -9,6 +9,7 @@ import { OnboardingDialog } from '@/components/onboarding-dialog';
 import { MealPlanView } from '@/components/meal-plan-view';
 import { MealPrepView } from '@/components/meal-prep-view';
 import { MealCalendar } from '@/components/meal-calendar';
+import { MacroTrendsChart } from '@/components/macro-trends-chart';
 import { ShoppingListSheet } from '@/components/shopping-list-sheet';
 import { BudgetGauge } from '@/components/budget-gauge';
 import { SavedPlansDialog } from '@/components/saved-plans-dialog';
@@ -45,6 +46,7 @@ function App() {
   const [shoppingListState, setShoppingListState] = useKV<ShoppingList | null>('shopping_list_state', null);
   const [savedMealPlans, setSavedMealPlans] = useKV<MealPlan[]>('saved_meal_plans', []);
   const [mealRatings, setMealRatings] = useKV<MealRating[]>('meal_ratings', []);
+  const [completedMeals, setCompletedMeals] = useKV<CompletedMeal[]>('completed_meals', []);
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingPrep, setIsGeneratingPrep] = useState(false);
@@ -884,7 +886,7 @@ function App() {
                           Meal Prep {mealPrepPlan && '✓'}
                         </TabsTrigger>
                         <TabsTrigger value="calendar">
-                          Calendar
+                          Progress & Trends
                         </TabsTrigger>
                       </TabsList>
                       
@@ -961,7 +963,10 @@ function App() {
                       </TabsContent>
 
                       <TabsContent value="calendar" className="mt-6">
-                        <MealCalendar mealPlan={mealPlan!} />
+                        <div className="space-y-6">
+                          <MacroTrendsChart completedMeals={completedMeals || []} />
+                          <MealCalendar mealPlan={mealPlan!} />
+                        </div>
                       </TabsContent>
                     </Tabs>
                   </motion.div>
