@@ -16,11 +16,12 @@ import { ShareMealPlanDialog } from '@/components/share-meal-plan-dialog';
 import { AppFooter } from '@/components/app-footer';
 import { DemoPreview } from '@/components/demo-preview';
 import { AnimatedAppDemo } from '@/components/animated-app-demo';
+import { ProfileDropdown } from '@/components/profile-dropdown';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Toaster } from '@/components/ui/sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, List, UserCircleGear, SignOut, FloppyDisk, Check, ClockClockwise, ShareNetwork, FilePdf, ChefHat } from '@phosphor-icons/react';
+import { Plus, List, SignOut, FloppyDisk, Check, ShareNetwork, FilePdf, ChefHat } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/hooks/use-language';
 import { exportMealPlanToPDF } from '@/lib/export-meal-plan-pdf';
@@ -639,16 +640,6 @@ function App() {
                   )}
                 </Button>
               )}
-              {currentUser && (savedMealPlans?.length ?? 0) > 0 && (
-                <Button
-                  variant="outline"
-                  onClick={() => setSavedPlansOpen(true)}
-                  className="relative"
-                >
-                  <ClockClockwise className="mr-2" />
-                  {t.history} ({savedMealPlans?.length ?? 0}/5)
-                </Button>
-              )}
               {hasMealPlan && (
                 <Button
                   variant="outline"
@@ -658,26 +649,20 @@ function App() {
                   {t.shoppingList}
                 </Button>
               )}
-              <Button
-                variant="outline"
-                onClick={() => setIsOnboarding(true)}
-              >
-                <UserCircleGear className="mr-2" />
-                {t.profile}
-              </Button>
               
               {currentUser ? (
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium hidden sm:inline">{currentUser.login}</span>
-                  <Button
-                    onClick={handleLogout}
-                    variant="destructive"
-                    size="sm"
-                  >
-                    <SignOut className="mr-2" />
-                    {t.logout}
-                  </Button>
-                </div>
+                <ProfileDropdown
+                  currentUser={currentUser}
+                  savedPlansCount={savedMealPlans?.length ?? 0}
+                  onProfileClick={() => setIsOnboarding(true)}
+                  onHistoryClick={() => setSavedPlansOpen(true)}
+                  onLogoutClick={handleLogout}
+                  onDeleteAccountClick={() => setShowDeleteAccountDialog(true)}
+                  profileLabel={t.profile}
+                  historyLabel={t.history}
+                  logoutLabel={t.logout}
+                  deleteAccountLabel="Delete Account"
+                />
               ) : (
                 <Button
                   variant="default"
