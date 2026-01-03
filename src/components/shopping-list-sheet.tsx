@@ -2,8 +2,12 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import type { ShoppingList } from '@/types/domain';
-import { ShoppingCart, CurrencyDollar } from '@phosphor-icons/react';
+import { ShoppingCart, CurrencyDollar, Export } from '@phosphor-icons/react';
+import { exportShoppingList, GROCERY_SERVICES, type GroceryService } from '@/lib/grocery-export';
+import { toast } from 'sonner';
+import { useState } from 'react';
 
 interface ShoppingListSheetProps {
   open: boolean;
@@ -12,6 +16,19 @@ interface ShoppingListSheetProps {
 }
 
 export function ShoppingListSheet({ open, onOpenChange, shoppingList }: ShoppingListSheetProps) {
+  const [showExportOptions, setShowExportOptions] = useState(false);
+
+  const handleExport = (service: GroceryService) => {
+    try {
+      (window as any).showToast = (message: string) => toast.success(message);
+      exportShoppingList(shoppingList, service);
+      setShowExportOptions(false);
+    } catch (error) {
+      toast.error('Export failed. Please try again.');
+      console.error('Export error:', error);
+    }
+  };
+
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
@@ -55,6 +72,40 @@ export function ShoppingListSheet({ open, onOpenChange, shoppingList }: Shopping
               </>
             )}
           </Card>
+
+          <div className="space-y-3">
+            <Button
+              onClick={() => setShowExportOptions(!showExportOptions)}
+              className="w-full"
+              size="lg"
+            >
+              <Export className="mr-2" />
+              Export to Grocery Service
+            </Button>
+
+            {showExportOptions && (
+              <div className="space-y-2 p-4 bg-muted/30 rounded-lg border">
+                <h4 className="font-heading font-semibold text-sm text-muted-foreground mb-3">
+                  Choose Export Format
+                </h4>
+                <div className="grid grid-cols-1 gap-2">
+                  {(Object.entries(GROCERY_SERVICES) as [GroceryService, typeof GROCERY_SERVICES[GroceryService]][]).map(
+                    ([key, config]) => (
+                      <Button
+                        key={key}
+                        variant="outline"
+                        onClick={() => handleExport(key)}
+                        className="justify-start h-auto py-3 hover:bg-background"
+                      >
+                        <span className="text-xl mr-3">{config.icon}</span>
+                        <span className="font-medium">{config.name}</span>
+                      </Button>
+                    )
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
 
           <div className="space-y-2">
             <h3 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">

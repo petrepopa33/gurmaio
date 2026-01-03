@@ -40,6 +40,13 @@ This is a commercial-grade product requiring multiple sophisticated engines (nut
 - **Progression**: Tap shopping list → Aggregate ingredients → Normalize units → Apply minimum quantities → Display list with estimated cost
 - **Success criteria**: No duplicate ingredients, quantities are realistic (e.g., "2 onions" not "137g onion"), total cost reflects actual grocery store purchases
 
+### Shopping List Export
+- **Functionality**: Export shopping list to popular grocery delivery services (Instacart, Amazon Fresh, Walmart) or as downloadable files (CSV, Plain Text)
+- **Purpose**: Enable seamless integration with users' preferred grocery shopping platforms and workflows
+- **Trigger**: User taps "Export to Grocery Service" button from shopping list view
+- **Progression**: Tap export → Choose service → Content copied to clipboard or file downloaded → Paste into grocery service app or open file
+- **Success criteria**: Export formats are service-appropriate, clipboard copy works reliably, file downloads succeed, exported data is complete and formatted correctly
+
 ### Account Management
 - **Functionality**: Delete all user data (GDPR compliant)
 - **Purpose**: Comply with data protection regulations and user privacy rights
@@ -56,6 +63,8 @@ This is a commercial-grade product requiring multiple sophisticated engines (nut
 - **Network Offline** - Cache last meal plan, show cached data with offline indicator, queue mutations
 - **Budget Exceeded After Generation** - Show explicit overage, offer to regenerate with stricter constraints or increase budget
 - **Malformed AI Response** - Schema validation, detailed error logging, automatic retry with simplified prompt
+- **Clipboard API Unavailable** - Fallback to legacy document.execCommand copy method for export functionality
+- **Export Format Errors** - Graceful error handling with user-friendly messages, offer alternative export formats
 
 ## Design Direction
 
@@ -130,7 +139,7 @@ Animations should reinforce the sense of precision and calculation. Use purposef
 **Icon Selection**:
 - Currency/Cost: CurrencyDollar, Coins
 - Nutrition: AppleWhole, ChartBar, FireSimple
-- Actions: Plus, ArrowRight, Check, X, Trash
+- Actions: Plus, ArrowRight, Check, X, Trash, Export
 - Shopping: ShoppingCart, List, Basket
 - User: User, Gear, SignOut
 
