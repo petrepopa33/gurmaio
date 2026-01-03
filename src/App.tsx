@@ -76,9 +76,13 @@ function App() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const shouldSkipAutoLogin = urlParams.get('logged_out') === 'true';
+    const isReturningFromLogout = sessionStorage.getItem('logout_in_progress') === 'true';
     
-    if (shouldSkipAutoLogin) {
-      toast.success('You have been logged out successfully', { duration: 3000 });
+    if (shouldSkipAutoLogin || isReturningFromLogout) {
+      sessionStorage.removeItem('logout_in_progress');
+      if (shouldSkipAutoLogin) {
+        toast.success('You have been logged out successfully', { duration: 3000 });
+      }
       window.history.replaceState({}, '', window.location.pathname);
     } else {
       loadUser();
@@ -98,6 +102,8 @@ function App() {
     try {
       toast.loading('Logging out...', { id: 'logout' });
       
+      sessionStorage.setItem('logout_in_progress', 'true');
+      
       setCurrentUser(null);
       setUserProfile(() => null);
       setMealPlan(() => null);
@@ -106,17 +112,27 @@ function App() {
       setIsDemoMode(false);
       
       try {
+        const storageKeys = await window.spark.kv.keys();
+        for (const key of storageKeys) {
+          if (key.startsWith('user_') || key.startsWith('current_') || key.startsWith('shopping_') || key.startsWith('saved_') || key.startsWith('meal_')) {
+            await window.spark.kv.delete(key);
+          }
+        }
+      } catch (e) {
+        console.warn('KV cleanup failed:', e);
+      }
+      
+      try {
         localStorage.clear();
-        sessionStorage.clear();
       } catch (e) {
         console.warn('Storage cleanup failed:', e);
       }
       
       await new Promise(resolve => setTimeout(resolve, 200));
       
-      toast.success('Logged out successfully', { id: 'logout', duration: 1500 });
+      toast.success('Logged out successfully', { id: 'logout', duration: 1000 });
       
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 300));
       
       const logoutUrl = new URL('/.spark/logout', window.location.origin);
       logoutUrl.searchParams.set('redirect_uri', window.location.origin + '/?logged_out=true');
@@ -124,12 +140,12 @@ function App() {
     } catch (error) {
       console.error('Logout error:', error);
       
+      sessionStorage.setItem('logout_in_progress', 'true');
       setCurrentUser(null);
       setUserProfile(() => null);
       
       try {
         localStorage.clear();
-        sessionStorage.clear();
       } catch (e) {
         console.warn('Storage cleanup failed:', e);
       }
@@ -331,17 +347,28 @@ function App() {
       
       toast.loading('Deleting your account and all data...', { id: 'delete-account' });
       
+      sessionStorage.setItem('logout_in_progress', 'true');
+      
       setUserProfile(() => null);
       setMealPlan(() => null);
       setShoppingListState(() => null);
       setSavedMealPlans(() => []);
       setMealRatings(() => []);
+      setMealPrepPlan(() => null);
+      
+      try {
+        const storageKeys = await window.spark.kv.keys();
+        for (const key of storageKeys) {
+          await window.spark.kv.delete(key);
+        }
+      } catch (e) {
+        console.warn('KV cleanup failed:', e);
+      }
       
       await new Promise(resolve => setTimeout(resolve, 200));
       
       try {
         localStorage.clear();
-        sessionStorage.clear();
       } catch (e) {
         console.warn('Storage cleanup failed:', e);
       }
@@ -354,12 +381,17 @@ function App() {
       
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      window.location.href = '/.spark/logout';
+      const logoutUrl = new URL('/.spark/logout', window.location.origin);
+      logoutUrl.searchParams.set('redirect_uri', window.location.origin + '/?logged_out=true');
+      window.location.href = logoutUrl.toString();
     } catch (error) {
       toast.error('Failed to delete account data', { id: 'delete-account' });
       console.error('Delete account error:', error);
       
-      window.location.href = '/.spark/logout';
+      sessionStorage.setItem('logout_in_progress', 'true');
+      const logoutUrl = new URL('/.spark/logout', window.location.origin);
+      logoutUrl.searchParams.set('redirect_uri', window.location.origin + '/?logged_out=true');
+      window.location.href = logoutUrl.toString();
     }
   };
 
