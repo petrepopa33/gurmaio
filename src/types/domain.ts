@@ -186,3 +186,28 @@ export interface DayProgress {
   total_cost: number;
   meals_count: number;
 }
+
+export interface MonthlyProgress {
+  month: string;
+  year: number;
+  days_completed: number;
+  total_days_in_month: number;
+  completion_percentage: number;
+  badge_earned: boolean;
+  badge_earned_at?: string;
+  total_meals_completed: number;
+  total_nutrition: IngredientNutrition;
+  total_cost: number;
+  completed_dates: string[];
+}
+
+export interface Badge {
+  badge_id: string;
+  month: string;
+  year: number;
+  earned_at: string;
+  completion_percentage: number;
+  total_days_completed: number;
+  total_meals: number;
+  image_data_url?: string;
+}

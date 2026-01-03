@@ -1,322 +1,203 @@
 import { useState } from 'react';
-import { useKV } from '@github/spark/hooks';
-import { motion, AnimatePresence } from 'framer-motion';
-import type { MealPlan, CompletedMeal, DayProgress } from '@/types/domain';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { Calendar, Check, X, ChartBar } from '@phosphor-icons/react';
-import { toast } from 'sonner';
-import { format, parseISO, isSameDay } from 'date-fns';
+import { CheckCircle, Circle } from '@phosphor-icons/react';
+import type { Day, DayProgress, CompletedMeal } from '@/types/domain';
+import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 interface MealCalendarProps {
-  mealPlan: MealPlan;
+  mealPlan: {
+    days: Day[];
+  };
+  completedDays: DayProgress[];
+  onToggleDayComplete: (day: Day, isComplete: boolean) => void;
+  currentDate?: string;
 }
 
-export function MealCalendar({ mealPlan }: MealCalendarProps) {
-  const [completedMeals, setCompletedMeals] = useKV<CompletedMeal[]>('completed_meals', []);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
+export function MealCalendar({
+  mealPlan,
+  completedDays,
+  onToggleDayComplete,
+  currentDate = new Date().toISOString().split('T')[0],
+}: MealCalendarProps) {
+  const [selectedDay, setSelectedDay] = useState<DayProgress | null>(null);
 
-  const getCompletedMealsForDay = (date: string): CompletedMeal[] => {
-    return (completedMeals || []).filter(cm => cm.date === date);
+  const isDayComplete = (date: string): boolean => {
+    return completedDays.some(d => d.date === date);
   };
 
-  const getDayProgress = (date: string): DayProgress | null => {
-    const dayMeals = getCompletedMealsForDay(date);
-    if (dayMeals.length === 0) return null;
-
-    const totalNutrition = dayMeals.reduce(
-      (acc, meal) => ({
-        calories: acc.calories + meal.nutrition.calories,
-        protein_g: acc.protein_g + meal.nutrition.protein_g,
-        carbohydrates_g: acc.carbohydrates_g + meal.nutrition.carbohydrates_g,
-        fats_g: acc.fats_g + meal.nutrition.fats_g,
-      }),
-      { calories: 0, protein_g: 0, carbohydrates_g: 0, fats_g: 0 }
-    );
-
-    const totalCost = dayMeals.reduce((acc, meal) => acc + meal.cost_eur, 0);
-
-    return {
-      date,
-      completed_meals: dayMeals,
-      total_nutrition: totalNutrition,
-      total_cost: totalCost,
-      meals_count: dayMeals.length,
-    };
+  const getDayProgress = (date: string): DayProgress | undefined => {
+    return completedDays.find(d => d.date === date);
   };
 
-  const isMealCompleted = (mealId: string, date: string): boolean => {
-    return (completedMeals || []).some(
-      cm => cm.meal_id === mealId && cm.date === date
-    );
+  const handleDayClick = (day: Day) => {
+    const dayProgress = getDayProgress(day.date);
+    setSelectedDay(dayProgress || null);
   };
 
-  const handleToggleMeal = (dayNumber: number, mealId: string) => {
-    const day = mealPlan.days.find(d => d.day_number === dayNumber);
-    if (!day) return;
-
-    const meal = day.meals.find(m => m.meal_id === mealId);
-    if (!meal) return;
-
-    const isCompleted = isMealCompleted(mealId, day.date);
-
-    if (isCompleted) {
-      setCompletedMeals(current =>
-        (current || []).filter(cm => !(cm.meal_id === mealId && cm.date === day.date))
-      );
-      toast.success('Meal unmarked');
-    } else {
-      const completedMeal: CompletedMeal = {
-        meal_id: mealId,
-        plan_id: mealPlan.plan_id,
-        completed_at: new Date().toISOString(),
-        date: day.date,
-        meal_type: meal.meal_type,
-        recipe_name: meal.recipe_name,
-        nutrition: meal.nutrition,
-        cost_eur: meal.cost.meal_cost_eur,
-      };
-
-      setCompletedMeals(current => [...(current || []), completedMeal]);
-      toast.success('Meal marked as done!');
+  const handleToggleComplete = (day: Day) => {
+    const isCurrentlyComplete = isDayComplete(day.date);
+    onToggleDayComplete(day, !isCurrentlyComplete);
+    
+    if (isCurrentlyComplete) {
+      setSelectedDay(null);
     }
   };
 
-  const getDayCompletionPercentage = (date: string): number => {
-    const day = mealPlan.days.find(d => d.date === date);
-    if (!day) return 0;
-
-    const totalMeals = day.meals.length;
-    const completedCount = day.meals.filter(m => isMealCompleted(m.meal_id, date)).length;
-    
-    return totalMeals > 0 ? Math.round((completedCount / totalMeals) * 100) : 0;
-  };
-
-  const selectedDayProgress = selectedDate ? getDayProgress(selectedDate) : null;
-
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="text-primary" />
-            Meal Tracking Calendar
-          </CardTitle>
-          <CardDescription>
-            Mark meals as completed to track your daily macro intake
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {mealPlan.days.map(day => {
-              const completionPercentage = getDayCompletionPercentage(day.date);
-              const isSelected = selectedDate === day.date;
-              const hasProgress = completionPercentage > 0;
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+        {mealPlan.days.map((day, index) => {
+          const isComplete = isDayComplete(day.date);
+          const isCurrent = day.date === currentDate;
+          const dayProgress = getDayProgress(day.date);
 
-              return (
-                <motion.div
-                  key={day.day_number}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: day.day_number * 0.05 }}
-                >
-                  <Card
-                    className={`cursor-pointer transition-all hover:shadow-md ${
-                      isSelected ? 'ring-2 ring-primary' : ''
-                    } ${hasProgress ? 'bg-accent/5' : ''}`}
-                    onClick={() => setSelectedDate(day.date)}
-                  >
-                    <CardHeader className="pb-3">
-                      <CardTitle className="text-base flex items-center justify-between">
-                        <span>Day {day.day_number}</span>
-                        {hasProgress && (
-                          <Badge variant="secondary" className="text-xs">
-                            {completionPercentage}%
-                          </Badge>
-                        )}
-                      </CardTitle>
-                      <CardDescription className="text-xs">
-                        {format(parseISO(day.date), 'MMM d, yyyy')}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-2">
-                      <div className="relative h-2 bg-muted rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${completionPercentage}%` }}
-                          transition={{ duration: 0.5 }}
-                          className="absolute left-0 top-0 h-full bg-primary rounded-full"
-                        />
-                      </div>
-                      <div className="space-y-1">
-                        {day.meals.map(meal => (
-                          <div
-                            key={meal.meal_id}
-                            className="flex items-center gap-2 text-xs"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleToggleMeal(day.day_number, meal.meal_id);
-                            }}
-                          >
-                            <Checkbox
-                              checked={isMealCompleted(meal.meal_id, day.date)}
-                              className="h-3 w-3"
-                            />
-                            <span className={`flex-1 truncate ${
-                              isMealCompleted(meal.meal_id, day.date)
-                                ? 'line-through text-muted-foreground'
-                                : ''
-                            }`}>
-                              {meal.meal_type}
-                            </span>
-                            {isMealCompleted(meal.meal_id, day.date) && (
-                              <Check size={12} className="text-primary" />
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              );
-            })}
-          </div>
-
-          <AnimatePresence mode="wait">
-            {selectedDate && selectedDayProgress && (
-              <motion.div
-                key={selectedDate}
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.3 }}
+          return (
+            <motion.div
+              key={day.date}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+            >
+              <Card
+                className={cn(
+                  'p-4 cursor-pointer transition-all hover:shadow-md',
+                  isComplete && 'border-primary bg-primary/5',
+                  isCurrent && 'ring-2 ring-accent',
+                  selectedDay?.date === day.date && 'ring-2 ring-primary'
+                )}
+                onClick={() => handleDayClick(day)}
               >
-                <Separator className="my-6" />
-                
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-heading text-xl font-semibold">
-                        {format(parseISO(selectedDate), 'EEEE, MMMM d')}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {selectedDayProgress.meals_count} meal{selectedDayProgress.meals_count !== 1 ? 's' : ''} completed
-                      </p>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setSelectedDate(null)}
-                    >
-                      <X />
-                    </Button>
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">Day {day.day_number}</p>
+                    <p className="text-sm font-semibold">
+                      {new Date(day.date).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </p>
                   </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardDescription className="text-xs">Calories</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-2xl font-bold text-primary">
-                          {Math.round(selectedDayProgress.total_nutrition.calories)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">kcal</p>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardDescription className="text-xs">Protein</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-2xl font-bold text-primary">
-                          {Math.round(selectedDayProgress.total_nutrition.protein_g)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">grams</p>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardDescription className="text-xs">Carbs</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-2xl font-bold text-primary">
-                          {Math.round(selectedDayProgress.total_nutrition.carbohydrates_g)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">grams</p>
-                      </CardContent>
-                    </Card>
-
-                    <Card>
-                      <CardHeader className="pb-2">
-                        <CardDescription className="text-xs">Fats</CardDescription>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-2xl font-bold text-primary">
-                          {Math.round(selectedDayProgress.total_nutrition.fats_g)}
-                        </p>
-                        <p className="text-xs text-muted-foreground">grams</p>
-                      </CardContent>
-                    </Card>
-                  </div>
-
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Completed Meals</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <ScrollArea className="h-[200px]">
-                        <div className="space-y-3">
-                          {selectedDayProgress.completed_meals.map((meal, idx) => (
-                            <div key={idx} className="p-3 bg-muted/50 rounded-lg space-y-2">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <p className="font-medium text-sm">{meal.recipe_name}</p>
-                                  <p className="text-xs text-muted-foreground capitalize">{meal.meal_type}</p>
-                                </div>
-                                <Badge variant="outline">€{meal.cost_eur.toFixed(2)}</Badge>
-                              </div>
-                              <div className="flex gap-4 text-xs text-muted-foreground">
-                                <span>{Math.round(meal.nutrition.calories)} kcal</span>
-                                <span>P: {Math.round(meal.nutrition.protein_g)}g</span>
-                                <span>C: {Math.round(meal.nutrition.carbohydrates_g)}g</span>
-                                <span>F: {Math.round(meal.nutrition.fats_g)}g</span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-primary/5 border-primary/20">
-                    <CardHeader>
-                      <CardTitle className="text-base flex items-center gap-2">
-                        <ChartBar className="text-primary" />
-                        Daily Cost
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-3xl font-bold text-primary">
-                        €{selectedDayProgress.total_cost.toFixed(2)}
-                      </p>
-                      <p className="text-xs text-muted-foreground mt-1">
-                        Total spent on completed meals
-                      </p>
-                    </CardContent>
-                  </Card>
+                  <Button
+                    size="sm"
+                    variant={isComplete ? 'default' : 'outline'}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleToggleComplete(day);
+                    }}
+                    className="h-8 w-8 p-0"
+                  >
+                    {isComplete ? (
+                      <CheckCircle weight="fill" size={20} />
+                    ) : (
+                      <Circle size={20} />
+                    )}
+                  </Button>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </CardContent>
-      </Card>
+
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center justify-between">
+                    <span className="text-muted-foreground">Meals:</span>
+                    <span className="font-medium">
+                      {isComplete ? dayProgress?.meals_count : day.meals.length}
+                    </span>
+                  </div>
+                  {isComplete && dayProgress && (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Calories:</span>
+                        <span className="font-medium">
+                          {Math.round(dayProgress.total_nutrition.calories)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-muted-foreground">Cost:</span>
+                        <span className="font-medium">€{dayProgress.total_cost.toFixed(2)}</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+
+                {isComplete && (
+                  <div className="mt-3 pt-3 border-t">
+                    <div className="flex items-center gap-2 text-xs text-primary">
+                      <CheckCircle weight="fill" size={14} />
+                      <span className="font-medium">Completed</span>
+                    </div>
+                  </div>
+                )}
+              </Card>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {selectedDay && (
+        <Card className="p-6">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">
+                {new Date(selectedDay.date).toLocaleDateString('en-US', {
+                  weekday: 'long',
+                  month: 'long',
+                  day: 'numeric',
+                })}
+              </h3>
+              <div className="flex items-center gap-2 text-sm text-primary font-medium">
+                <CheckCircle weight="fill" size={16} />
+                <span>Completed</span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Meals</p>
+                <p className="text-xl font-bold">{selectedDay.meals_count}</p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Calories</p>
+                <p className="text-xl font-bold">
+                  {Math.round(selectedDay.total_nutrition.calories)}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Protein</p>
+                <p className="text-xl font-bold">
+                  {Math.round(selectedDay.total_nutrition.protein_g)}g
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs text-muted-foreground">Cost</p>
+                <p className="text-xl font-bold">€{selectedDay.total_cost.toFixed(2)}</p>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t">
+              <p className="text-sm font-semibold mb-3">Completed Meals</p>
+              <div className="space-y-2">
+                {selectedDay.completed_meals.map((meal) => (
+                  <div
+                    key={meal.meal_id}
+                    className="flex items-center justify-between p-3 bg-muted/50 rounded-lg"
+                  >
+                    <div>
+                      <p className="text-sm font-medium">{meal.recipe_name}</p>
+                      <p className="text-xs text-muted-foreground capitalize">{meal.meal_type}</p>
+                    </div>
+                    <div className="text-right text-xs">
+                      <p className="font-medium">
+                        {Math.round(meal.nutrition.calories)} cal
+                      </p>
+                      <p className="text-muted-foreground">€{meal.cost_eur.toFixed(2)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </Card>
+      )}
     </div>
   );
 }

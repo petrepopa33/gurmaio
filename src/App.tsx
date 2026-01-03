@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useKV } from '@github/spark/hooks';
 import { AnimatePresence, motion } from 'framer-motion';
-import type { MealPlan, UserProfile, ShoppingList, MealRating, Meal, MealPrepPlan } from '@/types/domain';
+import type { MealPlan, UserProfile, ShoppingList, MealRating, Meal, MealPrepPlan, DayProgress, Badge, CompletedMeal } from '@/types/domain';
 import { generateMealPlan, generateShoppingList } from '@/lib/mock-data';
 import { generateMealSubstitution } from '@/lib/meal-substitution';
 import { generateMealPrepPlan } from '@/lib/meal-prep-generator';
@@ -21,11 +21,13 @@ import { AccountSettingsDialog } from '@/components/account-settings-dialog';
 import { CreateAccountDialog } from '@/components/create-account-dialog';
 import { EmailVerificationDialog } from '@/components/email-verification-dialog';
 import { EmailVerificationBanner } from '@/components/email-verification-banner';
+import { MealCalendar } from '@/components/meal-calendar';
+import { ProgressDialog } from '@/components/progress-dialog';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Toaster } from '@/components/ui/sonner';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Plus, List, SignOut, FloppyDisk, Check, ShareNetwork, FilePdf, ChefHat, GoogleLogo, AppleLogo, FacebookLogo, TwitterLogo } from '@phosphor-icons/react';
+import { Plus, List, SignOut, FloppyDisk, Check, ShareNetwork, FilePdf, ChefHat, GoogleLogo, AppleLogo, FacebookLogo, TwitterLogo, Trophy, CalendarCheck } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/hooks/use-language';
 import { useEmailVerification } from '@/hooks/use-email-verification';
@@ -48,18 +50,21 @@ function App() {
   const [shoppingListState, setShoppingListState] = useKV<ShoppingList | null>('shopping_list_state', null);
   const [savedMealPlans, setSavedMealPlans] = useKV<MealPlan[]>('saved_meal_plans', []);
   const [mealRatings, setMealRatings] = useKV<MealRating[]>('meal_ratings', []);
+  const [dayProgress, setDayProgress] = useKV<DayProgress[]>('day_progress', []);
+  const [badges, setBadges] = useKV<Badge[]>('earned_badges', []);
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingPrep, setIsGeneratingPrep] = useState(false);
   const [shoppingListOpen, setShoppingListOpen] = useState(false);
   const [savedPlansOpen, setSavedPlansOpen] = useState(false);
   const [shareMealPlanOpen, setShareMealPlanOpen] = useState(false);
+  const [progressDialogOpen, setProgressDialogOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<UserInfo | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [justSaved, setJustSaved] = useState(false);
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
   const [showAnimatedDemo, setShowAnimatedDemo] = useState(true);
-  const [activeTab, setActiveTab] = useState<'meals' | 'prep'>('meals');
+  const [activeTab, setActiveTab] = useState<'meals' | 'prep' | 'calendar'>('meals');
   const [showAccountSettings, setShowAccountSettings] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [showCreateAccountDialog, setShowCreateAccountDialog] = useState(false);
@@ -131,6 +136,8 @@ function App() {
       setMealPlan(() => null);
       setMealPrepPlan(() => null);
       setShoppingListState(() => null);
+      setDayProgress(() => []);
+      setBadges(() => []);
       setIsDemoMode(false);
       
       resetVerification();
@@ -138,7 +145,7 @@ function App() {
       try {
         const storageKeys = await window.spark.kv.keys();
         for (const key of storageKeys) {
-          if (key.startsWith('user_') || key.startsWith('current_') || key.startsWith('shopping_') || key.startsWith('saved_') || key.startsWith('meal_') || key.startsWith('email_verification_')) {
+          if (key.startsWith('user_') || key.startsWith('current_') || key.startsWith('shopping_') || key.startsWith('saved_') || key.startsWith('meal_') || key.startsWith('email_verification_') || key.startsWith('day_progress') || key.startsWith('earned_badges')) {
             await window.spark.kv.delete(key);
           }
         }
@@ -395,6 +402,8 @@ function App() {
       setSavedMealPlans(() => []);
       setMealRatings(() => []);
       setMealPrepPlan(() => null);
+      setDayProgress(() => []);
+      setBadges(() => []);
       
       resetVerification();
       
@@ -547,6 +556,82 @@ function App() {
       console.error('Error swapping meal:', error);
       toast.error(t.swapFailed);
     }
+  };
+
+  const handleToggleDayComplete = (day: any, isComplete: boolean) => {
+    if (isDemoMode) {
+      toast.error('Demo mode: Create an account to track progress', {
+        action: {
+          label: 'Create Account',
+          onClick: () => setShowCreateAccountDialog(true)
+        }
+      });
+      return;
+    }
+
+    if (!currentUser || !isVerified) {
+      toast.error('Please verify your email to track progress', {
+        action: {
+          label: 'Verify Now',
+          onClick: () => setShowEmailVerificationDialog(true)
+        }
+      });
+      return;
+    }
+
+    setDayProgress((current) => {
+      const progressList = current || [];
+      
+      if (isComplete) {
+        const existingDay = progressList.find(p => p.date === day.date);
+        if (existingDay) {
+          return progressList;
+        }
+
+        const completedMeals: CompletedMeal[] = day.meals.map((meal: any) => ({
+          meal_id: meal.meal_id,
+          plan_id: mealPlan?.plan_id || '',
+          completed_at: new Date().toISOString(),
+          date: day.date,
+          meal_type: meal.meal_type,
+          recipe_name: meal.recipe_name,
+          nutrition: meal.nutrition,
+          cost_eur: meal.cost.meal_cost_eur,
+        }));
+
+        const newDayProgress: DayProgress = {
+          date: day.date,
+          completed_meals: completedMeals,
+          total_nutrition: day.totals,
+          total_cost: day.totals.cost_eur,
+          meals_count: day.meals.length,
+        };
+
+        toast.success(`Day ${day.day_number} marked as complete! 🎉`);
+        return [...progressList, newDayProgress];
+      } else {
+        toast.info(`Day ${day.day_number} unmarked`);
+        return progressList.filter(p => p.date !== day.date);
+      }
+    });
+  };
+
+  const handleBadgeGenerated = (badge: Badge) => {
+    setBadges((current) => {
+      const badges = current || [];
+      const exists = badges.some(b => b.badge_id === badge.badge_id);
+      if (exists) return badges;
+      
+      toast.success('🏆 New badge earned!', {
+        description: `You completed every day in ${badge.month}/${badge.year}!`,
+        action: {
+          label: 'View Badge',
+          onClick: () => setProgressDialogOpen(true)
+        }
+      });
+      
+      return [...badges, badge];
+    });
   };
 
   if (!hasProfile) {
@@ -1091,11 +1176,15 @@ function App() {
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.4, ease: "easeOut" }}
                   >
-                    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'meals' | 'prep')}>
-                      <TabsList className="grid w-full max-w-xl grid-cols-2">
+                    <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'meals' | 'prep' | 'calendar')}>
+                      <TabsList className="grid w-full max-w-2xl grid-cols-3">
                         <TabsTrigger value="meals">Meal Plan</TabsTrigger>
                         <TabsTrigger value="prep" disabled={!mealPrepPlan}>
                           Meal Prep {mealPrepPlan && '✓'}
+                        </TabsTrigger>
+                        <TabsTrigger value="calendar">
+                          <CalendarCheck className="mr-2" size={16} />
+                          Track Progress
                         </TabsTrigger>
                       </TabsList>
                       
@@ -1169,6 +1258,32 @@ function App() {
                             </motion.div>
                           )}
                         </AnimatePresence>
+                      </TabsContent>
+                      
+                      <TabsContent value="calendar" className="mt-6">
+                        <div className="space-y-6">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h3 className="text-lg font-semibold">Track Your Progress</h3>
+                              <p className="text-sm text-muted-foreground">
+                                Mark days as complete and earn monthly badges
+                              </p>
+                            </div>
+                            <Button
+                              variant="outline"
+                              onClick={() => setProgressDialogOpen(true)}
+                            >
+                              <Trophy className="mr-2" size={16} />
+                              View Progress & Badges
+                            </Button>
+                          </div>
+                          
+                          <MealCalendar
+                            mealPlan={mealPlan!}
+                            completedDays={dayProgress || []}
+                            onToggleDayComplete={handleToggleDayComplete}
+                          />
+                        </div>
                       </TabsContent>
                     </Tabs>
                   </motion.div>
@@ -1244,6 +1359,15 @@ function App() {
           }}
         />
       )}
+
+      <ProgressDialog
+        open={progressDialogOpen}
+        onOpenChange={setProgressDialogOpen}
+        dayProgress={dayProgress || []}
+        badges={badges || []}
+        onBadgeGenerated={handleBadgeGenerated}
+        locale={language}
+      />
 
       <AppFooter onDeleteAccount={currentUser ? () => setShowDeleteAccountDialog(true) : undefined} />
 
