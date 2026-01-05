@@ -507,3 +507,9 @@ function MealCard({
     </Card>
   );
 }
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
+    </Card>
+  );
+}
