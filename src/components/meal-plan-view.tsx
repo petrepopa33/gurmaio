@@ -457,17 +457,15 @@ function MealCard({
                       size="sm"
                       variant="outline"
                       onClick={() => handlePortionChange(localMultiplier + 0.25)}
+                      className="h-6 w-6 p-0"
                     >
-                    >
+                      <Plus size={12} />
                     </Button>
                   </div>
                   <span className="text-muted-foreground tabular-nums">
-                  <span className="text-muted-foreground tabular-nums">
-                      ? 'Standard'
-                      ? 'Standard'xed(0)}%`}
+                    {localMultiplier === 1 ? 'Standard' : `${((localMultiplier - 1) * 100).toFixed(0)}%`}
                   </span>
-                  </span>
-                    <Button
+                  {localMultiplier !== 1 && (
                     <Button
                       size="sm"
                       onClick={() => handlePortionChange(1)}
@@ -477,69 +475,67 @@ function MealCard({
                     </Button>
                   )}
                 </div>
-                </div>
               </div>
             )}
 
             <div className="space-y-4">
               <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                    <span className="text-lg">🥗</span>
-                    {t.ingredients}
-                  </h4>
-                  <InfoTooltip 
-                    content="Ingredient quantities and nutrition values are calculated based on the recipe. Actual values may vary based on product brands and measurements."
-                    ariaLabel={INFO_LABELS.ingredientBreakdown}
-                    ariaLabel={INFO_LABELS.ingredientBreakdown}
-                  />
-                </div>ard rounded-xl border divide-y overflow-hidden">
-                <div className="bg-card rounded-xl border divide-y overflow-hidden">
-                  {adjustedMeal.ingredients.map((ingredient, index) => (
-                    <div
-                      key={ingredient.ingredient_id}olors group"
-                    >
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
-                        <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
-                          {index + 1}
-                        </div>
-                        <div className="flex-1 min-w-0 flex items-baseline gap-2">
-                          <span className="font-medium text-sm text-foreground truncate">
-                            {translateIngredient(ingredient.name, language)}
-                          </span>
-                          <span className="text-xs text-muted-foreground tabular-nums whitespace-nowrap">
-                            {ingredient.quantity_g}g
-                          </span>
-                        </div>
+                <h4 className="font-heading font-semibold flex items-center gap-2">
+                  <span className="text-lg">🥗</span>
+                  {t.ingredients}
+                </h4>
+                <InfoTooltip 
+                  content="Ingredient quantities and nutrition values are calculated based on the recipe. Actual values may vary based on product brands and measurements."
+                  ariaLabel={INFO_LABELS.ingredientBreakdown}
+                />
+              </div>
+              <div className="bg-card rounded-xl border divide-y overflow-hidden">
+                {adjustedMeal.ingredients.map((ingredient, index) => (
+                  <div
+                    key={ingredient.ingredient_id}
+                    className="px-4 py-3 hover:bg-muted/50 transition-colors group"
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                        {index + 1}
                       </div>
-                      <div className="flex-shrink-0 ml-4 text-right">
-                        <div className="font-semibold text-sm text-accent tabular-nums">
-                          €{ingredient.cost_eur.toFixed(2)}
-                        </div>
+                      <div className="flex-1 min-w-0 flex items-baseline gap-2">
+                        <span className="font-medium text-sm text-foreground truncate">
+                          {translateIngredient(ingredient.name, language)}
+                        </span>
+                        <span className="text-xs text-muted-foreground tabular-nums whitespace-nowrap">
+                          {ingredient.quantity_g}g
+                        </span>
                       </div>
                     </div>
-                  ))}
-                </div>
+                    <div className="flex-shrink-0 ml-4 text-right">
+                      <div className="font-semibold text-sm text-accent tabular-nums">
+                        €{ingredient.cost_eur.toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-
-              {meal.cooking_instructions && meal.cooking_instructions.length > 0 && (
-                <div className="space-y-3 bg-primary/5 rounded-xl p-4 border border-primary/10">
-                  <h4 className="font-heading font-semibold text-base text-primary flex items-center gap-2">
-                    <span className="text-xl">👨‍🍳</span>
-                    {t.cookingInstructions}
-                  </h4>
-                  <ol className="space-y-3">
-                    {meal.cooking_instructions.map((instruction, index) => (
-                      <li key={index} className="flex gap-3">
-                        <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold shadow-sm">
-                          {index + 1}
-                        </span>
-                        <span className="flex-1 text-sm leading-relaxed pt-1">{instruction}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              )}
             </div>
+
+            {meal.cooking_instructions && meal.cooking_instructions.length > 0 && (
+              <div className="space-y-3 bg-primary/5 rounded-xl p-4 border border-primary/10">
+                <h4 className="font-heading font-semibold text-base text-primary flex items-center gap-2">
+                  <span className="text-xl">👨‍🍳</span>
+                  {t.cookingInstructions}
+                </h4>
+                <ol className="space-y-3">
+                  {meal.cooking_instructions.map((instruction, index) => (
+                    <li key={index} className="flex gap-3">
+                      <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold shadow-sm">
+                        {index + 1}
+                      </span>
+                      <span className="flex-1 text-sm leading-relaxed pt-1">{instruction}</span>
+                    </li>
+                  ))}
+                </ol>
+              </div>
+            )}
           </AccordionContent>
         </AccordionItem>
       </Accordion>
