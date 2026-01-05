@@ -16,19 +16,19 @@ const ANIMATION_SCENES = [
     title: 'Create Your Profile',
     subtitle: 'Set budget, dietary preferences, and meal goals',
     render: () => (
-      <div className="space-y-4">
+      <div className="space-y-2">
         <motion.div
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="bg-card border-2 border-primary/20 rounded-2xl p-6 space-y-4 shadow-lg"
+          className="bg-card border-2 border-primary/20 rounded-xl p-3 space-y-2.5 shadow-lg"
         >
-          <div className="flex items-center gap-3 pb-3 border-b">
-            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <UserCircle weight="fill" className="w-8 h-8 text-primary" />
+          <div className="flex items-center gap-2 pb-2 border-b">
+            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+              <UserCircle weight="fill" className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <div className="font-bold text-sm">Profile Setup</div>
-              <div className="text-xs text-muted-foreground">Step 1 of 4</div>
+              <div className="font-bold text-xs">Profile Setup</div>
+              <div className="text-[10px] text-muted-foreground">Step 1 of 4</div>
             </div>
           </div>
           
@@ -36,12 +36,12 @@ const ANIMATION_SCENES = [
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 0.3 }}
-            className="space-y-2"
+            className="space-y-1"
           >
-            <div className="text-xs font-medium text-muted-foreground">Budget</div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-bold text-primary tabular-nums">€50</span>
-              <span className="text-sm text-muted-foreground">/ week</span>
+            <div className="text-[10px] font-medium text-muted-foreground">Budget</div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-2xl font-bold text-primary tabular-nums">€50</span>
+              <span className="text-xs text-muted-foreground">/ week</span>
             </div>
           </motion.div>
 
@@ -49,27 +49,27 @@ const ANIMATION_SCENES = [
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="space-y-2"
+            className="space-y-1"
           >
-            <div className="text-xs font-medium text-muted-foreground">Meal Plan</div>
-            <div className="text-sm"><span className="font-bold">7 days</span> • <span className="font-bold">3 meals</span> per day</div>
+            <div className="text-[10px] font-medium text-muted-foreground">Meal Plan</div>
+            <div className="text-xs"><span className="font-bold">7 days</span> • <span className="font-bold">3 meals</span> per day</div>
           </motion.div>
 
           <motion.div
             initial={{ x: -20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: 0.7 }}
-            className="space-y-2"
+            className="space-y-1"
           >
-            <div className="text-xs font-medium text-muted-foreground">Preferences</div>
-            <div className="flex flex-wrap gap-2">
+            <div className="text-[10px] font-medium text-muted-foreground">Preferences</div>
+            <div className="flex flex-wrap gap-1.5">
               {['Vegetarian', 'Gluten-Free', 'High Protein'].map((pref, i) => (
                 <motion.span
                   key={pref}
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.9 + i * 0.1, type: 'spring' }}
-                  className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium"
+                  className="px-2 py-0.5 bg-primary/10 text-primary rounded-full text-[10px] font-medium"
                 >
                   {pref}
                 </motion.span>
@@ -82,7 +82,7 @@ const ANIMATION_SCENES = [
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.5 }}
-          className="text-xs text-center text-muted-foreground"
+          className="text-[10px] text-center text-muted-foreground"
         >
           💡 AI tailors meals to your budget & preferences
         </motion.div>
@@ -95,19 +95,19 @@ const ANIMATION_SCENES = [
     title: 'AI Generates Your Plan',
     subtitle: 'Smart meal selection with nutrition & cost calculation',
     render: () => (
-      <div className="space-y-6">
+      <div className="space-y-4">
         <motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 200 }}
-          className="relative w-24 h-24 mx-auto"
+          className="relative w-16 h-16 mx-auto"
         >
           <motion.div
             animate={{ rotate: 360 }}
             transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-            className="absolute inset-0 rounded-full border-4 border-primary/20 border-t-primary"
+            className="absolute inset-0 rounded-full border-3 border-primary/20 border-t-primary"
           />
-          <div className="absolute inset-0 flex items-center justify-center text-4xl">
+          <div className="absolute inset-0 flex items-center justify-center text-3xl">
             <motion.span
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ duration: 1, repeat: Infinity }}
@@ -121,7 +121,7 @@ const ANIMATION_SCENES = [
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="space-y-3"
+          className="space-y-2"
         >
           {[
             { label: 'Analyzing budget', emoji: '💰' },
@@ -134,17 +134,17 @@ const ANIMATION_SCENES = [
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 + i * 0.3 }}
-              className="flex items-center gap-3 text-sm"
+              className="flex items-center gap-2 text-xs"
             >
-              <span className="text-lg">{step.emoji}</span>
+              <span className="text-base">{step.emoji}</span>
               <span className="text-muted-foreground">{step.label}</span>
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.7 + i * 0.3 }}
-                className="ml-auto w-5 h-5 rounded-full bg-accent flex items-center justify-center"
+                className="ml-auto w-4 h-4 rounded-full bg-accent flex items-center justify-center"
               >
-                <div className="w-2 h-2 rounded-full bg-accent-foreground" />
+                <div className="w-1.5 h-1.5 rounded-full bg-accent-foreground" />
               </motion.div>
             </motion.div>
           ))}
@@ -154,7 +154,7 @@ const ANIMATION_SCENES = [
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 2 }}
-          className="text-xs text-center text-muted-foreground"
+          className="text-[10px] text-center text-muted-foreground"
         >
           🤖 Powered by AI
         </motion.div>
@@ -167,17 +167,17 @@ const ANIMATION_SCENES = [
     title: 'Your Meal Plan Ready',
     subtitle: 'Complete meals with costs, nutrition & ingredients',
     render: () => (
-      <div className="space-y-3">
+      <div className="space-y-2">
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          className="bg-gradient-to-br from-primary/5 via-accent/5 to-primary/5 border border-primary/20 rounded-xl p-4 space-y-2"
+          className="bg-gradient-to-br from-primary/5 via-accent/5 to-primary/5 border border-primary/20 rounded-lg p-3 space-y-1.5"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-primary">Budget Status</span>
-            <span className="text-lg font-bold text-primary tabular-nums">€43.50 / €50</span>
+            <span className="text-[10px] font-bold text-primary">Budget Status</span>
+            <span className="text-sm font-bold text-primary tabular-nums">€43.50 / €50</span>
           </div>
-          <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+          <div className="relative h-1.5 bg-muted rounded-full overflow-hidden">
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: '87%' }}
@@ -185,15 +185,15 @@ const ANIMATION_SCENES = [
               className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-accent rounded-full"
             />
           </div>
-          <div className="text-xs text-muted-foreground">Under budget by €6.50 ✓</div>
+          <div className="text-[10px] text-muted-foreground">Under budget by €6.50 ✓</div>
         </motion.div>
 
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.5 }}
-            className="text-xs font-medium text-muted-foreground px-1"
+            className="text-[10px] font-medium text-muted-foreground px-0.5"
           >
             Day 1 - Monday
           </motion.div>
@@ -207,18 +207,18 @@ const ANIMATION_SCENES = [
               initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.7 + i * 0.2, type: 'spring', stiffness: 100 }}
-              className="bg-card border rounded-xl p-3 shadow-sm hover:shadow-md transition-all"
+              className="bg-card border rounded-lg p-2 shadow-sm hover:shadow-md transition-all"
             >
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-sm truncate">{meal.name}</div>
-                  <div className="text-xs text-muted-foreground">{meal.type}</div>
-                  <div className="flex items-center gap-3 mt-2 text-xs">
+                  <div className="font-semibold text-xs truncate">{meal.name}</div>
+                  <div className="text-[10px] text-muted-foreground">{meal.type}</div>
+                  <div className="flex items-center gap-2 mt-1 text-[10px]">
                     <span className="tabular-nums">{meal.cal} cal</span>
                     <span className="tabular-nums">{meal.protein}g protein</span>
                   </div>
                 </div>
-                <div className="text-base font-bold text-primary tabular-nums shrink-0">
+                <div className="text-xs font-bold text-primary tabular-nums shrink-0">
                   €{meal.cost.toFixed(2)}
                 </div>
               </div>
@@ -230,9 +230,9 @@ const ANIMATION_SCENES = [
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.8 }}
-          className="flex items-center justify-center gap-2 text-xs text-muted-foreground pt-2"
+          className="flex items-center justify-center gap-1.5 text-[10px] text-muted-foreground pt-1"
         >
-          <Sparkle weight="fill" className="w-3 h-3" />
+          <Sparkle weight="fill" className="w-2.5 h-2.5" />
           <span>6 more days ready to view</span>
         </motion.div>
       </div>
@@ -244,31 +244,31 @@ const ANIMATION_SCENES = [
     title: 'Powerful Features',
     subtitle: 'Everything you need for meal planning success',
     render: () => (
-      <div className="space-y-3">
+      <div className="space-y-2">
         {[
           {
-            icon: <ShoppingCart weight="fill" className="w-6 h-6" />,
+            icon: <ShoppingCart weight="fill" className="w-5 h-5" />,
             title: 'Shopping List',
             desc: 'Auto-generated with quantities & costs',
             color: 'from-blue-500/10 to-blue-600/10 border-blue-500/30',
             iconColor: 'text-blue-600'
           },
           {
-            icon: <CalendarCheck weight="fill" className="w-6 h-6" />,
+            icon: <CalendarCheck weight="fill" className="w-5 h-5" />,
             title: 'Track Progress',
             desc: 'Schedule meals & mark as complete',
             color: 'from-purple-500/10 to-purple-600/10 border-purple-500/30',
             iconColor: 'text-purple-600'
           },
           {
-            icon: <ChartBar weight="fill" className="w-6 h-6" />,
+            icon: <ChartBar weight="fill" className="w-5 h-5" />,
             title: 'Meal Prep',
             desc: 'Batch cooking recommendations',
             color: 'from-green-500/10 to-green-600/10 border-green-500/30',
             iconColor: 'text-green-600'
           },
           {
-            icon: <Sparkle weight="fill" className="w-6 h-6" />,
+            icon: <Sparkle weight="fill" className="w-5 h-5" />,
             title: 'Smart Swaps',
             desc: 'Replace meals you don\'t like',
             color: 'from-amber-500/10 to-amber-600/10 border-amber-500/30',
@@ -281,7 +281,7 @@ const ANIMATION_SCENES = [
             animate={{ x: 0, opacity: 1 }}
             transition={{ delay: i * 0.25, type: 'spring', stiffness: 100 }}
             className={cn(
-              'flex items-center gap-4 p-4 rounded-xl border-2 bg-gradient-to-br shadow-sm hover:shadow-md transition-all',
+              'flex items-center gap-3 p-2.5 rounded-lg border-2 bg-gradient-to-br shadow-sm hover:shadow-md transition-all',
               feature.color
             )}
           >
@@ -294,8 +294,8 @@ const ANIMATION_SCENES = [
               {feature.icon}
             </motion.div>
             <div className="flex-1 min-w-0">
-              <div className="font-bold text-sm">{feature.title}</div>
-              <div className="text-xs text-muted-foreground">{feature.desc}</div>
+              <div className="font-bold text-xs">{feature.title}</div>
+              <div className="text-[10px] text-muted-foreground">{feature.desc}</div>
             </div>
           </motion.div>
         ))}
@@ -304,7 +304,7 @@ const ANIMATION_SCENES = [
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 1.5 }}
-          className="text-xs text-center text-muted-foreground pt-2"
+          className="text-[10px] text-center text-muted-foreground pt-1"
         >
           ✨ And much more...
         </motion.div>
@@ -333,14 +333,14 @@ export function AnimatedAppDemo({ className }: AnimatedAppDemoProps) {
 
   return (
     <Card className={cn('overflow-hidden border-2 shadow-lg', className)}>
-      <div className="p-6 md:p-8 bg-gradient-to-br from-background via-muted/20 to-background">
-        <div className="flex items-center justify-between mb-8">
-          <div className="space-y-1 flex-1">
+      <div className="p-4 md:p-5 bg-gradient-to-br from-background via-muted/20 to-background">
+        <div className="flex items-center justify-between mb-4">
+          <div className="space-y-0.5 flex-1">
             <div className="flex items-center gap-2">
-              <div className="text-xs font-bold text-primary uppercase tracking-wider">
+              <div className="text-[10px] font-bold text-primary uppercase tracking-wider">
                 Step {currentScene + 1} of {ANIMATION_SCENES.length}
               </div>
-              <div className="h-1 w-12 bg-primary/20 rounded-full overflow-hidden">
+              <div className="h-0.5 w-8 bg-primary/20 rounded-full overflow-hidden">
                 <motion.div
                   className="h-full bg-primary"
                   initial={{ width: 0 }}
@@ -349,22 +349,22 @@ export function AnimatedAppDemo({ className }: AnimatedAppDemoProps) {
                 />
               </div>
             </div>
-            <h3 className="font-heading text-2xl md:text-3xl font-bold text-foreground">
+            <h3 className="font-heading text-lg md:text-xl font-bold text-foreground">
               {scene.title}
             </h3>
-            <p className="text-sm text-muted-foreground">{scene.subtitle}</p>
+            <p className="text-xs text-muted-foreground">{scene.subtitle}</p>
           </div>
           <Button
             variant="outline"
             size="icon"
             onClick={() => setIsPlaying(!isPlaying)}
-            className="rounded-full shrink-0 ml-4"
+            className="rounded-full shrink-0 ml-3 h-8 w-8"
           >
-            {isPlaying ? <Pause weight="fill" /> : <Play weight="fill" />}
+            {isPlaying ? <Pause weight="fill" size={14} /> : <Play weight="fill" size={14} />}
           </Button>
         </div>
 
-        <div className="min-h-[280px] md:min-h-[320px] flex items-center justify-center px-4">
+        <div className="min-h-[200px] md:min-h-[220px] flex items-center justify-center px-2">
           <AnimatePresence mode="wait">
             <motion.div
               key={scene.id}
@@ -379,8 +379,8 @@ export function AnimatedAppDemo({ className }: AnimatedAppDemoProps) {
           </AnimatePresence>
         </div>
 
-        <div className="mt-8 space-y-4">
-          <div className="flex items-center gap-2">
+        <div className="mt-4 space-y-3">
+          <div className="flex items-center gap-1.5">
             {ANIMATION_SCENES.map((_, index) => (
               <button
                 key={index}
@@ -389,7 +389,7 @@ export function AnimatedAppDemo({ className }: AnimatedAppDemoProps) {
                   setIsPlaying(false);
                 }}
                 className={cn(
-                  'h-2 flex-1 rounded-full transition-all duration-300',
+                  'h-1.5 flex-1 rounded-full transition-all duration-300',
                   index === currentScene
                     ? 'bg-primary shadow-sm'
                     : index < currentScene
@@ -408,11 +408,11 @@ export function AnimatedAppDemo({ className }: AnimatedAppDemoProps) {
                 setCurrentScene(prev);
                 setIsPlaying(false);
               }}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors font-medium"
+              className="text-[10px] text-muted-foreground hover:text-foreground transition-colors font-medium"
             >
               ← Previous
             </button>
-            <span className="text-xs text-muted-foreground font-medium">
+            <span className="text-[10px] text-muted-foreground font-medium">
               See how Gurmaio works
             </span>
             <button
@@ -420,7 +420,7 @@ export function AnimatedAppDemo({ className }: AnimatedAppDemoProps) {
                 setCurrentScene((prev) => (prev + 1) % ANIMATION_SCENES.length);
                 setIsPlaying(false);
               }}
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors font-medium"
+              className="text-[10px] text-muted-foreground hover:text-foreground transition-colors font-medium"
             >
               Next →
             </button>
