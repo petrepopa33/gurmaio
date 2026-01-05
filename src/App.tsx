@@ -25,7 +25,6 @@ import { EmailVerificationBanner } from '@/components/email-verification-banner'
 import { MealCalendar } from '@/components/meal-calendar';
 import { ProgressDialog } from '@/components/progress-dialog';
 import { StreakCounter } from '@/components/streak-counter';
-import { AgeGateDialog, AgeRejectionDialog } from '@/components/age-gate-dialog';
 import { MealPreferencesDialog } from '@/components/meal-preferences-dialog';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -59,7 +58,6 @@ function App() {
   const [scheduledDays, setScheduledDays] = useKV<ScheduledDay[]>('scheduled_days', []);
   const [dayProgress, setDayProgress] = useKV<DayProgress[]>('day_progress', []);
   const [badges, setBadges] = useKV<Badge[]>('earned_badges', []);
-  const [ageVerified, setAgeVerified] = useKV<boolean>('age_verified', false);
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingPrep, setIsGeneratingPrep] = useState(false);
@@ -78,8 +76,6 @@ function App() {
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [showCreateAccountDialog, setShowCreateAccountDialog] = useState(false);
   const [showEmailVerificationDialog, setShowEmailVerificationDialog] = useState(false);
-  const [showAgeGate, setShowAgeGate] = useState(!ageVerified);
-  const [showAgeRejection, setShowAgeRejection] = useState(false);
   const [showMealPreferences, setShowMealPreferences] = useState(false);
   
   const hasProfile = userProfile !== null;
@@ -940,16 +936,6 @@ function App() {
     });
   };
 
-  const handleAgeVerified = () => {
-    setAgeVerified(() => true);
-    setShowAgeGate(false);
-  };
-
-  const handleAgeRejected = () => {
-    setShowAgeGate(false);
-    setShowAgeRejection(true);
-  };
-
   const handleRemovePreference = (mealId: string) => {
     setMealPreferences((current) => {
       const preferences = current || [];
@@ -970,28 +956,6 @@ function App() {
       return filtered;
     });
   };
-
-  if (showAgeGate) {
-    return (
-      <>
-        <AgeGateDialog 
-          open={showAgeGate} 
-          onAgeVerified={handleAgeVerified}
-          onReject={handleAgeRejected}
-        />
-        <Toaster />
-      </>
-    );
-  }
-
-  if (showAgeRejection) {
-    return (
-      <>
-        <AgeRejectionDialog open={showAgeRejection} />
-        <Toaster />
-      </>
-    );
-  }
 
   if (!hasProfile) {
     return (

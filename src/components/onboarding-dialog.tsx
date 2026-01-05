@@ -213,6 +213,17 @@ export function OnboardingDialog({ open, onOpenChange, onSave, existingProfile }
       return;
     }
 
+    if (!useManualCalories && age) {
+      const ageNum = parseInt(age);
+      if (!isNaN(ageNum) && ageNum < 13) {
+        toast.error('You must be at least 13 years old to use this app', {
+          description: 'This requirement complies with COPPA and app store policies',
+          duration: 5000
+        });
+        return;
+      }
+    }
+
     let macroTargets: MacroTargets;
     if (macroPreset === 'custom') {
       const proteinPct = parseFloat(customProtein);
@@ -415,6 +426,9 @@ export function OnboardingDialog({ open, onOpenChange, onSave, existingProfile }
                       onChange={(e) => setAge(e.target.value)}
                       placeholder="30"
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Must be 13 or older to use this app
+                    </p>
                   </div>
 
                   <div className="space-y-2">
