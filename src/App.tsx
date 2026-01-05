@@ -1230,7 +1230,6 @@ function App() {
                     savedPlansCount={savedMealPlans?.length ?? 0}
                     preferencesCount={mealPreferences?.length ?? 0}
                     onProfileClick={() => setShowProfileDialog(true)}
-                    onEditMealProfile={() => setIsOnboarding(true)}
                     onHistoryClick={() => setSavedPlansOpen(true)}
                     onPreferencesClick={() => setShowMealPreferences(true)}
                     onAccountSettingsClick={() => setShowAccountSettings(true)}
