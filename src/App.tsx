@@ -277,14 +277,18 @@ function App() {
   };
 
   const handleSaveProfile = (profile: UserProfile, autoRegenerate = false) => {
+    const shouldRegenerate = autoRegenerate || hasMealPlan;
+    
     setUserProfile(() => profile);
     setIsOnboarding(false);
-    toast.success('Profile saved successfully');
     
-    if (autoRegenerate && hasMealPlan) {
+    if (shouldRegenerate) {
+      toast.success('Profile saved! Regenerating meal plan with new settings...');
       setTimeout(() => {
         handleGeneratePlan(profile);
-      }, 200);
+      }, 300);
+    } else {
+      toast.success('Profile saved successfully');
     }
   };
 
