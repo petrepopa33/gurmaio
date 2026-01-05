@@ -376,12 +376,9 @@ export function ShoppingListSheet({ open, onOpenChange, shoppingList, onToggleOw
                           {translateIngredient(item.display_name, language)}
                         </label>
                         <div className="text-sm text-muted-foreground tabular-nums">
-                          {(item.total_quantity * multiplier).toFixed(0)}{item.unit}
-                          {item.minimum_purchase_quantity > item.total_quantity && (
-                            <Badge variant="secondary" className="ml-2 text-xs">
-                              min {(item.minimum_purchase_quantity * multiplier).toFixed(0)}{item.unit}
-                            </Badge>
-                          )}
+                          {(item.minimum_purchase_quantity > item.total_quantity 
+                            ? item.minimum_purchase_quantity 
+                            : item.total_quantity * multiplier).toFixed(0)}{item.unit}
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
