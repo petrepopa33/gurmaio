@@ -482,10 +482,11 @@ function MealCard({
                         handleSwap();
                       }}
                       disabled={isSwapping}
-                      className="h-8 w-8 p-0"
+                      className="h-8 px-3 gap-1.5"
                       title="Swap meal"
                     >
                       <Repeat size={16} />
+                      <span className="text-xs font-medium">{isSwapping ? 'Swapping...' : 'Swap'}</span>
                     </Button>
                   )}
                   <Button
