@@ -366,6 +366,7 @@ function MealCard({
   const [isSwapping, setIsSwapping] = useState(false);
   const [localMultiplier, setLocalMultiplier] = useState(portionMultiplier);
   const [showIngredients, setShowIngredients] = useState(false);
+  const [isAccordionOpen, setIsAccordionOpen] = useState<string | undefined>(undefined);
 
   const handleSwap = async () => {
     if (!onSwap) return;
@@ -398,6 +399,14 @@ function MealCard({
     }
   };
 
+  const handleShowIngredientsClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!showIngredients) {
+      setIsAccordionOpen('meal');
+    }
+    setShowIngredients(!showIngredients);
+  };
+
   const adjustedMeal = {
     ...meal,
     nutrition: {
@@ -424,7 +433,7 @@ function MealCard({
 
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
-      <Accordion type="single" collapsible>
+      <Accordion type="single" collapsible value={isAccordionOpen} onValueChange={setIsAccordionOpen}>
         <AccordionItem value="meal" className="border-none">
           <AccordionTrigger className="px-6 py-4 hover:no-underline">
             <div className="flex flex-col w-full gap-3">
@@ -482,14 +491,12 @@ function MealCard({
                   <Button
                     size="sm"
                     variant={showIngredients ? 'default' : 'outline'}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setShowIngredients(!showIngredients);
-                    }}
-                    className="h-8 w-8 p-0"
-                    title="Show ingredients"
+                    onClick={handleShowIngredientsClick}
+                    className="h-8 px-3 gap-1.5"
+                    title="View ingredients list"
                   >
                     <ListBullets size={16} weight={showIngredients ? 'fill' : 'regular'} />
+                    <span className="text-xs font-medium">View Ingredients</span>
                   </Button>
                   {onPortionAdjustment && (
                     <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
