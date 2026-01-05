@@ -1284,20 +1284,22 @@ function generateFallbackMealPlan(userProfile: UserProfile): MealPlan {
 }
 
 export function generateShoppingList(mealPlan: MealPlan): ShoppingList {
-  const ingredientMap = new Map<string, { quantity: number; price: number; name: string }>();
+  const ingredientMap = new Map<string, { quantity: number; price: number; name: string; id: string }>();
 
   for (const day of mealPlan.days) {
     for (const meal of day.meals) {
       for (const ingredient of meal.ingredients) {
-        const existing = ingredientMap.get(ingredient.ingredient_id);
+        const normalizedName = ingredient.name.toLowerCase().trim();
+        const existing = ingredientMap.get(normalizedName);
         if (existing) {
           existing.quantity += ingredient.quantity_g;
           existing.price += ingredient.cost_eur;
         } else {
-          ingredientMap.set(ingredient.ingredient_id, {
+          ingredientMap.set(normalizedName, {
             quantity: ingredient.quantity_g,
             price: ingredient.cost_eur,
             name: ingredient.name,
+            id: ingredient.ingredient_id,
           });
         }
       }
@@ -1305,8 +1307,8 @@ export function generateShoppingList(mealPlan: MealPlan): ShoppingList {
   }
 
   const items: ShoppingListItem[] = Array.from(ingredientMap.entries()).map(
-    ([id, data]) => ({
-      ingredient_id: id,
+    ([_, data]) => ({
+      ingredient_id: data.id,
       display_name: data.name,
       total_quantity: Math.ceil(data.quantity / 50) * 50,
       unit: 'g' as const,
