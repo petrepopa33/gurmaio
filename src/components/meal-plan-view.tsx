@@ -495,28 +495,40 @@ function MealCard({
             )}
 
             <div className="space-y-6">
-              <div className="space-y-2">
-                <h4 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide mb-3 flex items-center gap-2">
-                  {t.ingredients}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-heading font-semibold text-base flex items-center gap-2">
+                    <span className="text-lg">🥗</span>
+                    {t.ingredients}
+                  </h4>
                   <InfoTooltip 
                     content="Ingredient quantities and nutrition values are calculated based on the recipe. Actual values may vary based on product brands and measurements."
                     ariaLabel={INFO_LABELS.ingredientBreakdown}
                   />
-                </h4>
-                <div className="space-y-1">
-                  {adjustedMeal.ingredients.map((ingredient) => (
+                </div>
+                <div className="bg-card rounded-xl border divide-y overflow-hidden">
+                  {adjustedMeal.ingredients.map((ingredient, index) => (
                     <div
                       key={ingredient.ingredient_id}
-                      className="grid grid-cols-1 md:grid-cols-3 gap-2 py-3 px-3 rounded-lg hover:bg-muted/50 transition-colors border border-transparent hover:border-border"
+                      className="flex items-center justify-between py-3.5 px-4 hover:bg-accent/5 transition-colors group"
                     >
-                      <div className="md:col-span-1 font-medium">
-                        {translateIngredient(ingredient.name, language)}
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
+                          {index + 1}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-medium text-foreground truncate">
+                            {translateIngredient(ingredient.name, language)}
+                          </div>
+                          <div className="text-sm text-muted-foreground tabular-nums">
+                            {ingredient.quantity_g}g
+                          </div>
+                        </div>
                       </div>
-                      <div className="md:col-span-1 text-sm text-muted-foreground tabular-nums">
-                        {ingredient.quantity_g}g
-                      </div>
-                      <div className="md:col-span-1 text-right font-medium text-accent tabular-nums">
-                        €{ingredient.cost_eur.toFixed(2)}
+                      <div className="flex-shrink-0 ml-4 text-right">
+                        <div className="font-semibold text-accent tabular-nums">
+                          €{ingredient.cost_eur.toFixed(2)}
+                        </div>
                       </div>
                     </div>
                   ))}
