@@ -158,34 +158,17 @@ export function ShoppingListSheet({ open, onOpenChange, shoppingList, onToggleOw
           </Card>
 
           <Card className="p-3 bg-accent/10 border-accent/30">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-heading font-semibold text-sm">Cost Summary</h3>
-              <InfoTooltip 
-                content={DISCLAIMERS.cost.full} 
-                ariaLabel={INFO_LABELS.costInfo}
-              />
-            </div>
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">{t.planCost}:</span>
-                <span className="font-heading text-xs font-bold tabular-nums">
-                  €{adjustedPlanCost.toFixed(2)}
-                </span>
+                <span className="text-sm text-muted-foreground">Plan estimated cost:</span>
+                <InfoTooltip 
+                  content={DISCLAIMERS.cost.full} 
+                  ariaLabel={INFO_LABELS.costInfo}
+                />
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">{t.toBuy}:</span>
-                <span className="font-heading text-xs font-bold tabular-nums text-accent">
-                  €{totalCostRemaining.toFixed(2)}
-                </span>
-              </div>
-              {shoppingList.summary.waste_cost_eur > 0 && (
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted-foreground">Unused:</span>
-                  <span className="font-heading text-xs font-bold tabular-nums">
-                    €{(shoppingList.summary.waste_cost_eur * multiplier).toFixed(2)}
-                  </span>
-                </div>
-              )}
+              <span className="font-heading text-lg font-bold tabular-nums">
+                €{adjustedPlanCost.toFixed(2)}
+              </span>
             </div>
           </Card>
 
@@ -405,23 +388,6 @@ export function ShoppingListSheet({ open, onOpenChange, shoppingList, onToggleOw
               </div>
             ))}
           </div>
-
-          <Card className="p-4 bg-primary/5 border-primary/20">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <CurrencyDollar size={20} className="text-primary" />
-                <span className="font-heading font-semibold">{t.totalToBuy}</span>
-              </div>
-              <div className="font-heading text-2xl font-bold text-primary tabular-nums">
-                €{totalCostRemaining.toFixed(2)}
-              </div>
-            </div>
-            {ownedCount > 0 && (
-              <div className="mt-2 text-sm text-muted-foreground text-center">
-                {t.alreadyHave} {ownedCount} {t.item}{ownedCount !== 1 ? 's' : ''}
-              </div>
-            )}
-          </Card>
 
           <p className="text-xs text-muted-foreground text-center">
             Prices are estimates based on regional averages. Actual costs may vary by store and location.
