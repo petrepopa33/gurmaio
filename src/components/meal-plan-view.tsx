@@ -394,13 +394,13 @@ function MealCard({
                       {onSwap && (
                         <Button
                           size="sm"
-                          variant="outline"
+                          variant="ghost"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleSwap();
                           }}
                           disabled={isSwapping}
-                          className="h-7 px-2"
+                          className="h-7 w-7 p-0"
                           title="Swap this meal"
                         >
                           <Repeat size={14} />
