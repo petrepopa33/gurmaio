@@ -947,6 +947,27 @@ function App() {
     setShowAgeRejection(true);
   };
 
+  const handleRemovePreference = (mealId: string) => {
+    setMealPreferences((current) => {
+      const preferences = current || [];
+      return preferences.filter(p => p.meal_id !== mealId);
+    });
+    toast.info('Preference removed');
+  };
+
+  const handleClearAllPreferences = (type: 'like' | 'dislike' | 'all') => {
+    setMealPreferences((current) => {
+      const preferences = current || [];
+      if (type === 'all') {
+        toast.success('All preferences cleared');
+        return [];
+      }
+      const filtered = preferences.filter(p => p.preference !== type);
+      toast.success(`All ${type}d meals cleared`);
+      return filtered;
+    });
+  };
+
   if (showAgeGate) {
     return (
       <>
@@ -1249,58 +1270,15 @@ function App() {
 
             <div className="flex items-center gap-2">
               <LanguageSwitcher currentLanguage={language} onLanguageChange={handleLanguageChange} />
-              {hasMealPlan && (isDemoMode ? (
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    toast.info('Demo mode: Create an account to save plans', {
-                      action: {
-                        label: 'Create Account',
-                        onClick: () => setShowCreateAccountDialog(true)
-                      }
-                    });
-                  }}
-                  title="Create an account to save meal plans"
-                >
-                  <FloppyDisk className="mr-2" />
-                  {t.savePlan} (Demo)
-                </Button>
-              ) : currentUser && (
-                <Button
-                  variant={justSaved ? "default" : "outline"}
-                  onClick={handleSaveMealPlan}
-                  disabled={isSaving || (!canSaveMorePlans && !isCurrentPlanAlreadySaved)}
-                  title={!canSaveMorePlans && !isCurrentPlanAlreadySaved ? "Maximum 5 saved plans reached" : ""}
-                >
-                  {justSaved ? (
-                    <>
-                      <Check className="mr-2" />
-                      {t.saved}
-                    </>
-                  ) : (
-                    <>
-                      <FloppyDisk className="mr-2" />
-                      {isSaving ? t.saving : t.savePlan}
-                    </>
-                  )}
-                </Button>
-              ))}
-              {hasMealPlan && (
-                <Button
-                  variant="outline"
-                  onClick={() => setShoppingListOpen(true)}
-                >
-                  <List className="mr-2" />
-                  {t.shoppingList}
-                </Button>
-              )}
               
               {currentUser ? (
                 <ProfileDropdown
                   currentUser={currentUser}
                   savedPlansCount={savedMealPlans?.length ?? 0}
+                  preferencesCount={mealPreferences?.length ?? 0}
                   onProfileClick={() => setIsOnboarding(true)}
                   onHistoryClick={() => setSavedPlansOpen(true)}
+                  onPreferencesClick={() => setShowMealPreferences(true)}
                   onAccountSettingsClick={() => setShowAccountSettings(true)}
                   onLogoutClick={handleLogout}
                   onDeleteAccountClick={() => setShowDeleteAccountDialog(true)}
@@ -1427,7 +1405,50 @@ function App() {
                     {mealPlan!.metadata.days}-{t.day} plan • Generated {new Date(mealPlan!.generated_at).toLocaleDateString()}
                   </p>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-2 flex-wrap">
+                  {isDemoMode ? (
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        toast.info('Demo mode: Create an account to save plans', {
+                          action: {
+                            label: 'Create Account',
+                            onClick: () => setShowCreateAccountDialog(true)
+                          }
+                        });
+                      }}
+                      title="Create an account to save meal plans"
+                    >
+                      <FloppyDisk className="mr-2" />
+                      Save (Demo)
+                    </Button>
+                  ) : currentUser && (
+                    <Button
+                      variant={justSaved ? "default" : "outline"}
+                      onClick={handleSaveMealPlan}
+                      disabled={isSaving || (!canSaveMorePlans && !isCurrentPlanAlreadySaved)}
+                      title={!canSaveMorePlans && !isCurrentPlanAlreadySaved ? "Maximum 5 saved plans reached" : ""}
+                    >
+                      {justSaved ? (
+                        <>
+                          <Check className="mr-2" />
+                          Saved
+                        </>
+                      ) : (
+                        <>
+                          <FloppyDisk className="mr-2" />
+                          {isSaving ? 'Saving...' : 'Save'}
+                        </>
+                      )}
+                    </Button>
+                  )}
+                  <Button
+                    variant="outline"
+                    onClick={() => setShoppingListOpen(true)}
+                  >
+                    <List className="mr-2" />
+                    Shopping
+                  </Button>
                   {!mealPrepPlan && (
                     <Button
                       onClick={handleGeneratePrepPlan}
@@ -1435,7 +1456,7 @@ function App() {
                       variant="outline"
                     >
                       <ChefHat className="mr-2" />
-                      {isGeneratingPrep ? 'Generating...' : 'Generate Prep Plan'}
+                      Prep Plan
                     </Button>
                   )}
                   <Button
@@ -1443,18 +1464,18 @@ function App() {
                     variant="outline"
                   >
                     <FilePdf className="mr-2" />
-                    {t.exportPDF}
+                    Export
                   </Button>
                   <Button
                     onClick={() => setShareMealPlanOpen(true)}
                     variant="outline"
                   >
                     <ShareNetwork className="mr-2" />
-                    {t.sharePlan}
+                    Share
                   </Button>
                   <Button onClick={handleGeneratePlan} disabled={isGenerating}>
                     <Plus className="mr-2" />
-                    {isGenerating ? t.generating : t.regenerate}
+                    {isGenerating ? 'Generating...' : 'New Plan'}
                   </Button>
                 </div>
               </div>
@@ -1722,6 +1743,14 @@ function App() {
         badges={badges || []}
         onBadgeGenerated={handleBadgeGenerated}
         locale={language}
+      />
+
+      <MealPreferencesDialog
+        open={showMealPreferences}
+        onOpenChange={setShowMealPreferences}
+        preferences={mealPreferences || []}
+        onRemovePreference={handleRemovePreference}
+        onClearAll={handleClearAllPreferences}
       />
 
       <AppFooter onDeleteAccount={currentUser ? () => setShowDeleteAccountDialog(true) : undefined} />
