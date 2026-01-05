@@ -1426,16 +1426,6 @@ function App() {
                     <List className="mr-2" />
                     Shopping
                   </Button>
-                  {!mealPrepPlan && (
-                    <Button
-                      onClick={handleGeneratePrepPlan}
-                      disabled={isGeneratingPrep}
-                      variant="outline"
-                    >
-                      <ChefHat className="mr-2" />
-                      Prep Plan
-                    </Button>
-                  )}
                   <Button
                     onClick={handleExportToPDF}
                     variant="outline"
@@ -1450,6 +1440,15 @@ function App() {
                     <ShareNetwork className="mr-2" />
                     Share
                   </Button>
+                  {!mealPrepPlan && (
+                    <Button
+                      onClick={handleGeneratePrepPlan}
+                      disabled={isGeneratingPrep}
+                    >
+                      <ChefHat className="mr-2" />
+                      Prep Plan
+                    </Button>
+                  )}
                   <Button onClick={handleGeneratePlan} disabled={isGenerating}>
                     <Plus className="mr-2" />
                     {isGenerating ? 'Generating...' : 'New Plan'}
