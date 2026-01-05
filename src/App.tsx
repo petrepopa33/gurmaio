@@ -1258,9 +1258,9 @@ function App() {
               {currentUser ? (
                 <ProfileDropdown
                   currentUser={currentUser}
-                  savedPlansCount={savedMealPlans?.length ?? 0}
-                  preferencesCount={mealPreferences?.length ?? 0}
-                  onProfileClick={() => setIsOnboarding(true)}
+                  onHistoryClick={() => setSavedPlansOpen(true)}
+                  onPreferencesClick={() => setShowMealPreferences(true)}
+                  onAccountSettingsClick={() => setShowAccountSettings(true)}
                   onHistoryClick={() => setSavedPlansOpen(true)}
                   onPreferencesClick={() => setShowMealPreferences(true)}
                   onAccountSettingsClick={() => setShowAccountSettings(true)}
