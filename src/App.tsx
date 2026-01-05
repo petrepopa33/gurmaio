@@ -129,6 +129,12 @@ function App() {
     }
   }, [currentUser, needsVerification, isDemoMode]);
 
+  useEffect(() => {
+    if (activeTab === 'prep' && mealPlan && !mealPrepPlan && !isGeneratingPrep) {
+      handleGeneratePrepPlan();
+    }
+  }, [activeTab]);
+
   const loadUser = async () => {
     try {
       const user = await window.spark.user();
@@ -1367,16 +1373,6 @@ function App() {
                       <Plus className="mr-2" />
                       {isGenerating ? 'Generating...' : 'New Plan'}
                     </Button>
-                    {!mealPrepPlan && (
-                      <Button
-                        onClick={handleGeneratePrepPlan}
-                        disabled={isGeneratingPrep}
-                        variant="default"
-                      >
-                        <ChefHat className="mr-2" />
-                        Meal Prep
-                      </Button>
-                    )}
                   </div>
                 </div>
 
