@@ -282,6 +282,15 @@ export function MealPlanView({
           return (
           <TabsContent key={day.day_number} value={day.day_number.toString()} className="space-y-4">
             <Card className="p-4 bg-muted/30">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className="text-xs">Selected Day</Badge>
+                  <InfoTooltip 
+                    content="Some days cost more than others depending on meals. Your weekly average stays within budget." 
+                    ariaLabel="Day cost information"
+                  />
+                </div>
+              </div>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
                 <div>
                   <div className="text-sm text-muted-foreground">{t.calories}</div>
@@ -480,6 +489,7 @@ function MealCard({
                             handlePortionChange(localMultiplier - 0.25);
                           }}
                           className="h-6 w-6 p-0"
+                          title="Adjust portions to fit your appetite"
                         >
                           <Minus size={12} />
                         </Button>
@@ -495,6 +505,7 @@ function MealCard({
                           max="5"
                           step="0.25"
                           className="w-14 h-6 text-center tabular-nums text-xs px-1"
+                          title="Adjust portions to fit your appetite"
                         />
                         <span className="text-xs text-muted-foreground">×</span>
                         <Button
@@ -505,10 +516,15 @@ function MealCard({
                             handlePortionChange(localMultiplier + 0.25);
                           }}
                           className="h-6 w-6 p-0"
+                          title="Adjust portions to fit your appetite"
                         >
                           <Plus size={12} />
                         </Button>
                       </div>
+                      <InfoTooltip 
+                        content="Adjust portions to fit your appetite. Changes update nutrition and costs automatically." 
+                        ariaLabel="Portion adjustment help"
+                      />
                     </div>
                   )}
                 </div>
