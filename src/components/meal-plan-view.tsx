@@ -21,7 +21,7 @@ interface MealPlanViewProps {
   onDislikeMeal?: (mealId: string, meal: Meal) => void;
   mealPreferences?: Map<string, 'like' | 'dislike'>;
   portionAdjustments?: Map<string, number>;
-  onPortionAdjustment?: (mealId: string, multiplier: number) => void;
+  onPortionAdjustment?: (mealId: string, multiplier: number, dayNumber: number) => void;
 }
 
 type ViewMode = 'total' | 'average';
@@ -41,28 +41,57 @@ export function MealPlanView({
 
   const days = mealPlan.metadata.days;
 
-  const totalCaloriesFromMacros = (mealPlan.plan_totals.protein_g * 4) + 
-                                  (mealPlan.plan_totals.carbohydrates_g * 4) + 
-                                  (mealPlan.plan_totals.fats_g * 9);
+  const calculateAdjustedTotals = () => {
+    let totalCalories = 0;
+    let totalProtein = 0;
+    let totalCarbs = 0;
+    let totalFats = 0;
+    let totalCost = 0;
+
+    mealPlan.days.forEach(day => {
+      day.meals.forEach(meal => {
+        const multiplier = portionAdjustments?.get(meal.meal_id) || 1;
+        totalCalories += meal.nutrition.calories * multiplier;
+        totalProtein += meal.nutrition.protein_g * multiplier;
+        totalCarbs += meal.nutrition.carbohydrates_g * multiplier;
+        totalFats += meal.nutrition.fats_g * multiplier;
+        totalCost += meal.cost.meal_cost_eur * multiplier;
+      });
+    });
+
+    return {
+      calories: Math.round(totalCalories),
+      protein_g: Math.round(totalProtein),
+      carbohydrates_g: Math.round(totalCarbs),
+      fats_g: Math.round(totalFats),
+      total_cost_eur: totalCost,
+    };
+  };
+
+  const adjustedPlanTotals = calculateAdjustedTotals();
+
+  const totalCaloriesFromMacros = (adjustedPlanTotals.protein_g * 4) + 
+                                  (adjustedPlanTotals.carbohydrates_g * 4) + 
+                                  (adjustedPlanTotals.fats_g * 9);
   
-  const proteinPercentage = Math.round((mealPlan.plan_totals.protein_g * 4 / totalCaloriesFromMacros) * 100);
-  const carbsPercentage = Math.round((mealPlan.plan_totals.carbohydrates_g * 4 / totalCaloriesFromMacros) * 100);
-  const fatsPercentage = Math.round((mealPlan.plan_totals.fats_g * 9 / totalCaloriesFromMacros) * 100);
+  const proteinPercentage = Math.round((adjustedPlanTotals.protein_g * 4 / totalCaloriesFromMacros) * 100);
+  const carbsPercentage = Math.round((adjustedPlanTotals.carbohydrates_g * 4 / totalCaloriesFromMacros) * 100);
+  const fatsPercentage = Math.round((adjustedPlanTotals.fats_g * 9 / totalCaloriesFromMacros) * 100);
 
   const displayValues = viewMode === 'total' 
     ? {
-        calories: mealPlan.plan_totals.calories,
-        protein: mealPlan.plan_totals.protein_g,
-        carbs: mealPlan.plan_totals.carbohydrates_g,
-        fats: mealPlan.plan_totals.fats_g,
-        cost: mealPlan.plan_totals.total_cost_eur,
+        calories: adjustedPlanTotals.calories,
+        protein: adjustedPlanTotals.protein_g,
+        carbs: adjustedPlanTotals.carbohydrates_g,
+        fats: adjustedPlanTotals.fats_g,
+        cost: adjustedPlanTotals.total_cost_eur,
       }
     : {
-        calories: Math.round(mealPlan.plan_totals.calories / days),
-        protein: Math.round(mealPlan.plan_totals.protein_g / days),
-        carbs: Math.round(mealPlan.plan_totals.carbohydrates_g / days),
-        fats: Math.round(mealPlan.plan_totals.fats_g / days),
-        cost: mealPlan.plan_totals.total_cost_eur / days,
+        calories: Math.round(adjustedPlanTotals.calories / days),
+        protein: Math.round(adjustedPlanTotals.protein_g / days),
+        carbs: Math.round(adjustedPlanTotals.carbohydrates_g / days),
+        fats: Math.round(adjustedPlanTotals.fats_g / days),
+        cost: adjustedPlanTotals.total_cost_eur / days,
       };
 
   return (
@@ -222,29 +251,57 @@ export function MealPlanView({
           ))}
         </TabsList>
 
-        {mealPlan.days.map((day) => (
+        {mealPlan.days.map((day) => {
+          const calculateDayTotals = () => {
+            let calories = 0;
+            let protein = 0;
+            let carbs = 0;
+            let fats = 0;
+            let cost = 0;
+
+            day.meals.forEach(meal => {
+              const multiplier = portionAdjustments?.get(meal.meal_id) || 1;
+              calories += meal.nutrition.calories * multiplier;
+              protein += meal.nutrition.protein_g * multiplier;
+              carbs += meal.nutrition.carbohydrates_g * multiplier;
+              fats += meal.nutrition.fats_g * multiplier;
+              cost += meal.cost.meal_cost_eur * multiplier;
+            });
+
+            return {
+              calories: Math.round(calories),
+              protein_g: Math.round(protein),
+              carbohydrates_g: Math.round(carbs),
+              fats_g: Math.round(fats),
+              cost_eur: cost,
+            };
+          };
+
+          const adjustedDayTotals = calculateDayTotals();
+
+          return (
           <TabsContent key={day.day_number} value={day.day_number.toString()} className="space-y-4">
             <Card className="p-4 bg-muted/30">
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center">
                 <div>
                   <div className="text-sm text-muted-foreground">{t.calories}</div>
-                  <div className="font-heading font-semibold tabular-nums">{day.totals.calories}</div>
+                  <div className="font-heading font-semibold tabular-nums">{adjustedDayTotals.calories}</div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">{t.protein}</div>
-                  <div className="font-heading font-semibold tabular-nums">{day.totals.protein_g}g</div>
+                  <div className="font-heading font-semibold tabular-nums">{adjustedDayTotals.protein_g}g</div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">{t.carbs}</div>
-                  <div className="font-heading font-semibold tabular-nums">{day.totals.carbohydrates_g}g</div>
+                  <div className="font-heading font-semibold tabular-nums">{adjustedDayTotals.carbohydrates_g}g</div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">{t.fats}</div>
-                  <div className="font-heading font-semibold tabular-nums">{day.totals.fats_g}g</div>
+                  <div className="font-heading font-semibold tabular-nums">{adjustedDayTotals.fats_g}g</div>
                 </div>
                 <div>
                   <div className="text-sm text-muted-foreground">{t.cost}</div>
-                  <div className="font-heading font-semibold tabular-nums text-accent">€{day.totals.cost_eur.toFixed(2)}</div>
+                  <div className="font-heading font-semibold tabular-nums text-accent">€{adjustedDayTotals.cost_eur.toFixed(2)}</div>
                 </div>
               </div>
             </Card>
@@ -267,7 +324,8 @@ export function MealPlanView({
               ))}
             </div>
           </TabsContent>
-        ))}
+          );
+        })}
       </Tabs>
     </div>
   );
@@ -294,7 +352,7 @@ function MealCard({
   onDislike?: (mealId: string, meal: Meal) => void;
   currentPreference?: 'like' | 'dislike';
   portionMultiplier: number;
-  onPortionAdjustment?: (mealId: string, multiplier: number) => void;
+  onPortionAdjustment?: (mealId: string, multiplier: number, dayNumber: number) => void;
 }) {
   const [isSwapping, setIsSwapping] = useState(false);
   const [localMultiplier, setLocalMultiplier] = useState(portionMultiplier);
@@ -326,7 +384,7 @@ function MealCard({
     const validMultiplier = Math.max(0.25, Math.min(5, newMultiplier));
     setLocalMultiplier(validMultiplier);
     if (onPortionAdjustment) {
-      onPortionAdjustment(meal.meal_id, validMultiplier);
+      onPortionAdjustment(meal.meal_id, validMultiplier, dayNumber);
     }
   };
 
@@ -413,22 +471,6 @@ function MealCard({
                   )}
                   {onPortionAdjustment && (
                     <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center gap-0.5 bg-muted/50 rounded-md px-1 py-0.5">
-                        {[0.5, 1, 1.5, 2].map((preset) => (
-                          <Button
-                            key={preset}
-                            size="sm"
-                            variant={localMultiplier === preset ? 'default' : 'ghost'}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handlePortionChange(preset);
-                            }}
-                            className="h-6 px-2 text-xs font-medium"
-                          >
-                            {preset}×
-                          </Button>
-                        ))}
-                      </div>
                       <div className="flex items-center gap-1 bg-muted/50 rounded-md px-1.5 py-0.5">
                         <Button
                           size="sm"

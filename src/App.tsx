@@ -527,7 +527,7 @@ function App() {
     });
   };
 
-  const handlePortionAdjustment = (mealId: string, multiplier: number) => {
+  const handlePortionAdjustment = (mealId: string, multiplier: number, dayNumber: number) => {
     setPortionAdjustments((current) => {
       const adjustments = current || [];
       const existingIndex = adjustments.findIndex(a => a.meal_id === mealId);
