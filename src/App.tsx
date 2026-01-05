@@ -25,7 +25,6 @@ import { MealCalendar } from '@/components/meal-calendar';
 import { ProgressDialog } from '@/components/progress-dialog';
 import { StreakCounter } from '@/components/streak-counter';
 import { AgeGateDialog, AgeRejectionDialog } from '@/components/age-gate-dialog';
-import { LegalDocumentDialog } from '@/components/legal-document-dialog';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Toaster } from '@/components/ui/sonner';
@@ -76,7 +75,6 @@ function App() {
   const [showEmailVerificationDialog, setShowEmailVerificationDialog] = useState(false);
   const [showAgeGate, setShowAgeGate] = useState(!ageVerified);
   const [showAgeRejection, setShowAgeRejection] = useState(false);
-  const [legalDocType, setLegalDocType] = useState<'privacy' | 'terms' | null>(null);
   
   const hasProfile = userProfile !== null;
   const hasMealPlan = mealPlan !== null;
@@ -1122,8 +1120,6 @@ function App() {
 
         <AppFooter 
           onDeleteAccount={currentUser ? () => setShowDeleteAccountDialog(true) : undefined}
-          onPrivacyClick={() => setLegalDocType('privacy')}
-          onTermsClick={() => setLegalDocType('terms')}
         />
 
         <AlertDialog open={showDeleteAccountDialog} onOpenChange={setShowDeleteAccountDialog}>
@@ -1682,12 +1678,6 @@ function App() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <LegalDocumentDialog
-        open={legalDocType !== null}
-        onOpenChange={(open) => !open && setLegalDocType(null)}
-        type={legalDocType || 'privacy'}
-      />
 
       <Toaster />
     </div>

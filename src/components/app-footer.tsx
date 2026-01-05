@@ -4,11 +4,9 @@ import { Shield, FileText, Trash, Envelope } from '@phosphor-icons/react';
 
 interface AppFooterProps {
   onDeleteAccount?: () => void;
-  onPrivacyClick?: () => void;
-  onTermsClick?: () => void;
 }
 
-export function AppFooter({ onDeleteAccount, onPrivacyClick, onTermsClick }: AppFooterProps) {
+export function AppFooter({ onDeleteAccount }: AppFooterProps) {
   return (
     <footer className="border-t bg-muted/30 mt-12">
       <div className="container mx-auto px-6 py-8">
@@ -18,22 +16,22 @@ export function AppFooter({ onDeleteAccount, onPrivacyClick, onTermsClick }: App
               Legal & Privacy
             </h3>
             <div className="flex flex-col gap-2">
-              <button
-                onClick={onPrivacyClick}
-                className="flex items-center gap-2 text-sm hover:text-primary transition-colors text-left"
+              <a
+                href="/privacy"
+                className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
                 aria-label="View Privacy Policy"
               >
                 <Shield size={16} aria-hidden="true" />
                 Privacy Policy
-              </button>
-              <button
-                onClick={onTermsClick}
-                className="flex items-center gap-2 text-sm hover:text-primary transition-colors text-left"
+              </a>
+              <a
+                href="/terms"
+                className="flex items-center gap-2 text-sm hover:text-primary transition-colors"
                 aria-label="View Terms of Service"
               >
                 <FileText size={16} aria-hidden="true" />
                 Terms of Service
-              </button>
+              </a>
               {onDeleteAccount && (
                 <button
                   onClick={onDeleteAccount}

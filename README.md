@@ -229,6 +229,25 @@ User → Profile Config → API
 - **App Store**: Follows Apple Human Interface Guidelines
 - **Play Store**: Follows Material Design principles
 - **Accessibility**: WCAG AA contrast ratios
+- **Privacy Policy**: Publicly accessible at `/privacy`
+- **Terms of Service**: Publicly accessible at `/terms`
+
+### Legal Document URLs for App Store Submission
+
+Both iOS App Store and Google Play Store require public URLs for legal documents:
+
+- **Privacy Policy**: `https://your-domain.com/privacy`
+- **Terms of Service**: `https://your-domain.com/terms`
+
+These pages are:
+- ✅ Publicly accessible (no authentication required)
+- ✅ Mobile-responsive
+- ✅ Include all required compliance information
+- ✅ GDPR Article 17 compliant (Right to Erasure)
+- ✅ COPPA compliant (13+ age restriction)
+- ✅ Medical and AI disclaimers
+
+See [LEGAL_COMPLIANCE.md](./LEGAL_COMPLIANCE.md) for complete app store compliance details.
 
 ## 📱 Mobile App Features
 
