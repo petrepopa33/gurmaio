@@ -359,68 +359,70 @@ function MealCard({
       <Accordion type="single" collapsible>
         <AccordionItem value="meal" className="border-none">
           <AccordionTrigger className="px-6 py-4 hover:no-underline">
-            <div className="flex items-center justify-between w-full pr-4">
-              <div className="flex items-center gap-4">
-                <Badge variant="outline" className="capitalize">
-                  {t[meal.meal_type]}
-                </Badge>
-                <div className="flex items-center gap-3">
+            <div className="flex flex-col w-full gap-3">
+              <div className="flex items-center justify-between w-full pr-4">
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3">
+                    <Badge variant="outline" className="capitalize">
+                      {t[meal.meal_type]}
+                    </Badge>
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="sm"
+                        variant={currentPreference === 'like' ? 'default' : 'ghost'}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleLike();
+                        }}
+                        className="h-7 w-7 p-0"
+                        title="Like this meal"
+                      >
+                        <ThumbsUp size={14} weight={currentPreference === 'like' ? 'fill' : 'regular'} />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant={currentPreference === 'dislike' ? 'destructive' : 'ghost'}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDislike();
+                        }}
+                        className="h-7 w-7 p-0"
+                        title="Dislike this meal"
+                      >
+                        <ThumbsDown size={14} weight={currentPreference === 'dislike' ? 'fill' : 'regular'} />
+                      </Button>
+                      {onSwap && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSwap();
+                          }}
+                          disabled={isSwapping}
+                          className="h-7 px-2"
+                          title="Swap this meal"
+                        >
+                          <Repeat size={14} />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                   <h3 className="font-heading text-lg font-semibold text-left">
                     {translateMeal(meal.recipe_name, language)}
                   </h3>
-                  <div className="flex items-center gap-1">
-                    <Button
-                      size="sm"
-                      variant={currentPreference === 'like' ? 'default' : 'ghost'}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleLike();
-                      }}
-                      className="h-8 w-8 p-0"
-                      title="Like this meal"
-                    >
-                      <ThumbsUp size={16} weight={currentPreference === 'like' ? 'fill' : 'regular'} />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant={currentPreference === 'dislike' ? 'destructive' : 'ghost'}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDislike();
-                      }}
-                      className="h-8 w-8 p-0"
-                      title="Dislike this meal"
-                    >
-                      <ThumbsDown size={16} weight={currentPreference === 'dislike' ? 'fill' : 'regular'} />
-                    </Button>
-                    {onSwap && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSwap();
-                        }}
-                        disabled={isSwapping}
-                        className="h-8 px-3"
-                        title="Swap this meal"
-                      >
-                        <Repeat size={16} />
-                      </Button>
-                    )}
-                  </div>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-6">
-                <div className="text-sm text-muted-foreground hidden md:flex items-center gap-4">
-                  <span className="tabular-nums">{adjustedMeal.nutrition.calories} cal</span>
-                  <span className="tabular-nums">{adjustedMeal.nutrition.protein_g}g P</span>
-                  <span className="tabular-nums">{adjustedMeal.nutrition.carbohydrates_g}g C</span>
-                  <span className="tabular-nums">{adjustedMeal.nutrition.fats_g}g F</span>
-                </div>
-                <div className="font-heading font-semibold text-accent tabular-nums">
-                  €{adjustedMeal.cost.meal_cost_eur.toFixed(2)}
+                <div className="flex items-center gap-6">
+                  <div className="text-sm text-muted-foreground hidden md:flex items-center gap-4">
+                    <span className="tabular-nums">{adjustedMeal.nutrition.calories} cal</span>
+                    <span className="tabular-nums">{adjustedMeal.nutrition.protein_g}g P</span>
+                    <span className="tabular-nums">{adjustedMeal.nutrition.carbohydrates_g}g C</span>
+                    <span className="tabular-nums">{adjustedMeal.nutrition.fats_g}g F</span>
+                  </div>
+                  <div className="font-heading font-semibold text-accent tabular-nums">
+                    €{adjustedMeal.cost.meal_cost_eur.toFixed(2)}
+                  </div>
                 </div>
               </div>
             </div>
