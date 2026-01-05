@@ -144,33 +144,33 @@ export function ShoppingListSheet({ open, onOpenChange, shoppingList, onToggleOw
             </div>
           </Card>
 
-          <Card className="p-4 bg-accent/10 border-accent/30">
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="font-heading font-semibold">Cost Summary</h3>
+          <Card className="p-3 bg-accent/10 border-accent/30">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-heading font-semibold text-sm">Cost Summary</h3>
               <InfoTooltip 
                 content={DISCLAIMERS.cost.full} 
                 ariaLabel={INFO_LABELS.costInfo}
               />
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">{t.planCost}:</div>
-                <div className="font-heading text-xl font-bold tabular-nums">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">{t.planCost}:</span>
+                <span className="font-heading text-base font-bold tabular-nums">
                   €{adjustedPlanCost.toFixed(2)}
-                </div>
+                </span>
               </div>
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">{t.toBuy}:</div>
-                <div className="font-heading text-xl font-bold tabular-nums text-accent">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">{t.toBuy}:</span>
+                <span className="font-heading text-base font-bold tabular-nums text-accent">
                   €{totalCostRemaining.toFixed(2)}
-                </div>
+                </span>
               </div>
             </div>
 
             {shoppingList.summary.waste_cost_eur > 0 && (
               <>
-                <Separator className="my-3" />
-                <div className="text-center text-sm text-muted-foreground">
+                <Separator className="my-2" />
+                <div className="text-center text-xs text-muted-foreground">
                   <span className="font-medium">€{(shoppingList.summary.waste_cost_eur * multiplier).toFixed(2)}</span> estimated unused portions
                 </div>
               </>
