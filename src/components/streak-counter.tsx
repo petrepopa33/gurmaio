@@ -14,13 +14,13 @@ export function StreakCounter({ completedDays, compact = false }: StreakCounterP
 
   if (compact) {
     return (
-      <div className="flex items-center gap-3 px-4 py-2 bg-card rounded-lg border">
+      <div className="flex items-center gap-3 px-4 py-2 bg-card rounded-lg border min-w-fit">
         <Flame 
           size={20} 
           weight="fill" 
           className={streakInfo.streakActive ? 'text-orange-500' : 'text-muted-foreground'}
         />
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 whitespace-nowrap">
           <span className="text-sm font-medium tabular-nums">
             {streakInfo.currentStreak} {streakInfo.currentStreak === 1 ? 'day' : 'days'}
           </span>
