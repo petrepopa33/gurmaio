@@ -1255,17 +1255,6 @@ function App() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <h1 className="font-heading text-2xl font-bold text-primary">{t.appName}</h1>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <LanguageSwitcher currentLanguage={language} onLanguageChange={handleLanguageChange} />
-              
-              {currentUser ? (
-                <ProfileDropdown
-                  currentUser={currentUser}
-                  savedPlansCount={savedMealPlans?.length ?? 0}
-                  preferencesCount={mealPreferences?.length ?? 0}
-                  onProfileClick={() => setIsOnboarding(true)}
                   onHistoryClick={() => setSavedPlansOpen(true)}
                   onPreferencesClick={() => setShowMealPreferences(true)}
                   onAccountSettingsClick={() => setShowAccountSettings(true)}
