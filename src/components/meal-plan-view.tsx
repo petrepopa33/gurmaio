@@ -13,7 +13,6 @@ import { translateMeal, translateIngredient } from '@/lib/i18n/content-translati
 import type { Language } from '@/lib/i18n/translations';
 import { InfoTooltip } from '@/components/info-tooltip';
 import { DISCLAIMERS, INFO_LABELS, VIEW_MODES, getViewModeContext } from '@/lib/disclaimers';
-import { getMealImage } from '@/lib/meal-images';
 
 interface MealPlanViewProps {
   mealPlan: MealPlan;
@@ -359,80 +358,70 @@ function MealCard({
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
       <Accordion type="single" collapsible>
         <AccordionItem value="meal" className="border-none">
-          <div className="relative h-48 w-full overflow-hidden">
-            <img 
-              src={getMealImage(meal.recipe_name, meal.meal_type)} 
-              alt={translateMeal(meal.recipe_name, language)}
-              className="w-full h-full object-cover"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
-            <div className="absolute top-3 left-3 flex gap-2">
-              <Badge variant="secondary" className="capitalize backdrop-blur-sm bg-background/80">
-                {t[meal.meal_type]}
-              </Badge>
-            </div>
-            <div className="absolute top-3 right-3 flex gap-1">
-              <Button
-                size="sm"
-                variant={currentPreference === 'like' ? 'default' : 'secondary'}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleLike();
-                }}
-                className="h-8 w-8 p-0 backdrop-blur-sm"
-                title="Like this meal"
-              >
-                <ThumbsUp size={16} weight={currentPreference === 'like' ? 'fill' : 'regular'} />
-              </Button>
-              <Button
-                size="sm"
-                variant={currentPreference === 'dislike' ? 'destructive' : 'secondary'}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleDislike();
-                }}
-                className="h-8 w-8 p-0 backdrop-blur-sm"
-                title="Dislike this meal"
-              >
-                <ThumbsDown size={16} weight={currentPreference === 'dislike' ? 'fill' : 'regular'} />
-              </Button>
-              {onSwap && (
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleSwap();
-                  }}
-                  disabled={isSwapping}
-                  className="h-8 w-8 p-0 backdrop-blur-sm"
-                  title="Swap this meal"
-                >
-                  <Repeat size={16} />
-                </Button>
-              )}
-            </div>
-            <div className="absolute bottom-3 right-3">
-              <div className="font-heading font-bold text-lg text-white tabular-nums backdrop-blur-sm bg-black/40 px-3 py-1.5 rounded-lg">
-                €{adjustedMeal.cost.meal_cost_eur.toFixed(2)}
-              </div>
-            </div>
-          </div>
-          
           <AccordionTrigger className="px-6 py-4 hover:no-underline">
-            <div className="flex flex-col w-full gap-2">
-              <div className="flex items-center justify-between w-full pr-4">
-                <h3 className="font-heading text-lg font-semibold text-left">
-                  {translateMeal(meal.recipe_name, language)}
-                </h3>
-                <div className="flex items-center gap-4">
-                  <div className="text-sm text-muted-foreground hidden md:flex items-center gap-3">
-                    <span className="tabular-nums">{adjustedMeal.nutrition.calories} cal</span>
-                    <span className="tabular-nums">{adjustedMeal.nutrition.protein_g}g P</span>
-                    <span className="tabular-nums">{adjustedMeal.nutrition.carbohydrates_g}g C</span>
-                    <span className="tabular-nums">{adjustedMeal.nutrition.fats_g}g F</span>
+            <div className="flex flex-col w-full gap-3">
+              <div className="flex items-start justify-between w-full pr-4 gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge variant="secondary" className="capitalize">
+                      {t[meal.meal_type]}
+                    </Badge>
                   </div>
+                  <h3 className="font-heading text-lg font-semibold text-left">
+                    {translateMeal(meal.recipe_name, language)}
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Button
+                    size="sm"
+                    variant={currentPreference === 'like' ? 'default' : 'outline'}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleLike();
+                    }}
+                    className="h-8 w-8 p-0"
+                    title="Like this meal"
+                  >
+                    <ThumbsUp size={16} weight={currentPreference === 'like' ? 'fill' : 'regular'} />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant={currentPreference === 'dislike' ? 'destructive' : 'outline'}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDislike();
+                    }}
+                    className="h-8 w-8 p-0"
+                    title="Dislike this meal"
+                  >
+                    <ThumbsDown size={16} weight={currentPreference === 'dislike' ? 'fill' : 'regular'} />
+                  </Button>
+                  {onSwap && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSwap();
+                      }}
+                      disabled={isSwapping}
+                      className="h-8 w-8 p-0"
+                      title="Swap this meal"
+                    >
+                      <Repeat size={16} />
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center justify-between w-full pr-4">
+                <div className="text-sm text-muted-foreground flex items-center gap-3">
+                  <span className="tabular-nums">{adjustedMeal.nutrition.calories} cal</span>
+                  <span className="tabular-nums">{adjustedMeal.nutrition.protein_g}g P</span>
+                  <span className="tabular-nums">{adjustedMeal.nutrition.carbohydrates_g}g C</span>
+                  <span className="tabular-nums">{adjustedMeal.nutrition.fats_g}g F</span>
+                </div>
+                <div className="font-heading font-bold text-base text-accent tabular-nums">
+                  €{adjustedMeal.cost.meal_cost_eur.toFixed(2)}
                 </div>
               </div>
             </div>
@@ -440,13 +429,6 @@ function MealCard({
 
           <AccordionContent className="px-6 pb-4">
             <Separator className="mb-4" />
-            
-            <div className="md:hidden mb-4 flex gap-4 text-sm text-muted-foreground">
-              <span className="tabular-nums">{adjustedMeal.nutrition.calories} cal</span>
-              <span className="tabular-nums">{adjustedMeal.nutrition.protein_g}g P</span>
-              <span className="tabular-nums">{adjustedMeal.nutrition.carbohydrates_g}g C</span>
-              <span className="tabular-nums">{adjustedMeal.nutrition.fats_g}g F</span>
-            </div>
 
             {onPortionAdjustment && (
               <div className="mb-6 bg-muted/50 rounded-lg p-4 space-y-3">
