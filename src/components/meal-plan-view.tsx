@@ -457,20 +457,19 @@ function MealCard({
                       size="sm"
                       variant="outline"
                       onClick={() => handlePortionChange(localMultiplier + 0.25)}
-                      className="h-6 w-6 p-0"
                     >
-                      <Plus size={12} />
+                    >
                     </Button>
                   </div>
                   <span className="text-muted-foreground tabular-nums">
-                    {localMultiplier === 1 
+                  <span className="text-muted-foreground tabular-nums">
                       ? 'Standard'
-                      : `${(localMultiplier * 100).toFixed(0)}%`}
+                      ? 'Standard'xed(0)}%`}
                   </span>
-                  {localMultiplier !== 1 && (
+                  </span>
+                    <Button
                     <Button
                       size="sm"
-                      variant="ghost"
                       onClick={() => handlePortionChange(1)}
                       className="h-6 px-2 text-xs"
                     >
@@ -478,26 +477,26 @@ function MealCard({
                     </Button>
                   )}
                 </div>
+                </div>
               </div>
             )}
 
             <div className="space-y-4">
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
-                  <h4 className="font-heading font-semibold text-base flex items-center gap-2">
                     <span className="text-lg">🥗</span>
                     {t.ingredients}
                   </h4>
                   <InfoTooltip 
                     content="Ingredient quantities and nutrition values are calculated based on the recipe. Actual values may vary based on product brands and measurements."
                     ariaLabel={INFO_LABELS.ingredientBreakdown}
+                    ariaLabel={INFO_LABELS.ingredientBreakdown}
                   />
-                </div>
+                </div>ard rounded-xl border divide-y overflow-hidden">
                 <div className="bg-card rounded-xl border divide-y overflow-hidden">
                   {adjustedMeal.ingredients.map((ingredient, index) => (
                     <div
-                      key={ingredient.ingredient_id}
-                      className="flex items-center justify-between py-2.5 px-4 hover:bg-accent/5 transition-colors group"
+                      key={ingredient.ingredient_id}olors group"
                     >
                       <div className="flex items-center gap-3 flex-1 min-w-0">
                         <div className="flex-shrink-0 w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
