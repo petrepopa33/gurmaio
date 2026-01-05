@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
@@ -366,7 +365,6 @@ function MealCard({
   const [isSwapping, setIsSwapping] = useState(false);
   const [localMultiplier, setLocalMultiplier] = useState(portionMultiplier);
   const [showDetails, setShowDetails] = useState(false);
-  const [isAccordionOpen, setIsAccordionOpen] = useState<string | undefined>(undefined);
 
   const handleSwap = async () => {
     if (!onSwap) return;
@@ -399,11 +397,7 @@ function MealCard({
     }
   };
 
-  const handleShowDetailsClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!showDetails) {
-      setIsAccordionOpen('meal');
-    }
+  const handleShowDetailsClick = () => {
     setShowDetails(!showDetails);
   };
 
@@ -433,178 +427,152 @@ function MealCard({
 
   return (
     <Card className="overflow-hidden hover:shadow-md transition-shadow">
-      <Accordion type="single" collapsible value={isAccordionOpen} onValueChange={setIsAccordionOpen}>
-        <AccordionItem value="meal" className="border-none">
-          <AccordionTrigger className="px-6 py-4 hover:no-underline">
-            <div className="flex flex-col w-full gap-3">
-              <div className="flex items-start justify-between w-full pr-4 gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge variant="secondary" className="capitalize">
-                      {t[meal.meal_type]}
-                    </Badge>
-                  </div>
-                  <h3 className="font-heading text-lg font-semibold text-left">
-                    {translateMeal(meal.recipe_name, language)}
-                  </h3>
-                </div>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <Button
-                    size="sm"
-                    variant={currentPreference === 'like' ? 'default' : 'outline'}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleLike();
-                    }}
-                    className="h-8 w-8 p-0"
-                    title="Like this meal"
-                  >
-                    <ThumbsUp size={16} weight={currentPreference === 'like' ? 'fill' : 'regular'} />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant={currentPreference === 'dislike' ? 'destructive' : 'outline'}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDislike();
-                    }}
-                    className="h-8 w-8 p-0"
-                    title="Dislike this meal"
-                  >
-                    <ThumbsDown size={16} weight={currentPreference === 'dislike' ? 'fill' : 'regular'} />
-                  </Button>
-                  {onSwap && (
+      <div className="px-6 py-4">
+        <div className="flex flex-col w-full gap-3">
+          <div className="flex items-start justify-between w-full gap-4">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <Badge variant="secondary" className="capitalize">
+                  {t[meal.meal_type]}
+                </Badge>
+              </div>
+              <h3 className="font-heading text-lg font-semibold text-left">
+                {translateMeal(meal.recipe_name, language)}
+              </h3>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <Button
+                size="sm"
+                variant={currentPreference === 'like' ? 'default' : 'outline'}
+                onClick={handleLike}
+                className="h-8 w-8 p-0"
+                title="Like this meal"
+              >
+                <ThumbsUp size={16} weight={currentPreference === 'like' ? 'fill' : 'regular'} />
+              </Button>
+              <Button
+                size="sm"
+                variant={currentPreference === 'dislike' ? 'destructive' : 'outline'}
+                onClick={handleDislike}
+                className="h-8 w-8 p-0"
+                title="Dislike this meal"
+              >
+                <ThumbsDown size={16} weight={currentPreference === 'dislike' ? 'fill' : 'regular'} />
+              </Button>
+              {onSwap && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleSwap}
+                  disabled={isSwapping}
+                  className="h-8 px-3 gap-1.5"
+                  title="Swap meal"
+                >
+                  <Repeat size={16} />
+                  <span className="text-xs font-medium">{isSwapping ? 'Swapping...' : 'Swap'}</span>
+                </Button>
+              )}
+              <Button
+                size="sm"
+                variant={showDetails ? 'default' : 'outline'}
+                onClick={handleShowDetailsClick}
+                className="h-8 px-3 gap-1.5"
+                title="View ingredients & cooking steps"
+              >
+                <ListBullets size={16} weight={showDetails ? 'fill' : 'regular'} />
+                <span className="text-xs font-medium">View Details</span>
+              </Button>
+              {onPortionAdjustment && (
+                <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1 bg-muted/50 rounded-md px-1.5 py-0.5">
                     <Button
                       size="sm"
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSwap();
-                      }}
-                      disabled={isSwapping}
-                      className="h-8 px-3 gap-1.5"
-                      title="Swap meal"
+                      variant="ghost"
+                      onClick={() => handlePortionChange(localMultiplier - 0.25)}
+                      className="h-6 w-6 p-0"
+                      title="Adjust portions to fit your appetite"
                     >
-                      <Repeat size={16} />
-                      <span className="text-xs font-medium">{isSwapping ? 'Swapping...' : 'Swap'}</span>
+                      <Minus size={12} />
                     </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant={showDetails ? 'default' : 'outline'}
-                    onClick={handleShowDetailsClick}
-                    className="h-8 px-3 gap-1.5"
-                    title="View ingredients & cooking steps"
-                  >
-                    <ListBullets size={16} weight={showDetails ? 'fill' : 'regular'} />
-                    <span className="text-xs font-medium">View Details</span>
-                  </Button>
-                  {onPortionAdjustment && (
-                    <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
-                      <div className="flex items-center gap-1 bg-muted/50 rounded-md px-1.5 py-0.5">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePortionChange(localMultiplier - 0.25);
-                          }}
-                          className="h-6 w-6 p-0"
-                          title="Adjust portions to fit your appetite"
-                        >
-                          <Minus size={12} />
-                        </Button>
-                        <Input
-                          type="number"
-                          value={localMultiplier.toFixed(2)}
-                          onChange={(e) => {
-                            e.stopPropagation();
-                            handlePortionChange(parseFloat(e.target.value) || 1);
-                          }}
-                          onClick={(e) => e.stopPropagation()}
-                          min="0.25"
-                          max="5"
-                          step="0.25"
-                          className="w-14 h-6 text-center tabular-nums text-xs px-1"
-                          title="Adjust portions to fit your appetite"
-                        />
-                        <span className="text-xs text-muted-foreground">×</span>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handlePortionChange(localMultiplier + 0.25);
-                          }}
-                          className="h-6 w-6 p-0"
-                          title="Adjust portions to fit your appetite"
-                        >
-                          <Plus size={12} />
-                        </Button>
-                      </div>
-                      <InfoTooltip 
-                        content="Adjust portions to fit your appetite. Changes update nutrition and costs automatically." 
-                        ariaLabel="Portion adjustment help"
-                      />
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center justify-between w-full pr-4">
-                <div className="text-sm text-muted-foreground flex items-center gap-3">
-                  <span className="tabular-nums">{adjustedMeal.nutrition.calories} cal</span>
-                  <span className="tabular-nums">{adjustedMeal.nutrition.protein_g}g P</span>
-                  <span className="tabular-nums">{adjustedMeal.nutrition.carbohydrates_g}g C</span>
-                  <span className="tabular-nums">{adjustedMeal.nutrition.fats_g}g F</span>
-                </div>
-                <div className="font-heading font-bold text-base text-accent tabular-nums">
-                  €{adjustedMeal.cost.meal_cost_eur.toFixed(2)}
-                </div>
-              </div>
-            </div>
-          </AccordionTrigger>
-
-          <AccordionContent className="px-6 pb-4">
-            <Separator className="mb-4" />
-
-            <div className="space-y-4">
-              {showDetails && (
-                <>
-                  <div className="border rounded-lg p-4">
-                    <h4 className="font-heading font-semibold text-sm mb-3">Ingredients</h4>
-                    <ul className="space-y-2">
-                      {adjustedMeal.ingredients.map((ingredient, index) => (
-                        <li key={index} className="flex items-center gap-2 text-sm">
-                          <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
-                          <span className="flex-1">
-                            {translateIngredient(ingredient.name, language)} - {ingredient.quantity_g}g
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
+                    <Input
+                      type="number"
+                      value={localMultiplier.toFixed(2)}
+                      onChange={(e) => handlePortionChange(parseFloat(e.target.value) || 1)}
+                      min="0.25"
+                      max="5"
+                      step="0.25"
+                      className="w-14 h-6 text-center tabular-nums text-xs px-1"
+                      title="Adjust portions to fit your appetite"
+                    />
+                    <span className="text-xs text-muted-foreground">×</span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handlePortionChange(localMultiplier + 0.25)}
+                      className="h-6 w-6 p-0"
+                      title="Adjust portions to fit your appetite"
+                    >
+                      <Plus size={12} />
+                    </Button>
                   </div>
-
-                  {meal.cooking_instructions && meal.cooking_instructions.length > 0 && (
-                    <div className="border rounded-lg p-4">
-                      <h4 className="font-heading font-semibold text-sm mb-3">Cooking Steps</h4>
-                      <ol className="space-y-3">
-                        {meal.cooking_instructions.map((instruction, index) => (
-                          <li key={index} className="flex gap-3">
-                            <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold shadow-sm">
-                              {index + 1}
-                            </span>
-                            <span className="flex-1 text-sm leading-relaxed pt-1">{instruction}</span>
-                          </li>
-                        ))}
-                      </ol>
-                    </div>
-                  )}
-                </>
+                  <InfoTooltip 
+                    content="Adjust portions to fit your appetite. Changes update nutrition and costs automatically." 
+                    ariaLabel="Portion adjustment help"
+                  />
+                </div>
               )}
             </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
+          </div>
+          <div className="flex items-center justify-between w-full">
+            <div className="text-sm text-muted-foreground flex items-center gap-3">
+              <span className="tabular-nums">{adjustedMeal.nutrition.calories} cal</span>
+              <span className="tabular-nums">{adjustedMeal.nutrition.protein_g}g P</span>
+              <span className="tabular-nums">{adjustedMeal.nutrition.carbohydrates_g}g C</span>
+              <span className="tabular-nums">{adjustedMeal.nutrition.fats_g}g F</span>
+            </div>
+            <div className="font-heading font-bold text-base text-accent tabular-nums">
+              €{adjustedMeal.cost.meal_cost_eur.toFixed(2)}
+            </div>
+          </div>
+        </div>
+
+        {showDetails && (
+          <>
+            <Separator className="my-4" />
+            <div className="space-y-4">
+              <div className="border rounded-lg p-4">
+                <h4 className="font-heading font-semibold text-sm mb-3">Ingredients</h4>
+                <ul className="space-y-2">
+                  {adjustedMeal.ingredients.map((ingredient, index) => (
+                    <li key={index} className="flex items-center gap-2 text-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                      <span className="flex-1">
+                        {translateIngredient(ingredient.name, language)} - {ingredient.quantity_g}g
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {meal.cooking_instructions && meal.cooking_instructions.length > 0 && (
+                <div className="border rounded-lg p-4">
+                  <h4 className="font-heading font-semibold text-sm mb-3">Cooking Steps</h4>
+                  <ol className="space-y-3">
+                    {meal.cooking_instructions.map((instruction, index) => (
+                      <li key={index} className="flex gap-3">
+                        <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold shadow-sm">
+                          {index + 1}
+                        </span>
+                        <span className="flex-1 text-sm leading-relaxed pt-1">{instruction}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+      </div>
     </Card>
   );
 }
