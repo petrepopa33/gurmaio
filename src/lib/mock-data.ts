@@ -1308,9 +1308,8 @@ export function generateShoppingList(mealPlan: MealPlan): ShoppingList {
 
   const items: ShoppingListItem[] = Array.from(ingredientMap.entries()).map(
     ([_, data]) => ({
-      ingredient_id: data.id,
       display_name: data.name,
-      total_quantity: Math.ceil(data.quantity / 50) * 50,
+      display_name: data.name,
       unit: 'g' as const,
       minimum_purchase_quantity: 100,
       estimated_price_eur: Number(data.price.toFixed(2)),
