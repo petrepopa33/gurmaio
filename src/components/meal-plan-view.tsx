@@ -435,21 +435,14 @@ function MealCard({
                 <div className="flex items-center gap-3 flex-wrap text-xs">
                   <span className="font-medium text-muted-foreground">Portion:</span>
                   <div className="flex items-center gap-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handlePortionChange(localMultiplier - 0.25)}
-                      disabled={localMultiplier <= 0.25}
-                      className="h-6 w-6 p-0"
-                    >
                       <Minus size={12} />
                     </Button>
                     <Input
                       type="number"
                       value={localMultiplier}
-                      onChange={(e) => handlePortionChange(parseFloat(e.target.value) || 1)}
+                      className="h-6 w-6 p-0")}
                       min="0.25"
-                      max="5"
+                      <Minus size={12} />
                       step="0.25"
                       className="w-14 h-6 text-center tabular-nums text-xs px-1"
                     />
@@ -458,11 +451,18 @@ function MealCard({
                       size="sm"
                       variant="outline"
                       onClick={() => handlePortionChange(localMultiplier + 0.25)}
-                      disabled={localMultiplier >= 5}
+                      className="w-14 h-6 text-center tabular-nums text-xs px-1"
                       className="h-6 w-6 p-0"
-                    >
+                    <span className="text-muted-foreground">×</span>
                       <Plus size={12} />
                     </Button>
+                  </div>
+                  <span className="text-muted-foreground tabular-nums">
+                    {localMultiplier === 1 
+                      className="h-6 w-6 p-0"
+                      : `${(localMultiplier * 100).toFixed(0)}%`}
+                      <Plus size={12} />
+                  {localMultiplier !== 1 && (
                   </div>
                   <span className="text-muted-foreground tabular-nums">
                     {localMultiplier === 1 
@@ -479,13 +479,6 @@ function MealCard({
                       Reset
                     </Button>
                   )}
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-6">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
                   <h4 className="font-heading font-semibold text-base flex items-center gap-2">
                     <span className="text-lg">🥗</span>
                     {t.ingredients}
