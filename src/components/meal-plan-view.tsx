@@ -470,16 +470,37 @@ function MealCard({
           <AccordionContent className="px-6 pb-4">
             <Separator className="mb-4" />
 
-                    <li key={index} className="flex gap-3">
-                      <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold shadow-sm">
-                        {index + 1}
+            <div className="space-y-4">
+              <div>
+                <h4 className="font-heading text-base font-semibold mb-3">Ingredients</h4>
+                <ul className="space-y-2">
+                  {adjustedMeal.ingredients.map((ingredient, index) => (
+                    <li key={index} className="flex items-center gap-2 text-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary flex-shrink-0" />
+                      <span className="flex-1">
+                        {translateIngredient(ingredient.name, language)} - {ingredient.quantity_g}g
                       </span>
-                      <span className="flex-1 text-sm leading-relaxed pt-1">{instruction}</span>
                     </li>
                   ))}
-                </ol>
+                </ul>
               </div>
-            )}
+
+              {meal.cooking_instructions && meal.cooking_instructions.length > 0 && (
+                <div>
+                  <h4 className="font-heading text-base font-semibold mb-3">Cooking Instructions</h4>
+                  <ol className="space-y-3">
+                    {meal.cooking_instructions.map((instruction, index) => (
+                      <li key={index} className="flex gap-3">
+                        <span className="flex-shrink-0 w-7 h-7 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-bold shadow-sm">
+                          {index + 1}
+                        </span>
+                        <span className="flex-1 text-sm leading-relaxed pt-1">{instruction}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )}
+            </div>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
