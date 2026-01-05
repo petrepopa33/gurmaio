@@ -265,7 +265,7 @@ export function MealPlanView({
               protein += meal.nutrition.protein_g * multiplier;
               carbs += meal.nutrition.carbohydrates_g * multiplier;
               fats += meal.nutrition.fats_g * multiplier;
-              cost += meal.cost.meal_cost_eur * multiplier;
+              cost += Number((meal.cost.meal_cost_eur * multiplier).toFixed(2));
             });
 
             return {
@@ -273,7 +273,7 @@ export function MealPlanView({
               protein_g: Math.round(protein),
               carbohydrates_g: Math.round(carbs),
               fats_g: Math.round(fats),
-              cost_eur: cost,
+              cost_eur: Number(cost.toFixed(2)),
             };
           };
 
@@ -397,7 +397,7 @@ function MealCard({
       fats_g: Math.round(meal.nutrition.fats_g * localMultiplier),
     },
     cost: {
-      meal_cost_eur: meal.cost.meal_cost_eur * localMultiplier,
+      meal_cost_eur: Number((meal.cost.meal_cost_eur * localMultiplier).toFixed(2)),
     },
     ingredients: meal.ingredients.map(ing => ({
       ...ing,
@@ -408,7 +408,7 @@ function MealCard({
         carbohydrates_g: Math.round(ing.nutrition.carbohydrates_g * localMultiplier),
         fats_g: Math.round(ing.nutrition.fats_g * localMultiplier),
       },
-      cost_eur: ing.cost_eur * localMultiplier,
+      cost_eur: Number((ing.cost_eur * localMultiplier).toFixed(2)),
     })),
   };
 
