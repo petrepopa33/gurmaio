@@ -1295,22 +1295,23 @@ export function generateShoppingList(mealPlan: MealPlan): ShoppingList {
           existing.quantity += ingredient.quantity_g;
           existing.price += ingredient.cost_eur;
         } else {
-            quantity: ingredient.quantity_g,
+          ingredientMap.set(normalizedName, {
             quantity: ingredient.quantity_g,
             name: ingredient.name,
             id: ingredient.ingredient_id,
-            id: ingredient.ingredient_id,
+            price: ingredient.cost_eur,
+          });
         }
-        }
+      }
     }
   }
 
   const items: ShoppingListItem[] = Array.from(ingredientMap.entries()).map(
     ([_, data]) => ({
-    ([_, data]) => ({
       ingredient_id: data.id,
-      display_name: data.name, * 50,
+      display_name: data.name,
       total_quantity: Math.ceil(data.quantity / 50) * 50,
+      unit: 'g' as const,
       minimum_purchase_quantity: 100,
       estimated_price_eur: Number(data.price.toFixed(2)),
     })
