@@ -3,6 +3,7 @@ import type { ShoppingList } from '@/types/domain';
 import type { Language } from '@/lib/i18n/translations';
 import { translations } from '@/lib/i18n/translations';
 import { translateIngredient } from '@/lib/i18n/content-translations';
+import { groupItemsByCategory, CATEGORIES } from '@/lib/ingredient-categories';
 
 export function exportShoppingListToPDF(
   shoppingList: ShoppingList,
@@ -107,49 +108,22 @@ export function exportShoppingListToPDF(
   doc.text(t.yourShoppingList, margin, yPosition);
   yPosition += 10;
 
-  const groupedItems: { [key: string]: typeof visibleItems } = {
-    'Produce': [],
-    'Meat & Seafood': [],
-    'Dairy & Eggs': [],
-    'Grains & Pasta': [],
-    'Pantry': [],
-    'Other': []
-  };
+  const groupedItems = groupItemsByCategory(visibleItems);
+  const sortedCategories = Array.from(groupedItems.keys()).sort(
+    (a, b) => CATEGORIES[a].sortOrder - CATEGORIES[b].sortOrder
+  );
 
-  visibleItems.forEach(item => {
-    const name = item.display_name.toLowerCase();
-    if (name.includes('tomat') || name.includes('onion') || name.includes('garlic') || 
-        name.includes('pepper') || name.includes('lettuce') || name.includes('carrot') ||
-        name.includes('cucumber') || name.includes('spinach') || name.includes('mushroom')) {
-      groupedItems['Produce'].push(item);
-    } else if (name.includes('chicken') || name.includes('beef') || name.includes('pork') || 
-               name.includes('fish') || name.includes('salmon') || name.includes('shrimp') ||
-               name.includes('meat') || name.includes('turkey')) {
-      groupedItems['Meat & Seafood'].push(item);
-    } else if (name.includes('milk') || name.includes('cheese') || name.includes('yogurt') || 
-               name.includes('butter') || name.includes('cream') || name.includes('egg')) {
-      groupedItems['Dairy & Eggs'].push(item);
-    } else if (name.includes('rice') || name.includes('pasta') || name.includes('bread') || 
-               name.includes('flour') || name.includes('oat') || name.includes('quinoa')) {
-      groupedItems['Grains & Pasta'].push(item);
-    } else if (name.includes('oil') || name.includes('salt') || name.includes('pepper') || 
-               name.includes('spice') || name.includes('sauce') || name.includes('vinegar') ||
-               name.includes('sugar') || name.includes('honey')) {
-      groupedItems['Pantry'].push(item);
-    } else {
-      groupedItems['Other'].push(item);
-    }
-  });
-
-  Object.entries(groupedItems).forEach(([category, items]) => {
+  sortedCategories.forEach(category => {
+    const items = groupedItems.get(category)!;
     if (items.length === 0) return;
 
     addNewPageIfNeeded(30);
 
+    const config = CATEGORIES[category];
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
     doc.setTextColor('#15803D');
-    doc.text(category, margin, yPosition);
+    doc.text(`${config.icon} ${config.label}`, margin, yPosition);
     yPosition += 8;
 
     items.forEach(item => {

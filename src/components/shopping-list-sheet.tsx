@@ -12,11 +12,12 @@ import { exportShoppingList, GROCERY_SERVICES, type GroceryService } from '@/lib
 import { generateShoppingListText, shareViaWhatsApp, shareViaEmail, copyToClipboard } from '@/lib/share-shopping-list';
 import { exportShoppingListToPDF } from '@/lib/export-shopping-list-pdf';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useLanguage } from '@/hooks/use-language';
 import { translateIngredient } from '@/lib/i18n/content-translations';
 import { InfoTooltip } from '@/components/info-tooltip';
 import { DISCLAIMERS, INFO_LABELS } from '@/lib/disclaimers';
+import { groupItemsByCategory, CATEGORIES, type IngredientCategory } from '@/lib/ingredient-categories';
 
 interface ShoppingListSheetProps {
   open: boolean;
@@ -39,6 +40,18 @@ export function ShoppingListSheet({ open, onOpenChange, shoppingList, onToggleOw
     .reduce((sum, item) => sum + item.estimated_price_eur, 0) * multiplier;
   
   const adjustedPlanCost = shoppingList.summary.plan_cost_eur * multiplier;
+
+  const groupedItems = useMemo(() => {
+    const grouped = groupItemsByCategory(visibleItems);
+    const sortedCategories = Array.from(grouped.keys()).sort(
+      (a, b) => CATEGORIES[a].sortOrder - CATEGORIES[b].sortOrder
+    );
+    return sortedCategories.map(category => ({
+      category,
+      items: grouped.get(category)!,
+      config: CATEGORIES[category],
+    }));
+  }, [visibleItems]);
 
   const handleExport = (service: GroceryService) => {
     try {
@@ -324,60 +337,73 @@ export function ShoppingListSheet({ open, onOpenChange, shoppingList, onToggleOw
             )}
           </div>
 
-          <div className="space-y-2">
-            <h3 className="font-heading font-semibold text-sm text-muted-foreground uppercase tracking-wide">
-              {t.yourShoppingList}
-            </h3>
-            {visibleItems.map((item) => (
-              <div
-                key={item.ingredient_id}
-                className={`flex items-center gap-3 py-3 px-4 rounded-lg border transition-all ${
-                  item.owned
-                    ? 'bg-muted/30 opacity-60'
-                    : 'hover:bg-muted/50'
-                }`}
-              >
-                <Checkbox
-                  id={`item-${item.ingredient_id}`}
-                  checked={item.owned || false}
-                  onCheckedChange={() => onToggleOwned?.(item.ingredient_id)}
-                  className="flex-shrink-0"
-                />
-                <div className="flex-1">
-                  <label
-                    htmlFor={`item-${item.ingredient_id}`}
-                    className={`font-medium cursor-pointer ${
-                      item.owned ? 'line-through text-muted-foreground' : ''
-                    }`}
-                  >
-                    {translateIngredient(item.display_name, language)}
-                  </label>
-                  <div className="text-sm text-muted-foreground tabular-nums">
-                    {(item.total_quantity * multiplier).toFixed(0)}{item.unit}
-                    {item.minimum_purchase_quantity > item.total_quantity && (
-                      <Badge variant="secondary" className="ml-2 text-xs">
-                        min {(item.minimum_purchase_quantity * multiplier).toFixed(0)}{item.unit}
-                      </Badge>
-                    )}
-                  </div>
+          <div className="space-y-6">
+            {groupedItems.map(({ category, items, config }) => (
+              <div key={category} className="space-y-2">
+                <div className="flex items-center gap-2 px-1">
+                  <span className="text-xl">{config.icon}</span>
+                  <h3 className="font-heading font-semibold text-sm text-foreground uppercase tracking-wide">
+                    {config.label}
+                  </h3>
+                  <span className="text-xs text-muted-foreground">
+                    ({items.length})
+                  </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <div className={`font-heading font-semibold tabular-nums ${
-                    item.owned ? 'text-muted-foreground line-through' : 'text-accent'
-                  }`}>
-                    €{(item.estimated_price_eur * multiplier).toFixed(2)}
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                    onClick={() => {
-                      onDeleteItem?.(item.ingredient_id);
-                      toast.success(t.itemRemoved);
-                    }}
-                  >
-                    <Trash size={16} />
-                  </Button>
+                
+                <div className="space-y-2">
+                  {items.map((item) => (
+                    <div
+                      key={item.ingredient_id}
+                      className={`flex items-center gap-3 py-3 px-4 rounded-lg border transition-all ${
+                        item.owned
+                          ? 'bg-muted/30 opacity-60'
+                          : 'hover:bg-muted/50'
+                      }`}
+                    >
+                      <Checkbox
+                        id={`item-${item.ingredient_id}`}
+                        checked={item.owned || false}
+                        onCheckedChange={() => onToggleOwned?.(item.ingredient_id)}
+                        className="flex-shrink-0"
+                      />
+                      <div className="flex-1">
+                        <label
+                          htmlFor={`item-${item.ingredient_id}`}
+                          className={`font-medium cursor-pointer ${
+                            item.owned ? 'line-through text-muted-foreground' : ''
+                          }`}
+                        >
+                          {translateIngredient(item.display_name, language)}
+                        </label>
+                        <div className="text-sm text-muted-foreground tabular-nums">
+                          {(item.total_quantity * multiplier).toFixed(0)}{item.unit}
+                          {item.minimum_purchase_quantity > item.total_quantity && (
+                            <Badge variant="secondary" className="ml-2 text-xs">
+                              min {(item.minimum_purchase_quantity * multiplier).toFixed(0)}{item.unit}
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className={`font-heading font-semibold tabular-nums ${
+                          item.owned ? 'text-muted-foreground line-through' : 'text-accent'
+                        }`}>
+                          €{(item.estimated_price_eur * multiplier).toFixed(2)}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                          onClick={() => {
+                            onDeleteItem?.(item.ingredient_id);
+                            toast.success(t.itemRemoved);
+                          }}
+                        >
+                          <Trash size={16} />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             ))}

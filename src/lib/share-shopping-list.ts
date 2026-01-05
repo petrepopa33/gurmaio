@@ -1,6 +1,7 @@
 import type { ShoppingList } from '@/types/domain';
 import { translations, type Language } from '@/lib/i18n/translations';
 import { translateIngredient } from '@/lib/i18n/content-translations';
+import { groupItemsByCategory, CATEGORIES } from '@/lib/ingredient-categories';
 
 export function generateShoppingListText(
   shoppingList: ShoppingList,
@@ -15,19 +16,34 @@ export function generateShoppingListText(
   const header = `🛒 ${t.shoppingList} - ${t.appName}\n`;
   const separator = '━━━━━━━━━━━━━━━━━━━━━\n\n';
   
-  const itemsList = items
-    .map((item, index) => {
-      const name = translateIngredient(item.display_name, language);
-      const quantity = `${item.total_quantity}${item.unit}`;
-      const price = `€${item.estimated_price_eur.toFixed(2)}`;
-      return `${index + 1}. ${name}\n   ${quantity} • ${price}`;
+  const groupedItems = groupItemsByCategory(items);
+  const sortedCategories = Array.from(groupedItems.keys()).sort(
+    (a, b) => CATEGORIES[a].sortOrder - CATEGORIES[b].sortOrder
+  );
+
+  const categorizedList = sortedCategories
+    .map(category => {
+      const categoryItems = groupedItems.get(category)!;
+      const config = CATEGORIES[category];
+      const categoryHeader = `${config.icon} ${config.label.toUpperCase()}\n`;
+      
+      const itemsList = categoryItems
+        .map((item) => {
+          const name = translateIngredient(item.display_name, language);
+          const quantity = `${item.total_quantity}${item.unit}`;
+          const price = `€${item.estimated_price_eur.toFixed(2)}`;
+          return `  • ${name}\n    ${quantity} • ${price}`;
+        })
+        .join('\n');
+      
+      return categoryHeader + itemsList;
     })
     .join('\n\n');
 
   const totalCost = items.reduce((sum, item) => sum + item.estimated_price_eur, 0);
   const footer = `\n\n${separator}${t.total}: €${totalCost.toFixed(2)}\n${t.items}: ${items.length}`;
 
-  return header + separator + itemsList + footer;
+  return header + separator + categorizedList + footer;
 }
 
 export function shareViaWhatsApp(text: string): void {
