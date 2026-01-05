@@ -96,14 +96,16 @@ export function ShoppingListSheet({ open, onOpenChange, shoppingList, onToggleOw
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
-        <SheetHeader className="space-y-4">
-          <div className="flex items-center gap-2">
-            <ShoppingCart size={24} className="text-primary" />
-            <SheetTitle className="font-heading text-2xl">{t.shoppingList}</SheetTitle>
+        <SheetHeader>
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <ShoppingCart size={24} className="text-primary" />
+              <SheetTitle className="font-heading text-2xl">{t.shoppingList}</SheetTitle>
+            </div>
+            <SheetDescription className="text-base font-medium">
+              {shoppingList.summary.total_items} {t.items}
+            </SheetDescription>
           </div>
-          <SheetDescription>
-            {shoppingList.summary.total_items} {t.items}
-          </SheetDescription>
         </SheetHeader>
 
         <div className="mt-6 space-y-4">
