@@ -30,6 +30,19 @@ export async function generateMealSubstitution(
   const cuisinesStr = userProfile.cuisine_preferences.length > 0 
     ? userProfile.cuisine_preferences.join(', ') 
     : 'any';
+  const otherCuisinesStr = userProfile.other_cuisines ? ` (including ${userProfile.other_cuisines})` : '';
+
+  const userMetrics = userProfile.weight_kg && userProfile.height_cm && userProfile.age && userProfile.sex
+    ? `Weight: ${userProfile.weight_kg}kg, Height: ${userProfile.height_cm}cm, Age: ${userProfile.age}, Sex: ${userProfile.sex}`
+    : '';
+  
+  const activityInfo = userProfile.activity_level 
+    ? `Activity Level: ${userProfile.activity_level}`
+    : '';
+  
+  const objectiveInfo = userProfile.objective
+    ? `Goal: ${userProfile.objective.replace('_', ' ')}`
+    : '';
 
   const highRatedMeals = mealRatings
     ?.filter(r => r.rating >= 4 && r.meal_type === currentMeal.meal_type)
@@ -86,6 +99,11 @@ export async function generateMealSubstitution(
 
   const prompt = (window.spark.llmPrompt as any)`You are a professional meal planner. Generate ONE alternative meal to replace an existing meal.
 
+USER PROFILE:
+${userMetrics ? `- Physical Metrics: ${userMetrics}` : ''}
+${activityInfo ? `- ${activityInfo}` : ''}
+${objectiveInfo ? `- ${objectiveInfo}` : ''}
+
 MEAL TO REPLACE:
 - Current meal: ${currentMeal.recipe_name}
 - Meal type: ${currentMeal.meal_type}
@@ -97,9 +115,9 @@ CONSTRAINTS:
 - Target carbs: ${targetCarbsG}g
 - Target fats: ${targetFatsG}g
 
-DIETARY PREFERENCES: ${dietaryPrefsStr}
-ALLERGENS TO AVOID: ${allergensStr}
-CUISINE PREFERENCES: ${cuisinesStr}${ratingGuidance}
+DIETARY PREFERENCES (MUST FOLLOW): ${dietaryPrefsStr}
+ALLERGENS TO AVOID (CRITICAL - NEVER INCLUDE): ${allergensStr}
+CUISINE PREFERENCES (PRIORITIZE THESE): ${cuisinesStr}${otherCuisinesStr}${ratingGuidance}
 
 IMPORTANT:
 1. Generate a DIFFERENT recipe than "${currentMeal.recipe_name}"

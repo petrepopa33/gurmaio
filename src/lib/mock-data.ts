@@ -42,7 +42,24 @@ export async function generateMealPlan(userProfile: UserProfile): Promise<MealPl
   const mealTypes = getMealTypesForDay(mealsPerDay);
   const mealTypesStr = mealTypes.join(', ');
 
+  const userMetrics = userProfile.weight_kg && userProfile.height_cm && userProfile.age && userProfile.sex
+    ? `Weight: ${userProfile.weight_kg}kg, Height: ${userProfile.height_cm}cm, Age: ${userProfile.age}, Sex: ${userProfile.sex}`
+    : '';
+  
+  const activityInfo = userProfile.activity_level 
+    ? `Activity Level: ${userProfile.activity_level}`
+    : '';
+  
+  const objectiveInfo = userProfile.objective
+    ? `Goal: ${userProfile.objective.replace('_', ' ')}`
+    : '';
+
   const prompt = (window.spark.llmPrompt as any)`You are a professional meal planner. Generate a ${userProfile.meal_plan_days}-day meal plan with the following constraints:
+
+USER PROFILE:
+${userMetrics ? `- Physical Metrics: ${userMetrics}` : ''}
+${activityInfo ? `- ${activityInfo}` : ''}
+${objectiveInfo ? `- ${objectiveInfo}` : ''}
 
 BUDGET CONSTRAINT (CRITICAL):
 - Total budget: €${totalBudget.toFixed(2)} for ${userProfile.meal_plan_days} days
@@ -60,9 +77,9 @@ NUTRITION TARGET:
 - PRIORITIZE meeting the macro percentages - this is critical for the user's goals
 - Adjust ingredient portions to hit macro targets as closely as possible
 
-DIETARY PREFERENCES: ${dietaryPrefsStr}
-ALLERGENS TO AVOID: ${allergensStr}
-CUISINE PREFERENCES: ${cuisinesStr}${otherCuisinesStr}
+DIETARY PREFERENCES (MUST FOLLOW): ${dietaryPrefsStr}
+ALLERGENS TO AVOID (CRITICAL - NEVER INCLUDE): ${allergensStr}
+CUISINE PREFERENCES (PRIORITIZE THESE): ${cuisinesStr}${otherCuisinesStr}
 
 IMPORTANT INSTRUCTIONS:
 1. Generate realistic, cookable recipes with simple ingredients
