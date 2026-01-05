@@ -59,6 +59,7 @@ export async function generateMealPlan(userProfile: UserProfile): Promise<MealPl
 
   const randomSeed = Math.floor(Math.random() * 1000000);
   const timestamp = Date.now();
+  const uniqueIdentifier = `${randomSeed}-${timestamp}-${crypto.randomUUID().slice(0, 8)}`;
   
   const prompt = (window.spark.llmPrompt as any)`You are a professional meal planner. Generate a UNIQUE and VARIED ${userProfile.meal_plan_days}-day meal plan with the following constraints:
 
@@ -106,6 +107,7 @@ IMPORTANT INSTRUCTIONS:
 7. Generate EXACTLY ${mealsPerDay} meals per day with the following meal types: ${mealTypesStr}
 8. NEVER use any ingredient from the excluded ingredients list - this is a strict requirement
 9. CREATE VARIETY - use different recipes, ingredients, and cooking techniques for each new generation
+10. ENSURE UNIQUENESS - even with the same parameters, generate completely different meals each time (generation ID: ${uniqueIdentifier})
 
 Return the result as a valid JSON object with a single property called "days" that contains an array of day objects. Each day must have:
 - day_number: number (1 to ${userProfile.meal_plan_days})
