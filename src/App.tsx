@@ -1629,9 +1629,9 @@ function App() {
                           )}
                         </AnimatePresence>
                       </TabsContent>
-        onSharePlan={handleShareSavedPlan}
-      />
 
+                      <TabsContent value="calendar" className="mt-6">
+                        <div className="space-y-6">
                           <div className="flex items-center justify-between">
                             <div>
                               <h3 className="text-lg font-semibold">Schedule & Track Your Meals</h3>
