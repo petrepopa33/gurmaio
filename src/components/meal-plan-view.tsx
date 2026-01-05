@@ -56,13 +56,21 @@ export function MealPlanView({ mealPlan, onSwapMeal, onRateMeal, mealRatings }: 
   return (
     <div className="space-y-6">
       <Card className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+          <div className="flex items-center gap-3 flex-wrap">
             <h3 className="font-heading text-lg font-semibold">Nutrition Summary</h3>
             <InfoTooltip 
               content={DISCLAIMERS.nutrition.full} 
               ariaLabel={INFO_LABELS.nutritionInfo}
             />
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className="text-xs whitespace-nowrap">
+                {getViewModeContext(viewMode, days)}
+              </Badge>
+              <Badge variant="outline" className="text-xs whitespace-nowrap">
+                {DISCLAIMERS.general.short}
+              </Badge>
+            </div>
           </div>
           
           <div className="flex items-center gap-2">
@@ -88,13 +96,6 @@ export function MealPlanView({ mealPlan, onSwapMeal, onRateMeal, mealRatings }: 
               </Button>
             </div>
           </div>
-        </div>
-
-        <div className="text-xs text-muted-foreground mb-4 flex items-center gap-2">
-          <span className="font-medium">{getViewModeContext(viewMode, days)}</span>
-          <Badge variant="outline" className="text-xs">
-            {DISCLAIMERS.general.short}
-          </Badge>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-5 gap-6">
