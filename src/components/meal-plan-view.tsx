@@ -576,10 +576,6 @@ function MealCard({
                 </div>
               )}
 
-              {meal.cooking_instructions && meal.cooking_instructions.length > 0 && (
-                <Accordion type="single" collapsible className="border rounded-lg">
-                  <AccordionItem value="cooking-steps" className="border-none">
-                    <AccordionTrigger className="px-4 py-3 text-sm hover:no-underline">
                       <span className="font-heading font-semibold">Show cooking steps</span>
                     </AccordionTrigger>
                     <AccordionContent className="px-4 pb-4">
