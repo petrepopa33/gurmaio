@@ -1266,6 +1266,7 @@ function App() {
                     savedPlansCount={savedMealPlans?.length ?? 0}
                     preferencesCount={mealPreferences?.length ?? 0}
                     onProfileClick={() => setShowProfileDialog(true)}
+                    onEditMealProfile={() => setIsOnboarding(true)}
                     onHistoryClick={() => setSavedPlansOpen(true)}
                     onPreferencesClick={() => setShowMealPreferences(true)}
                     onAccountSettingsClick={() => setShowAccountSettings(true)}
@@ -1411,16 +1412,6 @@ function App() {
                   </div>
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  {currentUser && (
-                    <Button
-                      variant="outline"
-                      onClick={() => setShowProfileDialog(true)}
-                      title="Profile & Settings"
-                    >
-                      <UserCircleGear className="mr-2" />
-                      Profile
-                    </Button>
-                  )}
                   {isDemoMode ? (
                     <Button
                       variant="outline"
@@ -1775,6 +1766,7 @@ function App() {
           currentUser={currentUser}
           savedPlansCount={savedMealPlans?.length ?? 0}
           preferencesCount={mealPreferences?.length ?? 0}
+          onEditMealProfile={() => setIsOnboarding(true)}
           onHistoryClick={() => setSavedPlansOpen(true)}
           onPreferencesClick={() => setShowMealPreferences(true)}
           onAccountSettingsClick={() => setShowAccountSettings(true)}

@@ -1,4 +1,4 @@
-import { UserCircleGear, SignOut, ClockClockwise, Trash, Gear, Heart } from '@phosphor-icons/react';
+import { UserCircleGear, SignOut, ClockClockwise, Trash, Gear, Heart, PencilSimple } from '@phosphor-icons/react';
 import {
   Dialog,
   DialogContent,
@@ -24,6 +24,7 @@ interface ProfileDialogProps {
   currentUser: UserInfo | null;
   savedPlansCount: number;
   preferencesCount: number;
+  onEditMealProfile: () => void;
   onHistoryClick: () => void;
   onPreferencesClick: () => void;
   onAccountSettingsClick: () => void;
@@ -37,6 +38,7 @@ export function ProfileDialog({
   currentUser,
   savedPlansCount,
   preferencesCount,
+  onEditMealProfile,
   onHistoryClick,
   onPreferencesClick,
   onAccountSettingsClick,
@@ -91,6 +93,15 @@ export function ProfileDialog({
           <Separator />
 
           <div className="space-y-2">
+            <Button
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => handleAction(onEditMealProfile)}
+            >
+              <PencilSimple className="mr-2 h-4 w-4" />
+              Edit Meal Profile
+            </Button>
+
             <Button
               variant="outline"
               className="w-full justify-start"
