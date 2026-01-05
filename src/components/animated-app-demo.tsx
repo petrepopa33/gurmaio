@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Play, Pause, ArrowRight, Check } from '@phosphor-icons/react';
+import { Play, Pause, UserCircle, Sparkle, ShoppingCart, CalendarCheck, ChartBar } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
 interface AnimatedAppDemoProps {
@@ -11,197 +11,302 @@ interface AnimatedAppDemoProps {
 
 const ANIMATION_SCENES = [
   {
-    id: 'budget',
-    duration: 3000,
-    title: 'Set Your Budget',
-    subtitle: 'Enter your weekly or daily food budget',
+    id: 'profile',
+    duration: 4000,
+    title: 'Create Your Profile',
+    subtitle: 'Set budget, dietary preferences, and meal goals',
     render: () => (
       <div className="space-y-4">
-        <div className="space-y-2">
-          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Weekly Budget</div>
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            className="flex items-center gap-3"
-          >
-            <div className="text-5xl font-bold text-primary tabular-nums">€50</div>
-            <motion.div
-              initial={{ opacity: 0, scale: 0 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5, type: 'spring', stiffness: 200 }}
-            >
-              <div className="w-10 h-10 rounded-full bg-accent flex items-center justify-center">
-                <Check className="w-6 h-6 text-accent-foreground" weight="bold" />
-              </div>
-            </motion.div>
-          </motion.div>
-        </div>
         <motion.div
-          className="relative h-3 bg-muted rounded-full overflow-hidden"
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className="bg-card border-2 border-primary/20 rounded-2xl p-6 space-y-4 shadow-lg"
         >
+          <div className="flex items-center gap-3 pb-3 border-b">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+              <UserCircle weight="fill" className="w-8 h-8 text-primary" />
+            </div>
+            <div>
+              <div className="font-bold text-sm">Profile Setup</div>
+              <div className="text-xs text-muted-foreground">Step 1 of 4</div>
+            </div>
+          </div>
+          
           <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: '75%' }}
-            transition={{ duration: 1.2, delay: 0.6, ease: 'easeOut' }}
-            className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-accent rounded-full"
-          />
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.3 }}
+            className="space-y-2"
+          >
+            <div className="text-xs font-medium text-muted-foreground">Budget</div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-bold text-primary tabular-nums">€50</span>
+              <span className="text-sm text-muted-foreground">/ week</span>
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="space-y-2"
+          >
+            <div className="text-xs font-medium text-muted-foreground">Meal Plan</div>
+            <div className="text-sm"><span className="font-bold">7 days</span> • <span className="font-bold">3 meals</span> per day</div>
+          </motion.div>
+
+          <motion.div
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className="space-y-2"
+          >
+            <div className="text-xs font-medium text-muted-foreground">Preferences</div>
+            <div className="flex flex-wrap gap-2">
+              {['Vegetarian', 'Gluten-Free', 'High Protein'].map((pref, i) => (
+                <motion.span
+                  key={pref}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.9 + i * 0.1, type: 'spring' }}
+                  className="px-3 py-1 bg-primary/10 text-primary rounded-full text-xs font-medium"
+                >
+                  {pref}
+                </motion.span>
+              ))}
+            </div>
+          </motion.div>
         </motion.div>
+
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1 }}
-          className="text-xs text-muted-foreground"
+          transition={{ delay: 1.5 }}
+          className="text-xs text-center text-muted-foreground"
         >
-          💡 Budget adjusts meal recommendations automatically
-        </motion.div>
-      </div>
-    ),
-  },
-  {
-    id: 'preferences',
-    duration: 3000,
-    title: 'Choose Preferences',
-    subtitle: 'Select dietary restrictions and cuisine styles',
-    render: () => (
-      <div className="space-y-3">
-        {[
-          { name: 'Vegetarian', emoji: '🥬' },
-          { name: 'Gluten-Free', emoji: '🌾' },
-          { name: 'High Protein', emoji: '💪' },
-        ].map((pref, i) => (
-          <motion.div
-            key={pref.name}
-            initial={{ x: -30, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: i * 0.25, type: 'spring', stiffness: 100 }}
-            className="flex items-center gap-3 p-4 bg-secondary/40 hover:bg-secondary/60 rounded-xl border border-border/50 transition-colors"
-          >
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: i * 0.25 + 0.3, type: 'spring', stiffness: 200 }}
-              className="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0"
-            >
-              <Check className="w-4 h-4 text-primary-foreground" weight="bold" />
-            </motion.div>
-            <span className="text-xl mr-2">{pref.emoji}</span>
-            <span className="text-sm font-semibold">{pref.name}</span>
-          </motion.div>
-        ))}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
-          className="text-xs text-muted-foreground text-center pt-2"
-        >
-          ✨ AI learns your taste preferences over time
+          💡 AI tailors meals to your budget & preferences
         </motion.div>
       </div>
     ),
   },
   {
     id: 'generate',
-    duration: 2500,
-    title: 'AI Generates Plan',
-    subtitle: 'Smart meal selection with nutrition calculation',
+    duration: 3500,
+    title: 'AI Generates Your Plan',
+    subtitle: 'Smart meal selection with nutrition & cost calculation',
     render: () => (
       <div className="space-y-6">
         <motion.div
-          animate={{
-            rotate: [0, 360],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            ease: 'linear',
-          }}
-          className="w-20 h-20 mx-auto"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ type: 'spring', stiffness: 200 }}
+          className="relative w-24 h-24 mx-auto"
         >
-          <div className="w-full h-full rounded-full border-4 border-primary/20 border-t-primary shadow-lg" />
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+            className="absolute inset-0 rounded-full border-4 border-primary/20 border-t-primary"
+          />
+          <div className="absolute inset-0 flex items-center justify-center text-4xl">
+            <motion.span
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 1, repeat: Infinity }}
+            >
+              🍽️
+            </motion.span>
+          </div>
         </motion.div>
+
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="text-center space-y-2"
+          className="space-y-3"
         >
-          <div className="text-base font-semibold text-foreground">Generating your meals...</div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: [0, 1, 0] }}
-            transition={{ duration: 2, repeat: Infinity }}
-            className="text-sm text-muted-foreground"
-          >
-            🤖 Calculating nutrition & costs
-          </motion.div>
-        </motion.div>
-        <div className="flex justify-center gap-2">
-          {[0, 1, 2].map((i) => (
+          {[
+            { label: 'Analyzing budget', emoji: '💰' },
+            { label: 'Selecting recipes', emoji: '👨‍🍳' },
+            { label: 'Calculating nutrition', emoji: '📊' },
+            { label: 'Optimizing costs', emoji: '✨' },
+          ].map((step, i) => (
             <motion.div
-              key={i}
-              initial={{ opacity: 0.3 }}
-              animate={{ opacity: [0.3, 1, 0.3] }}
-              transition={{
-                duration: 1.5,
-                repeat: Infinity,
-                delay: i * 0.2,
-              }}
-              className="w-2 h-2 rounded-full bg-primary"
-            />
+              key={step.label}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.5 + i * 0.3 }}
+              className="flex items-center gap-3 text-sm"
+            >
+              <span className="text-lg">{step.emoji}</span>
+              <span className="text-muted-foreground">{step.label}</span>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.7 + i * 0.3 }}
+                className="ml-auto w-5 h-5 rounded-full bg-accent flex items-center justify-center"
+              >
+                <div className="w-2 h-2 rounded-full bg-accent-foreground" />
+              </motion.div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 2 }}
+          className="text-xs text-center text-muted-foreground"
+        >
+          🤖 Powered by AI
+        </motion.div>
       </div>
     ),
   },
   {
     id: 'mealplan',
-    duration: 3500,
-    title: 'Your Meal Plan',
-    subtitle: 'Complete meals with exact costs and nutrition',
+    duration: 4500,
+    title: 'Your Meal Plan Ready',
+    subtitle: 'Complete meals with costs, nutrition & ingredients',
     render: () => (
       <div className="space-y-3">
-        {[
-          { name: 'Greek Yogurt Bowl', cal: '420', cost: '€3.20', emoji: '🥣' },
-          { name: 'Chickpea Curry', cal: '580', cost: '€4.50', emoji: '🍛' },
-          { name: 'Quinoa Salad', cal: '380', cost: '€3.80', emoji: '🥗' },
-        ].map((meal, i) => (
-          <motion.div
-            key={meal.name}
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: i * 0.2, type: 'spring', stiffness: 100 }}
-            whileHover={{ scale: 1.02 }}
-            className="flex items-center justify-between p-4 bg-card border border-border rounded-xl shadow-sm hover:shadow-md transition-shadow"
-          >
-            <div className="flex items-center gap-3 flex-1">
-              <span className="text-2xl">{meal.emoji}</span>
-              <div>
-                <div className="text-sm font-semibold">{meal.name}</div>
-                <div className="text-xs text-muted-foreground tabular-nums">{meal.cal} cal</div>
-              </div>
-            </div>
-            <div className="text-base font-bold text-primary tabular-nums">{meal.cost}</div>
-          </motion.div>
-        ))}
         <motion.div
           initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.8, type: 'spring', stiffness: 100 }}
-          className="flex items-center justify-between p-4 bg-gradient-to-r from-accent/10 to-primary/10 border-2 border-accent/50 rounded-xl shadow-sm"
+          className="bg-gradient-to-br from-primary/5 via-accent/5 to-primary/5 border border-primary/20 rounded-xl p-4 space-y-2"
         >
-          <div className="text-sm font-bold">Daily Total</div>
-          <div className="flex items-center gap-2">
-            <div className="text-xs text-muted-foreground">1,380 cal</div>
-            <div className="text-lg font-bold text-accent tabular-nums">€11.50</div>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-primary">Budget Status</span>
+            <span className="text-lg font-bold text-primary tabular-nums">€43.50 / €50</span>
           </div>
+          <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: '87%' }}
+              transition={{ duration: 1.2, delay: 0.3 }}
+              className="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-accent rounded-full"
+            />
+          </div>
+          <div className="text-xs text-muted-foreground">Under budget by €6.50 ✓</div>
         </motion.div>
+
+        <div className="space-y-2">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="text-xs font-medium text-muted-foreground px-1"
+          >
+            Day 1 - Monday
+          </motion.div>
+          {[
+            { name: 'Greek Yogurt Bowl', type: 'Breakfast', cal: 420, cost: 3.2, protein: 28 },
+            { name: 'Chickpea Curry', type: 'Lunch', cal: 580, cost: 4.5, protein: 22 },
+            { name: 'Quinoa Salad', type: 'Dinner', cal: 380, cost: 3.8, protein: 16 },
+          ].map((meal, i) => (
+            <motion.div
+              key={meal.name}
+              initial={{ y: 20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              transition={{ delay: 0.7 + i * 0.2, type: 'spring', stiffness: 100 }}
+              className="bg-card border rounded-xl p-3 shadow-sm hover:shadow-md transition-all"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-sm truncate">{meal.name}</div>
+                  <div className="text-xs text-muted-foreground">{meal.type}</div>
+                  <div className="flex items-center gap-3 mt-2 text-xs">
+                    <span className="tabular-nums">{meal.cal} cal</span>
+                    <span className="tabular-nums">{meal.protein}g protein</span>
+                  </div>
+                </div>
+                <div className="text-base font-bold text-primary tabular-nums shrink-0">
+                  €{meal.cost.toFixed(2)}
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.2 }}
-          className="text-xs text-muted-foreground text-center pt-1"
+          transition={{ delay: 1.8 }}
+          className="flex items-center justify-center gap-2 text-xs text-muted-foreground pt-2"
         >
-          🛒 One-click shopping list included
+          <Sparkle weight="fill" className="w-3 h-3" />
+          <span>6 more days ready to view</span>
+        </motion.div>
+      </div>
+    ),
+  },
+  {
+    id: 'features',
+    duration: 4000,
+    title: 'Powerful Features',
+    subtitle: 'Everything you need for meal planning success',
+    render: () => (
+      <div className="space-y-3">
+        {[
+          {
+            icon: <ShoppingCart weight="fill" className="w-6 h-6" />,
+            title: 'Shopping List',
+            desc: 'Auto-generated with quantities & costs',
+            color: 'from-blue-500/10 to-blue-600/10 border-blue-500/30',
+            iconColor: 'text-blue-600'
+          },
+          {
+            icon: <CalendarCheck weight="fill" className="w-6 h-6" />,
+            title: 'Track Progress',
+            desc: 'Schedule meals & mark as complete',
+            color: 'from-purple-500/10 to-purple-600/10 border-purple-500/30',
+            iconColor: 'text-purple-600'
+          },
+          {
+            icon: <ChartBar weight="fill" className="w-6 h-6" />,
+            title: 'Meal Prep',
+            desc: 'Batch cooking recommendations',
+            color: 'from-green-500/10 to-green-600/10 border-green-500/30',
+            iconColor: 'text-green-600'
+          },
+          {
+            icon: <Sparkle weight="fill" className="w-6 h-6" />,
+            title: 'Smart Swaps',
+            desc: 'Replace meals you don\'t like',
+            color: 'from-amber-500/10 to-amber-600/10 border-amber-500/30',
+            iconColor: 'text-amber-600'
+          },
+        ].map((feature, i) => (
+          <motion.div
+            key={feature.title}
+            initial={{ x: -30, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: i * 0.25, type: 'spring', stiffness: 100 }}
+            className={cn(
+              'flex items-center gap-4 p-4 rounded-xl border-2 bg-gradient-to-br shadow-sm hover:shadow-md transition-all',
+              feature.color
+            )}
+          >
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: i * 0.25 + 0.2, type: 'spring', stiffness: 200 }}
+              className={cn('shrink-0', feature.iconColor)}
+            >
+              {feature.icon}
+            </motion.div>
+            <div className="flex-1 min-w-0">
+              <div className="font-bold text-sm">{feature.title}</div>
+              <div className="text-xs text-muted-foreground">{feature.desc}</div>
+            </div>
+          </motion.div>
+        ))}
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.5 }}
+          className="text-xs text-center text-muted-foreground pt-2"
+        >
+          ✨ And much more...
         </motion.div>
       </div>
     ),
