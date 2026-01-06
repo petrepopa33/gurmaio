@@ -26,3 +26,5 @@ declare global {
   }
   const spark: Window['spark'];
 }
+
+export {}
