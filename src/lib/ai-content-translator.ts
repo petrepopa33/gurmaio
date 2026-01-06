@@ -1,29 +1,18 @@
 import type { Language } from '@/lib/i18n/translations';
 
 const LANGUAGE_NAMES: Record<Language, string> = {
-  en: 'English',
   es: 'Spanish',
-  pt: 'Portuguese',
+  pl: 'Polish',
+  nl: 'Dutch',
   pl: 'Polish',
   cs: 'Czech',
   nl: 'Dutch',
   ro: 'Romanian',
-  de: 'German',
+
   fr: 'French',
   it: 'Italian',
-};
-
-async function translateBatchContent(
-  items: string[],
-  targetLanguage: Language,
-  contentType: string
-): Promise<Map<string, string>> {
-  const resultMap = new Map<string, string>();
-  
-  if (targetLanguage === 'en' || items.length === 0) {
-    items.forEach(item => resultMap.set(item, item));
-    return resultMap;
-  }
+};targetLanguage: Language,
+ string
 
   try {
     const uniqueItems = Array.from(new Set(items));
