@@ -1,67 +1,67 @@
 import type { Language } from './i18n/translations';
 
-const translationCache = new Map<string, Record<Language, string>>();
-
 async function batchTranslateContent(
-  items: string[],
-  contentType: 'ingredient' | 'cooking_instruction' | 'meal_name',
-  targetLanguage: Language
+
 ): Promise<Map<string, string>> {
-  const resultMap = new Map<string, string>();
 
-  if (targetLanguage === 'en') {
     items.forEach(item => resultMap.set(item, item));
-    return resultMap;
   }
-
-  const uncachedItems: string[] = [];
-  
+  const uncachedItems: string[] =
   items.forEach(item => {
-    const cached = translationCache.get(item);
-    if (cached && cached[targetLanguage]) {
-      resultMap.set(item, cached[targetLanguage]);
+
     } else {
-      uncachedItems.push(item);
     }
-  });
 
-  if (uncachedItems.length === 0) {
-    return resultMap;
-  }
+   
 
-  try {
-    const contentTypeLabel = contentType === 'ingredient' ? 'Ingredient' : contentType === 'meal_name' ? 'Meal name' : 'Cooking instruction';
+    const contentTypeLabel = contentT
+  
+${contentTypeLabel}s to t
+
     
-    const prompt = spark.llmPrompt`Translate the following ${contentTypeLabel}s to ${targetLanguage}. Return a valid JSON object where each key is the original text and the value is the translation.
-
-${contentTypeLabel}s to translate:
-${uncachedItems.map((item, idx) => `${idx + 1}. ${item}`).join('\n')}
-
-Return format: {"original text": "translated text", ...}`;
-    
-    const translationResult = await spark.llm(prompt, 'gpt-4o-mini', true);
-    const translations = JSON.parse(translationResult);
-
-    uncachedItems.forEach(item => {
-      const translated = translations[item];
+    const translations = JSON.parse(translationRes
+    uncached
       if (translated) {
-        resultMap.set(item, translated);
-        const existing = translationCache.get(item) || {} as Record<Language, string>;
-        translationCache.set(item, {
-          ...existing,
-          [targetLanguage]: translated
-        });
-      } else {
-        resultMap.set(item, item);
-      }
-    });
-  } catch (error) {
-    console.error('Batch translation failed:', error);
-    uncachedItems.forEach(item => resultMap.set(item, item));
-  }
+     
+     
 
-  return resultMap;
-}
+        resultMap.set(item, item);
+    });
+   
+
+  retur
+
+  in
+  cookingInstructions: string[],
+
+  mealNames: Map<string, string>;
+}> {
+
+    batchTranslateContent(cookingInstructions, 'cooking_in
+
+    ingredients: ingredientsMap,
+    cookingInstructions: cookingInstructionsMap
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 export async function translateMealPlanContent(
   ingredients: string[],
