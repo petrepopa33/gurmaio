@@ -1,6 +1,6 @@
 import type { Language } from './i18n/translations';
 
-const translationCache = new Map<string, Record<Language, string>>();
+export async function translateAIContent(
 
 export async function translateAIContent(
   content: string,
@@ -31,40 +31,39 @@ export async function translateAIContent(
       cs: 'Czech',
     };
 
-    const contextMap = {
-      meal_name: 'meal/recipe name',
-      ingredient: 'ingredient name',
-      cooking_instruction: 'cooking instruction',
-    };
 
-    const promptText = `Translate this ${contextMap[contentType]} from English to ${languageNames[targetLanguage]}: "${content}". Return only the translated text, nothing else.`;
-    const prompt = window.spark.llmPrompt([promptText] as any);
     
-    const translated = await window.spark.llm(prompt, 'gpt-4o-mini', false);
     
-    if (!translationCache.has(cacheKey)) {
-      translationCache.set(cacheKey, {} as Record<Language, string>);
-    }
+      translationCache.set(cacheKey, {} as Record
     
-    const cachedEntry = translationCache.get(cacheKey)!;
-    cachedEntry[targetLanguage] = translated.trim();
-    
+
     return translated.trim();
-  } catch (error) {
-    console.error('Translation failed:', error);
-    return content;
+    
   }
-}
 
-export async function batchTranslateContent(
-  items: Array<{ content: string; type: 'meal_name' | 'ingredient' | 'cooking_instruction' }>,
-  targetLanguage: Language
+  items: Array<{ content: string; type: 'm
 ): Promise<Map<string, string>> {
-  if (targetLanguage === 'en') {
-    const resultMap = new Map<string, string>();
-    items.forEach(item => {
-      resultMap.set(item.content, item.content);
-    });
+    c
+    
+    return resultMap;
+
+
+    const languageNames: Reco
+      de: 'German',
+      fr: 'French',
+      pt: 'Portugue
+   
+ 
+
+    const ingredients = items.filter(i => i.
+
+      const mealNamesList 
+
+${mealNamesList.map((name, i) =>
+Requirements:
+2. Keep cultural context wh
+
+{
     return resultMap;
   }
 
@@ -90,7 +89,7 @@ export async function batchTranslateContent(
 
     if (mealNames.length > 0) {
       const mealNamesList = mealNames.map(m => m.content);
-      const mealNamesPromptText = `Translate these meal/recipe names from English to ${languageNames[targetLanguage]}. Return the result as a valid JSON object with a single property called "translations" that contains an array of objects with "original" and "translated" properties.
+      const mealNamesPrompt = window.spark.llmPrompt`Translate these meal/recipe names from English to ${languageNames[targetLanguage]}. Return the result as a valid JSON object with a single property called "translations" that contains an array of objects with "original" and "translated" properties.
 
 Meal names to translate:
 ${mealNamesList.map((name, i) => `${i + 1}. ${name}`).join('\n')}
@@ -107,7 +106,6 @@ Return ONLY valid JSON in this format:
     {"original": "meal name 2", "translated": "translated name 2"}
   ]
 }`;
-      const mealNamesPrompt = window.spark.llmPrompt([mealNamesPromptText] as any);
       
       const mealNamesResult = await window.spark.llm(mealNamesPrompt, 'gpt-4o-mini', true);
       const mealNamesData = JSON.parse(mealNamesResult);
@@ -121,7 +119,7 @@ Return ONLY valid JSON in this format:
 
     if (ingredients.length > 0) {
       const ingredientsList = ingredients.map(i => i.content);
-      const ingredientsPromptText = `Translate each ingredient name below from English to ${languageNames[targetLanguage]}. Return the result as a valid JSON object with a single property called "translations" that contains an array of objects with "original" and "translated" properties.
+      const ingredientsPrompt = window.spark.llmPrompt`Translate each ingredient name below from English to ${languageNames[targetLanguage]}. Return the result as a valid JSON object with a single property called "translations" that contains an array of objects with "original" and "translated" properties.
 
 Ingredients to translate:
 ${ingredientsList.map((name, i) => `${i + 1}. ${name}`).join('\n')}
@@ -132,85 +130,83 @@ Requirements:
 3. Return ONLY valid JSON in this format:
 {
   "translations": [
-    {"original": "ingredient 1", "translated": "translated ingredient 1"},
-    {"original": "ingredient 2", "translated": "translated ingredient 2"}
-  ]
-}`;
-      const ingredientsPrompt = window.spark.llmPrompt([ingredientsPromptText] as any);
-      
-      const ingredientsResult = await window.spark.llm(ingredientsPrompt, 'gpt-4o-mini', true);
-      const ingredientsData = JSON.parse(ingredientsResult);
-      
-      if (ingredientsData.translations && Array.isArray(ingredientsData.translations)) {
-        ingredientsData.translations.forEach((item: any) => {
           translationsMap.set(item.original, item.translated);
-        });
       }
-    }
 
-    if (instructions.length > 0) {
-      const instructionsList = instructions.map(i => i.content);
-      const instructionsPromptText = `Translate these cooking instructions from English to ${languageNames[targetLanguage]}. Return the result as a valid JSON object with a single property called "translations" that contains an array of objects with "original" and "translated" properties.
-
-Instructions to translate:
-${instructionsList.map((inst, i) => `${i + 1}. ${inst}`).join('\n')}
-
-Requirements:
-1. Use imperative form (commands)
-2. Keep translations clear and actionable
-3. Return ONLY valid JSON in this format:
-{
-  "translations": [
-    {"original": "instruction 1", "translated": "translated instruction 1"},
-    {"original": "instruction 2", "translated": "translated instruction 2"}
-  ]
-}`;
-      const instructionsPrompt = window.spark.llmPrompt([instructionsPromptText] as any);
-      
-      const instructionsResult = await window.spark.llm(instructionsPrompt, 'gpt-4o-mini', true);
-      const instructionsData = JSON.parse(instructionsResult);
-      
-      if (instructionsData.translations && Array.isArray(instructionsData.translations)) {
-        instructionsData.translations.forEach((item: any) => {
-          translationsMap.set(item.original, item.translated);
-        });
-      }
-    }
-
-    return translationsMap;
-  } catch (error) {
-    console.error('Batch translation failed:', error);
-    const fallbackMap = new Map<string, string>();
-    items.forEach(item => {
-      fallbackMap.set(item.content, item.content);
-    });
-    return fallbackMap;
   }
+    co
+      fallbackMap.set(item.content, item.content);
+    return fallbackMap;
 }
-
 export async function translateMealPlanContent(
-  meals: Array<{
     recipe_name: string;
-    ingredients: Array<{ name: string }>;
     cooking_instructions: string[];
-  }>,
-  targetLanguage: Language
-): Promise<Map<string, string>> {
-  const items: Array<{ content: string; type: 'meal_name' | 'ingredient' | 'cooking_instruction' }> = [];
+  targetLan
+  const
+  mea
 
-  meals.forEach(meal => {
-    items.push({ content: meal.recipe_name, type: 'meal_name' });
-    meal.ingredients.forEach(ing => {
-      items.push({ content: ing.name, type: 'ingredient' });
     });
-    meal.cooking_instructions.forEach(inst => {
-      items.push({ content: inst, type: 'cooking_instruction' });
-    });
+      items.push({ content: inst, type: 'cooking_instruction' })
   });
 
-  return batchTranslateContent(items, targetLanguage);
-}
 
-export function clearTranslationCache() {
   translationCache.clear();
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
