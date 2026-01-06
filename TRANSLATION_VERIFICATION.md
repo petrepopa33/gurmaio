@@ -1,13 +1,13 @@
 # Raport de Verificare Traduceri - Gurmaio
 
-## Data: 2026
-## Limbi verificate: EN, RO (și toate celelalte)
 
-## Status Verificare
 
-### ✅ Traduceri Complete
 
-1. **Interfață Principală**
+   - ✅ Toate textele
+
+2. **Onboarding**
+
+   - ✅ Preferințe culinare 
    - ✅ Toate textele din meniul principal
    - ✅ Butoane de acțiune (Generate, Save, Share, etc.)
    - ✅ Etichete de navigare
@@ -18,26 +18,26 @@
    - ✅ Alergeni (Gluten, Dairy, etc.)
    - ✅ Preferințe culinare (Italian, Asian, etc.)
    - ✅ Niveluri de activitate
-   - ✅ Obiective (Lose Weight, Maintain, Gain Muscle)
+- ✅ Check mark bold și colorat pentru limba curentă
 
-3. **Plan de Mese**
-   - ✅ Tipuri de mese (Breakfast, Lunch, Dinner, Snack)
-   - ✅ Informații nutriționale (Calories, Protein, Carbs, Fats)
-   - ✅ Costuri și buget
-   - ✅ Acțiuni (Swap Meal, Like, Dislike)
+- ✅ Toast de loadin
+- ✅ Mesaj în limba română pentru schimbare
+### 3. Structură Traduceri
+translations = {
+  de: { ... },
 
-4. **Listă Cumpărături**
-   - ✅ Titluri și descrieri
-   - ✅ Opțiuni de export
-   - ✅ Acțiuni share
+  pt: { ... },
+  pl: { ... },
+  cs: { ... }
+```
 
-## Îmbunătățiri Implementate
+### Interfață
 
-### 1. Vizibilitate Buton Schimbare Limbă
-- ✅ Mărit dimensiunea iconiței Globe
-- ✅ Adăugat lățime minimă pentru buton (min-w-[100px])
-- ✅ Îmbunătățit aspectul dropdown-ului (min-w-[200px])
-- ✅ Highlight pentru limba selectată (background accent)
+
+- "Create Your Profile" → "Creează-ț
+- "Dietary Preferences" → "Preferințe alimentare"
+### Alimente & Nutriție
+- "Chicken Breast" → "Piept de Pui"
 - ✅ Check mark bold și colorat pentru limba curentă
 - ✅ Spacing mai generos între elemente
 
@@ -88,7 +88,7 @@ translations = {
    - Verifică că toate textele sunt în română
 
 2. **Verifică Funcționalitatea**
-   - Generează un plan de mese
+
    - Verifică că numele meselor sunt traduse
    - Verifică că ingredientele sunt traduse
    - Verifică că butoanele și etichetele sunt în română
