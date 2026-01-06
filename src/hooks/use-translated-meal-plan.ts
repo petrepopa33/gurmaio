@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { MealPlan } from '@/types/domain';
 import type { Language } from '@/lib/i18n/translations';
-import { translateMealPlanContent } from '@/lib/ai-content-translator';
+import { batchTranslateMealPlanContent } from '@/lib/ai-content-translator';
 
 interface TranslatedMealPlan extends MealPlan {
   _isTranslating?: boolean;
@@ -56,7 +56,7 @@ export function useTranslatedMealPlan(
           });
         });
 
-        const { mealNames, ingredients, cookingInstructions } = await translateMealPlanContent(
+        const { mealNames, ingredients, cookingInstructions } = await batchTranslateMealPlanContent(
           allMealNames,
           allIngredients,
           allInstructions,
