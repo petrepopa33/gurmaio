@@ -1276,10 +1276,12 @@ function App() {
                     currentUser={currentUser}
                     savedPlansCount={savedMealPlans?.length ?? 0}
                     preferencesCount={mealPreferences?.length ?? 0}
+                    currentLanguage={language}
                     onProfileClick={() => setShowProfileDialog(true)}
                     onHistoryClick={() => setSavedPlansOpen(true)}
                     onPreferencesClick={() => setShowMealPreferences(true)}
                     onAccountSettingsClick={() => setShowAccountSettings(true)}
+                    onLanguageChange={handleLanguageChange}
                     onLogoutClick={handleLogout}
                     onDeleteAccountClick={() => setShowDeleteAccountDialog(true)}
                     profileLabel="Profile"
@@ -1289,21 +1291,27 @@ function App() {
                   />
                 </div>
               ) : isDemoMode ? (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => setShowCreateAccountDialog(true)}
-                >
-                  Create Account
-                </Button>
+                <div className="flex items-center gap-3">
+                  <LanguageSwitcher currentLanguage={language} onLanguageChange={handleLanguageChange} />
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => setShowCreateAccountDialog(true)}
+                  >
+                    Create Account
+                  </Button>
+                </div>
               ) : (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => window.location.href = '/.spark/login'}
-                >
-                  {t.login}
-                </Button>
+                <div className="flex items-center gap-3">
+                  <LanguageSwitcher currentLanguage={language} onLanguageChange={handleLanguageChange} />
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => window.location.href = '/.spark/login'}
+                  >
+                    {t.login}
+                  </Button>
+                </div>
               )}
             </div>
           </div>
