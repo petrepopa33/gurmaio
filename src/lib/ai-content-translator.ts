@@ -2,22 +2,19 @@ import type { Language } from './i18n/translations';
 
 const translationCache = new Map<string, Record<Language, string>>();
 
-  targetLanguage: Language,
-): Promise<string>
+export async function translateContent(
+  content: string,
+  contentType: 'meal_name' | 'ingredient' | 'cooking_instruction',
+  targetLanguage: Language
+): Promise<string> {
+  if (targetLanguage === 'en' || !content) {
     return content;
-
-  
-    const cached = translationCa
-      return cached
   }
 
-    de: 'German',
-  
-    pt: 'Portuguese',
-    pl: 'Polish',
-    cs: 'Czech',
-
-    }
+  const cacheKey = `${contentType}:${content}`;
+  const cached = translationCache.get(cacheKey);
+  if (cached && cached[targetLanguage]) {
+    return cached[targetLanguage];
   }
 
   const languageNames: Record<Language, string> = {
@@ -40,9 +37,10 @@ const translationCache = new Map<string, Record<Language, string>>();
   };
 
   try {
-    const prompt = window.spark.llmPrompt`${contextPrompts[contentType]}
+    const contentTypeLabel = contentType === 'meal_name' ? 'recipe/meal name' : contentType === 'ingredient' ? 'ingredient name' : 'cooking instruction';
+    const prompt = `${contextPrompts[contentType]}
 
-Task: Translate the following ${contentType === 'meal_name' ? 'recipe/meal name' : contentType === 'ingredient' ? 'ingredient name' : 'cooking instruction'} from English to ${languageNames[targetLanguage]}.
+Task: Translate the following ${contentTypeLabel} from English to ${languageNames[targetLanguage]}.
 
 Original text: "${content}"
 
@@ -60,10 +58,10 @@ Translation:`;
     const translation = await window.spark.llm(prompt, 'gpt-4o-mini', false);
     const cleanedTranslation = translation.trim().replace(/^["']|["']$/g, '');
 
-    if (!translationCache.has(content)) {
-      translationCache.set(content, { en: content } as Record<Language, string>);
+    if (!translationCache.has(cacheKey)) {
+      translationCache.set(cacheKey, { en: content } as Record<Language, string>);
     }
-    const cached = translationCache.get(content)!;
+    const cached = translationCache.get(cacheKey)!;
     cached[targetLanguage] = cleanedTranslation;
 
     return cleanedTranslation;
@@ -81,95 +79,44 @@ export async function translateMealBatch(
     return new Map();
   }
 
-    pl: 'Polish',
-    cs: 'Czech',
+  const translationMap = new Map<string, string>();
+  const allTexts = new Set<string>();
 
-    const textsArray = Ar
-    
+  meals.forEach(meal => {
+    allTexts.add(meal.recipe_name);
+    meal.ingredients.forEach(ing => allTexts.add(ing.name));
+    meal.cooking_instructions.forEach(inst => allTexts.add(inst));
+  });
+
+  const batchSize = 20;
+  const textsArray = Array.from(allTexts);
+
+  for (let i = 0; i < textsArray.length; i += batchSize) {
+    try {
       const batch = textsArray.slice(i, i + batchSize);
-      const itemsList = batch.map((text, idx) => {
-     
-
-
-
-
-1. Return ONLY a 
-3. For meal names:
-5. For cooking ins
-7. Do not include the
-Format example:
-  "1": "Translate
-  ...
-
-
-
-      b
-        if (parsed[translationKey]) {
-          
-    
-            translationCache.set(cacheKey, { en: content } a
-          const cached = translationCache.get(cacheKey)
       
-
+      for (const text of batch) {
+        const contentType = meals.some(m => m.recipe_name === text)
+          ? 'meal_name'
+          : meals.some(m => m.ingredients.some(ing => ing.name === text))
+          ? 'ingredient'
+          : 'cooking_instruction';
+        
+        const translated = await translateContent(text, contentType, targetLanguage);
+        translationMap.set(text, translated);
+      }
+    } catch (error) {
+      console.error('Batch translation error:', error);
     }
-    console.error('Batch translation error:', error);
+  }
 
+  return translationMap;
+}
 
 export function clearTranslationCache(): void {
+  translationCache.clear();
+}
 
 export function getTranslationCacheSize(): number {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  return translationCache.size;
+}
