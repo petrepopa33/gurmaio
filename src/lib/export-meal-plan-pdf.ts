@@ -1,4 +1,4 @@
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import type { MealPlan } from '@/types/domain';
 import type { Language } from '@/lib/i18n/translations';
 import { translations } from '@/lib/i18n/translations';
