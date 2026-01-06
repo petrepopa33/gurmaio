@@ -2,18 +2,18 @@ import type { Language } from './i18n/translations';
 
 const translationCache = new Map<string, Record<Language, string>>();
 
-export async function translateContent(
+  contentType: 'meal_name' | 'ingredien
   content: string,
   contentType: 'meal_name' | 'ingredient' | 'cooking_instruction',
   targetLanguage: Language
-): Promise<string> {
-  if (targetLanguage === 'en') {
-    return content;
-  }
+    return cached[ta
 
-  const cacheKey = `${contentType}:${content}:${targetLanguage}`;
-  const cached = translationCache.get(cacheKey);
-  if (cached && cached[targetLanguage]) {
+    en: 'English',
+   
+
+    nl: 'Dutch',
+    ro: 'Romanian',
+  };
     return cached[targetLanguage];
   }
 
@@ -30,123 +30,49 @@ export async function translateContent(
     cs: 'Czech',
   };
 
-  const contextPrompts: Record<typeof contentType, string> = {
-    meal_name: 'You are translating a recipe/meal name for a meal planning application.',
-    ingredient: 'You are translating a food ingredient name for a meal planning application.',
-    cooking_instruction: 'You are translating a cooking instruction step for a meal planning application.',
-  };
-
-  try {
-    const contentTypeLabel = contentType === 'meal_name' ? 'recipe/meal name' : contentType === 'ingredient' ? 'ingredient name' : 'cooking instruction';
-    
-    const promptString = `${contextPrompts[contentType]}
-
-Task: Translate the following ${contentTypeLabel} from English to ${languageNames[targetLanguage]}.
-
-Original text: "${content}"
-
-Requirements:
-1. Provide ONLY the translated text, no explanations or additional text
-2. Keep the translation natural and culturally appropriate
-3. For meal names: Keep them appetizing and descriptive
-4. For ingredients: Use standard culinary terms for that language
-5. For cooking instructions: Use imperative form (command form) as is standard in recipes
-6. Maintain any important details like measurements or cooking methods
-7. DO NOT add quotes or formatting - just the plain translated text
-
-Translation:`;
-
-    const translation = await window.spark.llm(promptString, 'gpt-4o-mini', false);
-    const cleanedTranslation = translation.trim().replace(/^["']|["']$/g, '');
-
-    if (!translationCache.has(cacheKey)) {
-      translationCache.set(cacheKey, { en: content } as Record<Language, string>);
-    }
     const cached = translationCache.get(cacheKey)!;
-    cached[targetLanguage] = cleanedTranslation;
 
-    return cleanedTranslation;
   } catch (error) {
-    console.error(`Translation failed for ${contentType}:`, error);
     return content;
-  }
 }
 
-interface MealContent {
-  recipe_name: string;
-  ingredients: Array<{ name: string; [key: string]: any }>;
-  cooking_instructions: string[];
+  ingre
 }
 
-export async function translateMealBatch(
-  meals: MealContent[],
   targetLanguage: Language
-): Promise<Map<string, string>> {
-  if (targetLanguage === 'en') {
-    return new Map();
+
   }
 
-  const translationsMap = new Map<string, string>();
-
-  const languageNames: Record<Language, string> = {
-    en: 'English',
+  const langu
     de: 'German',
-    fr: 'French',
     es: 'Spanish',
-    it: 'Italian',
     pt: 'Portuguese',
-    nl: 'Dutch',
     pl: 'Polish',
-    ro: 'Romanian',
     cs: 'Czech',
-  };
 
-  const uniqueMealNames = new Set<string>();
   const uniqueIngredients = new Set<string>();
-  const uniqueInstructions = new Set<string>();
 
-  meals.forEach(meal => {
-    uniqueMealNames.add(meal.recipe_name);
-    meal.ingredients.forEach(ing => uniqueIngredients.add(ing.name));
-    meal.cooking_instructions.forEach(inst => uniqueInstructions.add(inst));
-  });
+    uniqueMeal
 
-  try {
+
     const mealNamesList = Array.from(uniqueMealNames);
-    const ingredientsList = Array.from(uniqueIngredients);
-    const instructionsList = Array.from(uniqueInstructions);
 
     if (mealNamesList.length > 0) {
-      const mealNamesPrompt = `You are translating meal/recipe names from English to ${languageNames[targetLanguage]} for a meal planning application.
 
-Translate each meal name below. Return the result as a valid JSON object with a single property called "translations" that contains an array of objects with "original" and "translated" properties.
 
-Meal names to translate:
-${mealNamesList.map((name, i) => `${i + 1}. ${name}`).join('\n')}
-
+${mealNamesList.map((name, i) => `${i + 1}. ${name}
 Requirements:
-1. Keep translations appetizing and descriptive
-2. Use natural, culturally appropriate names
-3. Maintain the essence of the dish
-4. Return ONLY valid JSON in this format:
-{
+
+4. Return ONLY valid JSON in t
   "translations": [
-    {"original": "meal name 1", "translated": "translated name 1"},
     {"original": "meal name 2", "translated": "translated name 2"}
-  ]
 }`;
+   
+ 
 
-      const mealNamesResult = await window.spark.llm(mealNamesPrompt, 'gpt-4o-mini', true);
-      const mealNamesData = JSON.parse(mealNamesResult);
-      
-      if (mealNamesData.translations && Array.isArray(mealNamesData.translations)) {
-        mealNamesData.translations.forEach((item: any) => {
-          translationsMap.set(`meal:${item.original}`, item.translated);
         });
-      }
     }
-
-    if (ingredientsList.length > 0) {
+ 
       const ingredientsPrompt = `You are translating ingredient names from English to ${languageNames[targetLanguage]} for a meal planning application.
 
 Translate each ingredient name below. Return the result as a valid JSON object with a single property called "translations" that contains an array of objects with "original" and "translated" properties.
