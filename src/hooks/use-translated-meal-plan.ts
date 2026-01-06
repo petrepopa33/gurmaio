@@ -36,29 +36,47 @@ export function useTranslatedMealPlan(
       setIsTranslating(true);
 
       try {
-        const allMeals = mealPlan.days.flatMap(day => 
-          day.meals.map(meal => ({
-            recipe_name: meal.recipe_name,
-            ingredients: meal.ingredients,
-            cooking_instructions: meal.cooking_instructions || [],
-          }))
+        const allMealNames: string[] = [];
+        const allIngredients: string[] = [];
+        const allInstructions: string[] = [];
+
+        mealPlan.days.forEach(day => {
+          day.meals.forEach(meal => {
+            allMealNames.push(meal.recipe_name);
+            meal.ingredients.forEach(ing => {
+              if (!allIngredients.includes(ing.name)) {
+                allIngredients.push(ing.name);
+              }
+            });
+            (meal.cooking_instructions || []).forEach(inst => {
+              if (!allInstructions.includes(inst)) {
+                allInstructions.push(inst);
+              }
+            });
+          });
+        });
+
+        const { mealNames, ingredients, cookingInstructions } = await translateMealPlanContent(
+          allMealNames,
+          allIngredients,
+          allInstructions,
+          targetLanguage
         );
-        const translationsMap = await translateMealPlanContent(allMeals, targetLanguage);
 
         const translatedDays = mealPlan.days.map(day => ({
           ...day,
           meals: day.meals.map(meal => {
-            const translatedMealName = translationsMap.get(meal.recipe_name) || meal.recipe_name;
+            const translatedMealName = mealNames.get(meal.recipe_name) || meal.recipe_name;
 
             const translatedIngredients = meal.ingredients.map(ing => {
               return {
                 ...ing,
-                name: translationsMap.get(ing.name) || ing.name,
+                name: ingredients.get(ing.name) || ing.name,
               };
             });
 
             const translatedInstructions = (meal.cooking_instructions || []).map(inst => {
-              return translationsMap.get(inst) || inst;
+              return cookingInstructions.get(inst) || inst;
             });
 
             return {

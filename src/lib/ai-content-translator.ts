@@ -2,20 +2,18 @@ import type { Language } from './i18n/translations';
 
 const translationCache = new Map<string, Record<Language, string>>();
 
+export async function translateContent(
+  content: string,
+  targetLanguage: Language
 ): Promise<string> {
-    return content
+  if (!content || targetLanguage === 'en') {
+    return content;
+  }
 
-  const cached = translatio
-    return cached[ta
-
-    const languageN
-   
-
-      pt: 'Portuguese',
-      pl: 'Polish',
-      cs: 'Czech',
+  const cached = translationCache.get(content);
+  if (cached && cached[targetLanguage]) {
     return cached[targetLanguage];
-   
+  }
 
   try {
     const languageNames: Record<Language, string> = {
@@ -31,39 +29,21 @@ const translationCache = new Map<string, Record<Language, string>>();
       cs: 'Czech',
     };
 
-    return content;
-}
-export async function batchTranslateContent(
-  contentType: 'meal_name' | 'ingredient' 
-): Promise<Map<string, string>> {
-  
-    items.forEach(item => resultMap.set(item, item));
-  }
-  const uncachedItems: string[] = [];
-    const ca
-    if (cached && cached[targetLanguage]) {
-    } else {
+    const promptText = `Translate the following text to ${languageNames[targetLanguage]}. Return ONLY the translation, nothing else:
+
+${content}`;
+
+    const translation = await window.spark.llm(promptText, 'gpt-4o-mini');
+    
+    if (!translationCache.has(content)) {
+      translationCache.set(content, {} as Record<Language, string>);
     }
-
-
-
-
-      de: 'German',
-
-      pt: 'Po
-      pl: 'Poli
-
-
-
-2. Keep cultural context where appropriate
+    const cacheEntry = translationCache.get(content)!;
+    cacheEntry[targetLanguage] = translation;
     
-2. Keep measurements and quantities as-is
-    } else {
-2. Keep technical cooking terms accurate
-    
-    const itemsList = uncached
-    const prompt = 
-Items to translate:
+    return translation;
+  } catch (error) {
+    console.error('Translation error:', error);
     return content;
   }
 }
@@ -80,87 +60,71 @@ export async function batchTranslateContent(
     return resultMap;
   }
 
-export async function translateMealPl
-    recipe_name: string;
-    cooking_instructions: string[];
-  targetLanguage: Language
-  const resultMap = new Map<string, string>
-  if (targetLanguage === 'en') {
-      result
-      meal.cooking_instructions
-    r
+  const uncachedItems: string[] = [];
+  items.forEach(item => {
+    const cached = translationCache.get(item);
+    if (cached && cached[targetLanguage]) {
+      resultMap.set(item, cached[targetLanguage]);
+    } else {
+      uncachedItems.push(item);
+    }
+  });
 
+  if (uncachedItems.length === 0) {
+    return resultMap;
+  }
 
+  try {
+    const languageNames: Record<Language, string> = {
+      en: 'English',
+      de: 'German',
+      fr: 'French',
+      es: 'Spanish',
+      it: 'Italian',
+      pt: 'Portuguese',
+      nl: 'Dutch',
+      pl: 'Polish',
+      ro: 'Romanian',
+      cs: 'Czech',
+    };
 
-    if (!allMealNames
-   
+    const contextInstructions: Record<typeof contentType, string> = {
+      meal_name: `Translate meal/recipe names to ${languageNames[targetLanguage]}. Keep cultural context where appropriate.`,
+      ingredient: `Translate ingredient names to ${languageNames[targetLanguage]}. Keep measurements and quantities as-is.`,
+      cooking_instruction: `Translate cooking instructions to ${languageNames[targetLanguage]}. Keep technical cooking terms accurate.`,
+    };
 
+    const itemsList = uncachedItems.map((item, i) => `${i + 1}. ${item}`).join('\n');
+    
+    const promptText = `${contextInstructions[contentType]}
+
+Items to translate:
+${itemsList}
+
+Return the translations as a JSON object with a single property "translations" that contains an array of translated strings in the same order. Only return the JSON, nothing else.`;
+
+    const response = await window.spark.llm(promptText, 'gpt-4o-mini', true);
+    const parsed = JSON.parse(response);
+    const translations: string[] = parsed.translations || [];
+
+    uncachedItems.forEach((item, index) => {
+      const translation = translations[index] || item;
+      resultMap.set(item, translation);
+      
+      if (!translationCache.has(item)) {
+        translationCache.set(item, {} as Record<Language, string>);
       }
-    meal.cooking_instructions.forEach(inst => {
-        allInstructi
+      const cacheEntry = translationCache.get(item)!;
+      cacheEntry[targetLanguage] = translation;
     });
 
-    batchTranslateCo
-    batchTranslateCo
-
-  ingredientsMap.f
-
+    return resultMap;
+  } catch (error) {
+    console.error('Batch translation error:', error);
+    uncachedItems.forEach(item => resultMap.set(item, item));
+    return resultMap;
+  }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 export async function translateMealPlanContent(
   mealNames: string[],
