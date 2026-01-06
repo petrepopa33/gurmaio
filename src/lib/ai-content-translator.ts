@@ -2,66 +2,66 @@ import type { Language } from './i18n/translations';
 
 export async function translateContentBatch(
   items: string[],
-  targetLanguage: Language
+  const resultMap = new Ma
 ): Promise<Map<string, string>> {
   const resultMap = new Map<string, string>();
   
-  if (targetLanguage === 'en' || items.length === 0) {
-    items.forEach(item => resultMap.set(item, item));
     return resultMap;
-  }
 
-  const uniqueItems = Array.from(new Set(items));
-  
-  if (uniqueItems.length === 0) {
-    return resultMap;
-  }
+    const itemsJson =
+   
 
-  try {
-    const itemsJson = JSON.stringify(uniqueItems);
-    
-    const languageNames: Record<Language, string> = {
-      en: 'English',
-      de: 'German',
-      fr: 'French',
       es: 'Spanish',
-      it: 'Italian',
-      pt: 'Portuguese',
-      nl: 'Dutch',
+  
       pl: 'Polish',
-      ro: 'Romanian',
       cs: 'Czech'
-    };
 
-    const prompt = (window.spark.llmPrompt as any)`Translate the following array of text items to ${languageNames[targetLanguage]}.
 
-Input JSON array:
-${itemsJson}
+${items
+Return a JSON object with a "translations" propert
+Exam
+  "translations": ["translated item 1", "translated i
 
-Return a JSON object with a "translations" property containing an array of translated strings in the same order as the input. Keep the translation natural and contextually appropriate for food/cooking content.
-
-Example format:
-{
-  "translations": ["translated item 1", "translated item 2", ...]
-}`;
-
-    const response = await window.spark.llm(prompt, 'gpt-4o-mini', true);
-    const parsed = JSON.parse(response);
-    
-    if (parsed.translations && Array.isArray(parsed.translations)) {
-      uniqueItems.forEach((item, index) => {
-        const translated = parsed.translations[index];
-        if (translated && typeof translated === 'string') {
-          resultMap.set(item, translated);
-        } else {
-          resultMap.set(item, item);
-        }
+    const parsed = 
+    if (parsed.tran
+        const transl
+          resultMap.
+          resultMap.set
       });
-    }
 
-    uniqueItems.forEach(item => {
-      if (!resultMap.has(item)) {
-        resultMap.set(item, item);
+      if (!resultMap.
+      }
+  } ca
+
+
+
+export async func
+  mealNames:
+
+  ingredients: Map<string, string>;
+
+  const [transl
+ 
+  ]);
+  r
+
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
       }
     });
   } catch (error) {
