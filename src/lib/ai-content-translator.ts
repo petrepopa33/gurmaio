@@ -1,68 +1,67 @@
 import type { Language } from '@/lib/i18n/translations';
 
-const LANGUAGE_NAMES: Record<Language, string> = {
-  en: 'English',
+  de: 'German',
+  es: 'Spanish',
   de: 'German',
   fr: 'French',
   es: 'Spanish',
   it: 'Italian',
-  pt: 'Portuguese',
-  nl: 'Dutch',
-  pl: 'Polish',
-  ro: 'Romanian',
   cs: 'Czech',
-};
 
-async function translateBatchContent(
-  items: string[],
-  targetLanguage: Language,
-  contentType: string
-): Promise<Map<string, string>> {
-  const resultMap = new Map<string, string>();
+  items: string
+  contentType: st
+  const result
   
-  if (targetLanguage === 'en') {
-    items.forEach(item => resultMap.set(item, item));
-    return resultMap;
-  }
 
-  if (items.length === 0) {
-    return resultMap;
-  }
 
-  const uniqueItems = Array.from(new Set(items));
+    return resultM
+
   
-  try {
-    const languageName = LANGUAGE_NAMES[targetLanguage] || targetLanguage;
-    const itemsList = uniqueItems.map(item => `"${item}"`).join('\n');
+    const languageName = LANGUAGE
     
-    const promptText = `You are a professional food and recipe translator. Translate the following ${contentType} from English to ${languageName}.
 
-Important rules:
-- Maintain the original meaning and culinary accuracy
-- Use natural, native expressions for food terms
+- Maintain the original meaning 
 - Keep measurements and numbers unchanged
-- Return ONLY a JSON object with the format: {"original text": "translated text"}
-- Do not include any explanations or additional text
+- Do not include any 
+Ite
 
-Items to translate:
-${itemsList}
 
-Return the result as a valid JSON object with original text as keys and translated text as values.`;
+    const translation
+   
 
-    const translationResult = await window.spark.llm(promptText, 'gpt-4o', true);
-    const translations = JSON.parse(translationResult);
-    
-    uniqueItems.forEach(item => {
-      const translated = translations[item];
-      if (translated) {
-        resultMap.set(item, translated);
       } else {
-        resultMap.set(item, item);
-      }
-    });
+  
 
-    return resultMap;
   } catch (error) {
+    
+  }
+
+  ingredients: s
+  cookingInstructions: string[],
+): Promise<{
+  mealNames: Map<string, string>;
+}> {
+    translateBatchContent(ingredients, targetLanguag
+
+
+    ingredients: ingredientsMap,
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     console.error('Translation error:', error);
     uniqueItems.forEach(item => resultMap.set(item, item));
     return resultMap;
