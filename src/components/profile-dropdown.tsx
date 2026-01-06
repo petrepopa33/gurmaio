@@ -1,4 +1,4 @@
-import { SignOut, ClockClockwise, Trash, Gear, Heart, CaretDown, Globe } from '@phosphor-icons/react';
+import { SignOut, ClockClockwise, Trash, Gear, Heart, CaretDown, Globe, CaretRight } from '@phosphor-icons/react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -6,6 +6,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -110,28 +113,29 @@ export function ProfileDropdown({
           <Gear className="mr-2 h-4 w-4" />
           <span>Account Settings</span>
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuLabel className="text-xs text-muted-foreground uppercase tracking-wide px-2 py-1.5">
-          Language / Limbă
-        </DropdownMenuLabel>
-        <div className="max-h-[200px] overflow-y-auto">
-          {LANGUAGES.map((lang) => (
-            <DropdownMenuItem
-              key={lang.code}
-              onClick={() => onLanguageChange(lang.code as Language)}
-              className={`gap-3 py-2.5 cursor-pointer hover:bg-accent transition-colors ${
-                lang.code === currentLanguage ? 'bg-accent/50 font-semibold' : ''
-              }`}
-            >
-              <Globe className="h-4 w-4 text-muted-foreground" weight="duotone" />
-              <span className="text-base">{lang.flag}</span>
-              <span className="flex-1 font-medium text-sm">{lang.name}</span>
-              {lang.code === currentLanguage && (
-                <span className="text-primary font-bold">✓</span>
-              )}
-            </DropdownMenuItem>
-          ))}
-        </div>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger>
+            <Globe className="mr-2 h-4 w-4" />
+            <span>{currentLang.flag} {currentLang.name}</span>
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="max-h-[300px] overflow-y-auto">
+            {LANGUAGES.map((lang) => (
+              <DropdownMenuItem
+                key={lang.code}
+                onClick={() => onLanguageChange(lang.code as Language)}
+                className={`gap-2 cursor-pointer ${
+                  lang.code === currentLanguage ? 'bg-accent/50 font-semibold' : ''
+                }`}
+              >
+                <span className="text-base">{lang.flag}</span>
+                <span className="flex-1 font-medium text-sm">{lang.name}</span>
+                {lang.code === currentLanguage && (
+                  <span className="text-primary font-bold">✓</span>
+                )}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={onLogoutClick}>
           <SignOut className="mr-2 h-4 w-4" />
