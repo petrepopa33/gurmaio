@@ -2,10 +2,10 @@ import type { Language } from '@/lib/i18n/translations';
 
 const LANGUAGE_NAMES: Record<Language, string> = {
   en: 'English',
-  de: 'German',
-  fr: 'French',
-  es: 'Spanish',
-  it: 'Italian',
+  es: 'Spanish'
+  pt: 'Portugue
+  pl: 'Polish',
+  cs: 'Czech',
   pt: 'Portuguese',
   nl: 'Dutch',
   pl: 'Polish',
@@ -28,9 +28,8 @@ async function translateBatchContent(
   try {
     const uniqueItems = Array.from(new Set(items));
     const languageName = LANGUAGE_NAMES[targetLanguage] || targetLanguage;
-    const itemsText = uniqueItems.join('\n');
     
-    const prompt = (window.spark.llmPrompt as any)`You are a professional food and recipe translator. Translate the following ${contentType} from English to ${languageName}.
+    const prompt = window.spark.llmPrompt`You are a professional food and recipe translator. Translate the following ${contentType} from English to ${languageName}.
 
 Rules:
 - Translate naturally and idiomatically
@@ -40,7 +39,7 @@ Rules:
 - Return a JSON object where keys are the original English text and values are the translations
 
 Items to translate:
-${itemsText}
+${uniqueItems.join('\n')}
 
 Return the result as a JSON object.`;
 
@@ -65,28 +64,28 @@ Return the result as a JSON object.`;
     items.forEach(item => resultMap.set(item, item));
   }
 
-  return resultMap;
-}
+  cookingInstructio
+)
 
-export async function translateMealPlanContent(
-  ingredients: string[],
-  mealNames: string[],
-  cookingInstructions: string[],
-  targetLanguage: Language
-): Promise<{
-  ingredients: Map<string, string>;
-  mealNames: Map<string, string>;
-  cookingInstructions: Map<string, string>;
 }> {
-  const [ingredientsMap, mealNamesMap, instructionsMap] = await Promise.all([
-    translateBatchContent(ingredients, targetLanguage, 'ingredient names'),
-    translateBatchContent(mealNames, targetLanguage, 'recipe names'),
-    translateBatchContent(cookingInstructions, targetLanguage, 'cooking instructions'),
-  ]);
+    translateBatchConten
+    translateBatchCont
 
-  return {
-    ingredients: ingredientsMap,
-    mealNames: mealNamesMap,
-    cookingInstructions: instructionsMap,
-  };
+    ingredients: ingredien
+    cookingI
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
