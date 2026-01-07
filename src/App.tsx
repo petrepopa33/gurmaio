@@ -1031,7 +1031,12 @@ function App() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b">
           <div className="container mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
-              <h1 className="font-heading text-xl font-bold text-primary">{t.appName}</h1>
+              <h1 
+                className="font-heading text-xl font-bold text-primary cursor-pointer hover:opacity-80 transition-opacity"
+                onClick={() => window.location.reload()}
+              >
+                {t.appName}
+              </h1>
               <div className="flex items-center gap-2">
                 <LanguageSwitcher currentLanguage={language} onLanguageChange={handleLanguageChange} />
                 {currentUser && (
@@ -1267,7 +1272,20 @@ function App() {
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <h1 className="font-heading text-2xl font-bold text-primary">{t.appName}</h1>
+            <h1 
+              className="font-heading text-2xl font-bold text-primary cursor-pointer hover:opacity-80 transition-opacity"
+              onClick={() => {
+                setUserProfile(() => null);
+                setMealPlan(() => null);
+                setMealPrepPlan(() => null);
+                setShoppingListState(() => null);
+                setScheduledDays(() => []);
+                setDayProgress(() => []);
+                setActiveTab('meals');
+              }}
+            >
+              {t.appName}
+            </h1>
             <div className="flex items-center gap-3">
               {currentUser ? (
                 <div className="flex items-center gap-3">
