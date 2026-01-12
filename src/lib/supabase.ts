@@ -14,8 +14,8 @@ const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY');
 const hasConfig = Boolean(supabaseUrl) && Boolean(supabaseAnonKey);
 
 export const supabase = hasConfig
+  ? createClient(supabaseUrl, supabaseAnonKey)
   : null;
-export co
 
 export const isSupabaseConfigured = hasConfig;
 
