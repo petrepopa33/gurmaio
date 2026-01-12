@@ -19,13 +19,13 @@ export const supabase = hasConfig
 
 export const isSupabaseConfigured = hasConfig;
 
-
-n {
-
- Boolean(supabaseUrl),
-: Boolean(supabaseAnonKey),
-;
-
+export function getSupabaseStatus() {
+  return {
+    configured: hasConfig,
+    hasUrl: Boolean(supabaseUrl),
+    hasAnonKey: Boolean(supabaseAnonKey),
+  };
+}
 
 
 
