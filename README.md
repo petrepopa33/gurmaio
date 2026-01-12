@@ -86,25 +86,35 @@ npm run dev
 
 ### 🗄️ Database Setup (Supabase)
 
-The app now uses **Supabase** as the backend for persistent data storage. Complete setup instructions:
+The app uses **Supabase** as the backend for persistent data storage.
 
-- **⚡ Quick Setup**: See [QUICKSTART.md](./QUICKSTART.md) (5 minutes)
-- **📖 Full Guide**: See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
-- **🔧 Integration**: See [INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md)
-- **✅ Checklist**: See [INTEGRATION_CHECKLIST.md](./INTEGRATION_CHECKLIST.md)
+#### Quick Start
+1. **Setup Guide**: [supabase/SETUP.md](./supabase/SETUP.md) - Complete setup instructions (5 minutes)
+2. **Apply Migration**: [supabase/migrations/20240101000000_initial_schema.sql](./supabase/migrations/20240101000000_initial_schema.sql)
+3. **Verify**: [supabase/VERIFICATION_CHECKLIST.md](./supabase/VERIFICATION_CHECKLIST.md)
 
-**What's included:**
-- Complete database schema with RLS
-- TypeScript types for all tables
-- Service layer for all CRUD operations
-- Security policies for user data isolation
-- Example integration patterns
+#### Documentation
+- 📖 **Schema Overview**: [supabase/README.md](./supabase/README.md)
+- 🎨 **Visual Diagrams**: [supabase/SCHEMA_DIAGRAM.md](./supabase/SCHEMA_DIAGRAM.md)
+- 🔍 **Query Reference**: [supabase/QUERY_REFERENCE.md](./supabase/QUERY_REFERENCE.md)
+- 📋 **Full Index**: [supabase/INDEX.md](./supabase/INDEX.md)
 
-**Tables created:**
-- profiles, meal_plans, meal_preferences, portion_adjustments
-- scheduled_days, day_progress, badges, shopping_lists, meal_prep_plans
+#### Core Tables (5)
+1. **profiles** - User settings and meal preferences
+2. **meal_plans** - Meal plans with budget and duration
+3. **meals** - Individual meals with nutritional data
+4. **shopping_items** - Shopping list items per meal plan
+5. **user_progress** - Daily progress tracking
 
-See [SUPABASE_INTEGRATION_SUMMARY.md](./SUPABASE_INTEGRATION_SUMMARY.md) for complete details.
+#### Features
+- ✅ Row Level Security (RLS) on all tables
+- ✅ Automatic timestamps with triggers
+- ✅ Cascading deletes for data integrity
+- ✅ Optimized indexes for performance
+- ✅ JSONB fields for flexible data storage
+- ✅ Data validation with CHECK constraints
+
+See [supabase/INDEX.md](./supabase/INDEX.md) for complete documentation.
 
 ### Features Demonstrated
 - ✅ User onboarding flow
