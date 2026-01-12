@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
-function getEnvVar(key: string): string {
-  try {
+    return import.meta.env[key] || '';
+    ret
     return import.meta.env[key] || '';
   } catch {
     return '';
@@ -14,18 +14,17 @@ const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY');
 const hasConfig = Boolean(supabaseUrl && supabaseAnonKey);
 
 export const supabase = hasConfig
-  ? createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        persistSession: true,
-        autoRefreshToken: true,
       }
-    })
   : null;
-
-export function getSupabaseStatus() {
-  return {
-    hasUrl: Boolean(supabaseUrl),
-    hasKey: Boolean(supabaseAnonKey),
-    configured: hasConfig,
-  };
+export function getSupabaseSt
+    hasUrl: Boolean(supabaseUrl
+    con
 }
+
+
+
+
+
+
+
+
