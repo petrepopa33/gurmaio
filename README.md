@@ -68,6 +68,7 @@ This repository includes a working React prototype demonstrating the Gurmaio UI 
 ### Prerequisites
 - Node.js 18+
 - npm
+- Supabase account (for data persistence)
 
 ### Installation
 
@@ -75,18 +76,49 @@ This repository includes a working React prototype demonstrating the Gurmaio UI 
 # Install dependencies
 npm install
 
+# Configure Supabase (see QUICKSTART.md for full setup)
+cp .env.example .env
+# Add your Supabase credentials to .env
+
 # Start development server
 npm run dev
 ```
 
+### 🗄️ Database Setup (Supabase)
+
+The app now uses **Supabase** as the backend for persistent data storage. Complete setup instructions:
+
+- **⚡ Quick Setup**: See [QUICKSTART.md](./QUICKSTART.md) (5 minutes)
+- **📖 Full Guide**: See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md)
+- **🔧 Integration**: See [INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md)
+- **✅ Checklist**: See [INTEGRATION_CHECKLIST.md](./INTEGRATION_CHECKLIST.md)
+
+**What's included:**
+- Complete database schema with RLS
+- TypeScript types for all tables
+- Service layer for all CRUD operations
+- Security policies for user data isolation
+- Example integration patterns
+
+**Tables created:**
+- profiles, meal_plans, meal_preferences, portion_adjustments
+- scheduled_days, day_progress, badges, shopping_lists, meal_prep_plans
+
+See [SUPABASE_INTEGRATION_SUMMARY.md](./SUPABASE_INTEGRATION_SUMMARY.md) for complete details.
+
 ### Features Demonstrated
 - ✅ User onboarding flow
 - ✅ Budget and dietary preference configuration
-- ✅ Meal plan generation (with mock data)
+- ✅ Meal plan generation (with AI)
 - ✅ Multi-day meal plan visualization
 - ✅ Nutrition and cost breakdowns at all levels
 - ✅ Shopping list aggregation
+- ✅ Calendar scheduling and progress tracking
+- ✅ Meal prep planning
+- ✅ Badges and achievements
 - ✅ Responsive design (mobile & desktop)
+- ✅ Multi-language support (10 languages)
+- ✅ Data persistence with Supabase
 
 ## 🏗️ Production Implementation
 
