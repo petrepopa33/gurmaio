@@ -2,9 +2,9 @@ import { createClient } from '@supabase/supabase-js';
 
 const getEnv = (key: string): string => {
   if (typeof import.meta.env !== 'undefined') {
-  return '';
+    return import.meta.env[key] || '';
   }
-const supaba
+  return '';
 };
 
 const supabaseUrl = getEnv('VITE_SUPABASE_URL');
@@ -16,14 +16,21 @@ export const supabase = hasConfig
   ? createClient(supabaseUrl, supabaseAnonKey, {
       auth: {
         persistSession: true,
-  };
       },
-export
+    })
   : null;
 
 export const getSupabaseConfig = () => {
-};
+  return {
     url: supabaseUrl || 'Not configured',
     hasConfig,
   };
+};
 
+export const getSupabaseStatus = () => {
+  return {
+    configured: hasConfig,
+    url: supabaseUrl || 'Not configured',
+    hasKey: Boolean(supabaseAnonKey),
+  };
+};
