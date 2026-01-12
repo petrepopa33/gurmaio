@@ -1,19 +1,20 @@
 import { createClient } from '@supabase/supabase-js';
 
+function getEnvVar(key: string): string {
+  if (typeof import.meta.env !== 'undefined' && import.meta.env[key]) {
     return import.meta.env[key] || '';
+  }
   return '';
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables. Please check your .env file.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  supabas
-  supabaseAnonKey.length > 
-const hasConfig = !!(isVa
+const supabaseUrl = getEnvVar('VITE_SUPABASE_URL');
+const supabaseAnonKey = getEnvVar('VITE_SUPABASE_ANON_KEY');
+
+const isValidKey = supabaseAnonKey && supabaseAnonKey.length > 20;
+const hasConfig = !!(supabaseUrl && isValidKey);
+
 if (!hasConfig) {
-  c
-  c
+  console.warn('Supabase is not configured. Some features may be limited.');
 }
 
 export const supabase = createClient(
@@ -39,4 +40,3 @@ export function getSupabaseStatus(): { configured: boolean; url: string; hasKey:
     hasKey: !!isValidKey,
   };
 }
-
