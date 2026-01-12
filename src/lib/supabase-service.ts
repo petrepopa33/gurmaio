@@ -12,8 +12,16 @@ import type {
 } from '@/types/domain';
 
 export class SupabaseService {
+  private static ensureSupabase() {
+    if (!supabase) {
+      throw new Error('Supabase is not configured');
+    }
+    return supabase;
+  }
+
   static async getCurrentUser() {
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const client = this.ensureSupabase();
+    const { data: { user }, error } = await client.auth.getUser();
     if (error) throw error;
     return user;
   }
@@ -22,7 +30,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) return null;
 
-    const { data, error } = await supabase
+    const client = this.ensureSupabase();
+    const { data, error } = await client
       .from('profiles')
       .select('*')
       .eq('user_id', user.id)
@@ -52,7 +61,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
-    const { error } = await supabase
+    const client = this.ensureSupabase();
+    const { error } = await client
       .from('profiles')
       .upsert({
         user_id: user.id,
@@ -73,7 +83,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) return null;
 
-    const { data, error } = await supabase
+    const client = this.ensureSupabase();
+    const { data, error } = await client
       .from('meal_plans')
       .select('*')
       .eq('user_id', user.id)
@@ -105,7 +116,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
-    const { error } = await supabase
+    const client = this.ensureSupabase();
+    const { error } = await client
       .from('meal_plans')
       .upsert({
         user_id: user.id,
@@ -126,7 +138,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) return [];
 
-    const { data, error } = await supabase
+    const client = this.ensureSupabase();
+    const { data, error } = await client
       .from('meal_plans')
       .select('*')
       .eq('user_id', user.id)
@@ -150,7 +163,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
-    const { error } = await supabase
+    const client = this.ensureSupabase();
+    const { error } = await client
       .from('meal_plans')
       .delete()
       .eq('user_id', user.id)
@@ -163,7 +177,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) return [];
 
-    const { data, error } = await supabase
+    const client = this.ensureSupabase();
+    const { data, error } = await client
       .from('meal_preferences')
       .select('*')
       .eq('user_id', user.id);
@@ -184,7 +199,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
-    const { error } = await supabase
+    const client = this.ensureSupabase();
+    const { error } = await client
       .from('meal_preferences')
       .upsert({
         user_id: user.id,
@@ -205,7 +221,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
-    const { error } = await supabase
+    const client = this.ensureSupabase();
+    const { error } = await client
       .from('meal_preferences')
       .delete()
       .eq('user_id', user.id)
@@ -218,7 +235,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) return [];
 
-    const { data, error } = await supabase
+    const client = this.ensureSupabase();
+    const { data, error } = await client
       .from('portion_adjustments')
       .select('*')
       .eq('user_id', user.id);
@@ -235,7 +253,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
-    const { error } = await supabase
+    const client = this.ensureSupabase();
+    const { error } = await client
       .from('portion_adjustments')
       .upsert({
         user_id: user.id,
@@ -252,7 +271,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
-    const { error } = await supabase
+    const client = this.ensureSupabase();
+    const { error } = await client
       .from('portion_adjustments')
       .delete()
       .eq('user_id', user.id)
@@ -265,7 +285,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) return [];
 
-    const { data, error } = await supabase
+    const client = this.ensureSupabase();
+    const { data, error } = await client
       .from('scheduled_days')
       .select('*')
       .eq('user_id', user.id)
@@ -290,7 +311,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
-    const { error } = await supabase
+    const client = this.ensureSupabase();
+    const { error } = await client
       .from('scheduled_days')
       .upsert({
         user_id: user.id,
@@ -314,7 +336,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
-    const { error } = await supabase
+    const client = this.ensureSupabase();
+    const { error } = await client
       .from('scheduled_days')
       .delete()
       .eq('user_id', user.id)
@@ -327,7 +350,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) return [];
 
-    const { data, error } = await supabase
+    const client = this.ensureSupabase();
+    const { data, error } = await client
       .from('day_progress')
       .select('*')
       .eq('user_id', user.id)
@@ -348,7 +372,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
-    const { error } = await supabase
+    const client = this.ensureSupabase();
+    const { error } = await client
       .from('day_progress')
       .upsert({
         user_id: user.id,
@@ -368,7 +393,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
-    const { error } = await supabase
+    const client = this.ensureSupabase();
+    const { error } = await client
       .from('day_progress')
       .delete()
       .eq('user_id', user.id)
@@ -381,7 +407,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) return [];
 
-    const { data, error } = await supabase
+    const client = this.ensureSupabase();
+    const { data, error } = await client
       .from('badges')
       .select('*')
       .eq('user_id', user.id)
@@ -405,7 +432,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
-    const { error } = await supabase
+    const client = this.ensureSupabase();
+    const { error } = await client
       .from('badges')
       .upsert({
         user_id: user.id,
@@ -428,7 +456,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) return null;
 
-    const { data, error } = await supabase
+    const client = this.ensureSupabase();
+    const { data, error } = await client
       .from('shopping_lists')
       .select('*')
       .eq('user_id', user.id)
@@ -448,7 +477,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
-    const { error } = await supabase
+    const client = this.ensureSupabase();
+    const { error } = await client
       .from('shopping_lists')
       .upsert({
         user_id: user.id,
@@ -465,7 +495,8 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) return null;
 
-    const { data, error } = await supabase
+    const client = this.ensureSupabase();
+    const { data, error } = await client
       .from('meal_prep_plans')
       .select('*')
       .eq('user_id', user.id)
@@ -506,7 +537,8 @@ export class SupabaseService {
       storage_requirements: prepPlan.storage_requirements,
     };
 
-    const { error } = await supabase
+    const client = this.ensureSupabase();
+    const { error } = await client
       .from('meal_prep_plans')
       .upsert({
         user_id: user.id,
@@ -524,16 +556,17 @@ export class SupabaseService {
     const user = await this.getCurrentUser();
     if (!user) throw new Error('Not authenticated');
 
+    const client = this.ensureSupabase();
     await Promise.all([
-      supabase.from('profiles').delete().eq('user_id', user.id),
-      supabase.from('meal_plans').delete().eq('user_id', user.id),
-      supabase.from('meal_preferences').delete().eq('user_id', user.id),
-      supabase.from('portion_adjustments').delete().eq('user_id', user.id),
-      supabase.from('scheduled_days').delete().eq('user_id', user.id),
-      supabase.from('day_progress').delete().eq('user_id', user.id),
-      supabase.from('badges').delete().eq('user_id', user.id),
-      supabase.from('shopping_lists').delete().eq('user_id', user.id),
-      supabase.from('meal_prep_plans').delete().eq('user_id', user.id),
+      client.from('profiles').delete().eq('user_id', user.id),
+      client.from('meal_plans').delete().eq('user_id', user.id),
+      client.from('meal_preferences').delete().eq('user_id', user.id),
+      client.from('portion_adjustments').delete().eq('user_id', user.id),
+      client.from('scheduled_days').delete().eq('user_id', user.id),
+      client.from('day_progress').delete().eq('user_id', user.id),
+      client.from('badges').delete().eq('user_id', user.id),
+      client.from('shopping_lists').delete().eq('user_id', user.id),
+      client.from('meal_prep_plans').delete().eq('user_id', user.id),
     ]);
   }
 }

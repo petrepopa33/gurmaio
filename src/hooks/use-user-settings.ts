@@ -14,15 +14,16 @@ export function useUserSettings() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!user) {
+    if (!user || !supabase) {
       setSettings({});
       setLoading(false);
       return;
     }
 
+    const client = supabase;
     const loadSettings = async () => {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await client
           .from('user_settings')
           .select('*')
           .eq('user_id', user.id)
@@ -46,7 +47,7 @@ export function useUserSettings() {
   }, [user]);
 
   const updateSettings = useCallback(async (newSettings: Partial<UserSettings>) => {
-    if (!user) return;
+    if (!user || !supabase) return;
 
     const updatedSettings = { ...settings, ...newSettings };
     setSettings(updatedSettings);
