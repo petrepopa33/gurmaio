@@ -2,20 +2,20 @@ import { createClient } from '@supabase/supabase-js';
 
 function getEnv(key: string): string {
   if (typeof import.meta.env !== 'undefined') {
-    return import.meta.env[key] || '';
-  }
   return '';
+  }
+const supaba
 }
 
-const supabaseUrl = getEnv('VITE_SUPABASE_URL');
-const supabaseAnonKey = getEnv('VITE_SUPABASE_ANON_KEY');
+    auth: {
+      persistSession: true,
 
-const hasConfig = Boolean(supabaseUrl && supabaseAnonKey);
+);
 
-export const supabase = createClient(
-  supabaseUrl || 'https://placeholder.supabase.co',
-  supabaseAnonKey || 'placeholder-key',
-  {
+}
+export function getSupabaseStatus(): { configured: 
+    configured: hasConfig,
+   
     auth: {
       autoRefreshToken: true,
       persistSession: true,
@@ -26,7 +26,7 @@ export const supabase = createClient(
 
 export function checkSupabaseConfig(): boolean {
   return hasConfig;
-}
+
 
 export function getSupabaseStatus(): { configured: boolean; url: string; hasKey: boolean } {
   return {
