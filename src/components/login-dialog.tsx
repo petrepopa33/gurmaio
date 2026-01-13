@@ -13,16 +13,24 @@ interface LoginDialogProps {
 }
 
 export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
-  const { signIn } = useAuth();
+  const { signIn, resendSignupConfirmationEmail } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [info, setInfo] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+
+  const isEmailNotConfirmedError = (message: string) => {
+    const normalized = (message || '').toLowerCase();
+    return normalized.includes('email not confirmed') || normalized.includes('not confirmed');
+  };
 
   const handleLogin = async () => {
     setError('');
     setSuccess(false);
+    setInfo('');
 
     if (!email || !password) {
       setError('Please enter your email and password');
@@ -57,7 +65,31 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
     setPassword('');
     setError('');
     setSuccess(false);
+    setInfo('');
     onOpenChange(false);
+  };
+
+  const handleResendConfirmation = async () => {
+    setError('');
+    setInfo('');
+
+    if (!email) {
+      setError('Please enter your email address first');
+      return;
+    }
+
+    setIsResending(true);
+    const { error: resendError } = await resendSignupConfirmationEmail(email, {
+      emailRedirectTo: window.location.origin,
+    });
+    setIsResending(false);
+
+    if (resendError) {
+      setError(resendError.message || 'Failed to resend confirmation email. Please try again.');
+      return;
+    }
+
+    setInfo('Confirmation email sent. Please check your inbox (and spam) and then try logging in again.');
   };
 
   return (
@@ -76,6 +108,28 @@ export function LoginDialog({ open, onOpenChange }: LoginDialogProps) {
             <Alert variant="destructive">
               <Warning className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {error && isEmailNotConfirmedError(error) && (
+            <Alert className="bg-muted/40">
+              <AlertDescription className="flex items-center justify-between gap-3">
+                <span>Your email is not confirmed yet.</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResendConfirmation}
+                  disabled={isLoggingIn || success || isResending}
+                >
+                  {isResending ? 'Sending...' : 'Resend email'}
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {info && (
+            <Alert className="bg-muted/40">
+              <AlertDescription>{info}</AlertDescription>
             </Alert>
           )}
 

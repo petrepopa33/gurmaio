@@ -12,6 +12,10 @@ interface AuthContextType {
     options?: { emailRedirectTo?: string }
   ) => Promise<{ error: Error | null; needsEmailConfirmation?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  resendSignupConfirmationEmail: (
+    email: string,
+    options?: { emailRedirectTo?: string }
+  ) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
 
@@ -78,6 +82,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const resendSignupConfirmationEmail = async (email: string, options?: { emailRedirectTo?: string }) => {
+    if (!supabase) {
+      return { error: new Error('Supabase not configured') };
+    }
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email,
+        options: {
+          emailRedirectTo: options?.emailRedirectTo,
+        },
+      });
+      return { error };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  };
+
   const signOut = async () => {
     if (!supabase) return;
     await supabase.auth.signOut();
@@ -89,6 +111,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     loading,
     signUp,
     signIn,
+    resendSignupConfirmationEmail,
     signOut,
   };
 

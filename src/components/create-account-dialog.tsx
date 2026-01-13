@@ -30,7 +30,7 @@ const passwordRequirements: PasswordRequirement[] = [
 ];
 
 export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogProps) {
-  const { signUp } = useAuth();
+  const { signUp, resendSignupConfirmationEmail } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -38,6 +38,8 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
   const [success, setSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [needsConfirmation, setNeedsConfirmation] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [agreeToTerms, setAgreeToTerms] = useState(false);
@@ -76,6 +78,7 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
     setError('');
     setSuccess(false);
     setSuccessMessage('');
+    setNeedsConfirmation(false);
 
     if (!email || !password || !confirmPassword) {
       setError('Please fill in all fields');
@@ -117,6 +120,7 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
       }
 
       setSuccess(true);
+      setNeedsConfirmation(Boolean(needsEmailConfirmation));
       setSuccessMessage(
         needsEmailConfirmation
           ? 'Account created! Please check your email to confirm your account.'
@@ -124,14 +128,42 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
       );
       setIsCreating(false);
 
-      setTimeout(() => {
-        onOpenChange(false);
-      }, 1500);
+      if (!needsEmailConfirmation) {
+        setTimeout(() => {
+          onOpenChange(false);
+        }, 1500);
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to create account. Please try again.';
       setError(message);
       setIsCreating(false);
     }
+  };
+
+  const handleResendConfirmation = async () => {
+    setError('');
+    setSuccess(false);
+    setSuccessMessage('');
+
+    if (!email) {
+      setError('Please enter your email address first');
+      return;
+    }
+
+    setIsResending(true);
+    const { error: resendError } = await resendSignupConfirmationEmail(email, {
+      emailRedirectTo: window.location.origin,
+    });
+    setIsResending(false);
+
+    if (resendError) {
+      setError(resendError.message || 'Failed to resend confirmation email. Please try again.');
+      return;
+    }
+
+    setSuccess(true);
+    setNeedsConfirmation(true);
+    setSuccessMessage('Confirmation email sent. Please check your inbox (and spam).');
   };
 
   const handleOAuthSignIn = async (provider: 'google' | 'apple' | 'facebook' | 'twitter') => {
@@ -269,6 +301,19 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
                 {successMessage || 'Account created successfully!'}
               </AlertDescription>
             </Alert>
+          )}
+
+          {needsConfirmation && (
+            <div className="flex items-center justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleResendConfirmation}
+                disabled={isCreating || isResending}
+              >
+                {isResending ? 'Sending...' : 'Resend confirmation email'}
+              </Button>
+            </div>
           )}
 
           <div className="space-y-2">
