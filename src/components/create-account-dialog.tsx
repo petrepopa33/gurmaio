@@ -8,6 +8,8 @@ import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { EnvelopeSimple, Warning, CheckCircle, Check, X, Eye, EyeSlash, GoogleLogo, AppleLogo, FacebookLogo, TwitterLogo } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 
 interface CreateAccountDialogProps {
   open: boolean;
@@ -28,11 +30,13 @@ const passwordRequirements: PasswordRequirement[] = [
 ];
 
 export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogProps) {
+  const { signUp } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -71,6 +75,7 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
   const handleCreateAccount = async () => {
     setError('');
     setSuccess(false);
+    setSuccessMessage('');
 
     if (!email || !password || !confirmPassword) {
       setError('Please fill in all fields');
@@ -101,34 +106,69 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
     setIsCreating(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      const { error: signUpError, needsEmailConfirmation } = await signUp(email, password, {
+        emailRedirectTo: window.location.origin,
+      });
+
+      if (signUpError) {
+        setError(signUpError.message || 'Failed to create account. Please try again.');
+        setIsCreating(false);
+        return;
+      }
+
       setSuccess(true);
-      
+      setSuccessMessage(
+        needsEmailConfirmation
+          ? 'Account created! Please check your email to confirm your account.'
+          : 'Account created successfully!'
+      );
+      setIsCreating(false);
+
       setTimeout(() => {
-        window.location.href = '/.spark/login';
+        onOpenChange(false);
       }, 1500);
     } catch (err) {
-      setError('Failed to create account. Please try again.');
+      const message = err instanceof Error ? err.message : 'Failed to create account. Please try again.';
+      setError(message);
       setIsCreating(false);
     }
   };
 
-  const handleGoogleSignIn = () => {
-    window.location.href = '/.spark/login?provider=google';
+  const handleOAuthSignIn = async (provider: 'google' | 'apple' | 'facebook' | 'twitter') => {
+    setError('');
+    setSuccess(false);
+    setSuccessMessage('');
+
+    if (!supabase) {
+      setError('Supabase not configured');
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const { error: oauthError } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+
+      if (oauthError) {
+        setError(oauthError.message || 'Failed to sign in. Please try again.');
+        setIsCreating(false);
+      }
+      // On success, browser redirects away.
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to sign in. Please try again.';
+      setError(message);
+      setIsCreating(false);
+    }
   };
 
-  const handleAppleSignIn = () => {
-    window.location.href = '/.spark/login?provider=apple';
-  };
-
-  const handleFacebookSignIn = () => {
-    window.location.href = '/.spark/login?provider=facebook';
-  };
-
-  const handleTwitterSignIn = () => {
-    window.location.href = '/.spark/login?provider=twitter';
-  };
+  const handleGoogleSignIn = () => void handleOAuthSignIn('google');
+  const handleAppleSignIn = () => void handleOAuthSignIn('apple');
+  const handleFacebookSignIn = () => void handleOAuthSignIn('facebook');
+  const handleTwitterSignIn = () => void handleOAuthSignIn('twitter');
 
   const handleClose = () => {
     if (!isCreating) {
@@ -137,6 +177,7 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
       setConfirmPassword('');
       setError('');
       setSuccess(false);
+      setSuccessMessage('');
       setShowPassword(false);
       setShowConfirmPassword(false);
       setAgreeToTerms(false);
@@ -225,7 +266,7 @@ export function CreateAccountDialog({ open, onOpenChange }: CreateAccountDialogP
             <Alert className="bg-accent/10 border-accent text-accent-foreground">
               <CheckCircle className="h-4 w-4" />
               <AlertDescription>
-                Account created successfully! Redirecting to login...
+                {successMessage || 'Account created successfully!'}
               </AlertDescription>
             </Alert>
           )}

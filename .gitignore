@@ -35,3 +35,4 @@ pids
 
 # Supabase CLI temp metadata
 supabase/.temp/
+.vercel

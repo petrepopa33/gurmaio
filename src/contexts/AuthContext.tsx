@@ -6,7 +6,11 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
-  signUp: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signUp: (
+    email: string,
+    password: string,
+    options?: { emailRedirectTo?: string }
+  ) => Promise<{ error: Error | null; needsEmailConfirmation?: boolean }>;
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
 }
@@ -41,16 +45,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (email: string, password: string, options?: { emailRedirectTo?: string }) => {
     if (!supabase) {
       return { error: new Error('Supabase not configured') };
     }
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: options?.emailRedirectTo,
+        },
       });
-      return { error };
+      return { error, needsEmailConfirmation: Boolean(data.user) && !data.session };
     } catch (error) {
       return { error: error as Error };
     }
