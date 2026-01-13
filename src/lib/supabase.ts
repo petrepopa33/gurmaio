@@ -43,3 +43,28 @@ export function getSupabaseStatus() {
 
 
 
+
+export function getSupabaseStatus() {
+  return {
+    configured: hasConfig,
+    hasUrl: Boolean(supabaseUrl),
+    hasAnonKey: Boolean(supabaseAnonKey),
+  };
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
