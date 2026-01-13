@@ -28,6 +28,7 @@ import { StreakCounter } from '@/components/streak-counter';
 import { MealPreferencesDialog } from '@/components/meal-preferences-dialog';
 import { TodayCard } from '@/components/today-card';
 import { FirstSuccessDialog } from '@/components/first-success-dialog';
+import { Logo } from '@/components/logo';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Toaster } from '@/components/ui/sonner';
@@ -1074,12 +1075,12 @@ function App() {
         <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b">
           <div className="container mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
-              <h1 
-                className="font-heading text-xl font-bold text-primary cursor-pointer hover:opacity-80 transition-opacity"
+              <div 
+                className="cursor-pointer hover:opacity-80 transition-opacity"
                 onClick={() => window.location.reload()}
               >
-                {t.appName}
-              </h1>
+                <Logo size="md" />
+              </div>
               <div className="flex items-center gap-2">
                 <LanguageSwitcher currentLanguage={language} onLanguageChange={handleLanguageChange} />
                 {currentUser && (
@@ -1103,6 +1104,9 @@ function App() {
         <main className="pt-20 pb-16 px-6">
           <div className="max-w-6xl mx-auto">
             <div className="text-center space-y-6 mb-12">
+              <div className="flex justify-center mb-8">
+                <Logo size="lg" showText={false} />
+              </div>
               <h2 className="font-heading text-5xl md:text-6xl font-bold text-foreground tracking-tight">
                 {t.tagline}
               </h2>
@@ -1320,8 +1324,8 @@ function App() {
       <header className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <h1 
-              className="font-heading text-2xl font-bold text-primary cursor-pointer hover:opacity-80 transition-opacity"
+            <div 
+              className="cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => {
                 setUserProfile(() => null);
                 setMealPlan(() => null);
@@ -1332,8 +1336,8 @@ function App() {
                 setActiveTab('meals');
               }}
             >
-              {t.appName}
-            </h1>
+              <Logo size="md" />
+            </div>
             <div className="flex items-center gap-3">
               {currentUser ? (
                 <div className="flex items-center gap-3">
