@@ -1,4 +1,4 @@
-name = "gurmaio-workers"
+name = "gurmaio-worker"
 main = "packages/gurmaio-workers/src/index.ts"
 compatibility_date = "2025-01-01"
 
