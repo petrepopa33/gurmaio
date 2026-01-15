@@ -1,0 +1,14 @@
+name: (disabled) Workers deploy via Cloudflare Deploy-from-Git
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  disabled:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Disabled
+        run: echo "Workers deploy is handled by Cloudflare Deploy-from-Git. This workflow is intentionally disabled."

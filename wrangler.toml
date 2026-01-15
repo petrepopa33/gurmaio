@@ -1,0 +1,12 @@
+name = "gurmaio-workers"
+main = "packages/gurmaio-workers/src/index.ts"
+compatibility_date = "2025-01-01"
+
+# Secrets should be configured in Cloudflare dashboard (Worker -> Settings -> Variables):
+# - SUPABASE_URL
+# - SUPABASE_SERVICE_ROLE_KEY
+# Optional:
+# - ALLOWED_ORIGINS (comma-separated)
+
+[vars]
+ALLOWED_ORIGINS = "*"
