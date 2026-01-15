@@ -42,6 +42,7 @@ import { exportMealPlanToPDF } from '@/lib/export-meal-plan-pdf';
 import { DISCLAIMERS } from '@/lib/disclaimers';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { generateMealPlanViaWorkers, isWorkersApiConfigured } from '@/lib/workers-api';
 
 interface UserInfo {
   avatarUrl: string;
@@ -384,8 +385,12 @@ function App() {
     
     try {
       await new Promise(resolve => setTimeout(resolve, 300));
-      
-      const newPlan = await generateMealPlan(profileToUse);
+
+      const shouldUseWorker = !isDemoMode && Boolean(authUser) && Boolean(supabase) && isWorkersApiConfigured();
+
+      const newPlan = shouldUseWorker
+        ? await generateMealPlanViaWorkers()
+        : await generateMealPlan(profileToUse);
       
       console.log('✅ New plan generated successfully:', {
         planId: newPlan.plan_id,
@@ -402,7 +407,11 @@ function App() {
       });
     } catch (error) {
       console.error('Error generating meal plan:', error);
-      toast.error('Failed to generate meal plan. Please try again.');
+      if (!isDemoMode && Boolean(authUser) && !isWorkersApiConfigured()) {
+        toast.error('Backend API not configured. Set VITE_WORKERS_API_URL to enable meal plan generation.');
+      } else {
+        toast.error('Failed to generate meal plan. Please try again.');
+      }
     } finally {
       setIsGenerating(false);
     }

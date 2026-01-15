@@ -1,6 +1,18 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { useLanguage } from '../hooks/use-language';
 import { renderHook, act } from '@testing-library/react';
+
+vi.mock('@github/spark/hooks', () => {
+  return {
+    useKV: <T,>(_key: string, defaultValue: T) => {
+      let value = defaultValue;
+      const setValue = (updater: any) => {
+        value = typeof updater === 'function' ? updater(value) : updater;
+      };
+      return [value, setValue] as const;
+    },
+  };
+});
 
 describe('Multi-language Support Tests', () => {
   describe('Language Hook', () => {

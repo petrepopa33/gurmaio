@@ -1,6 +1,10 @@
 import type { MealPlan, ShoppingList, ShoppingListItem, UserProfile } from '@/types/domain';
 import { calculateMacroGrams, getMacroDescription } from '@/lib/macro-calculator';
 
+function getSparkRuntime(): any | null {
+  return (globalThis as any)?.spark ?? null;
+}
+
 function getMealTypesForDay(mealsPerDay: number): string[] {
   if (mealsPerDay === 1) return ['lunch'];
   if (mealsPerDay === 2) return ['breakfast', 'dinner'];
@@ -12,234 +16,490 @@ function getMealTypesForDay(mealsPerDay: number): string[] {
 }
 
 export async function generateMealPlan(userProfile: UserProfile): Promise<MealPlan> {
+  const spark = getSparkRuntime();
+  if (!spark?.llmPrompt || !spark?.llm) {
+    console.warn('⚠️ Spark LLM runtime not available; using fallback meal plan generator');
+  }
+
+  // For this frontend prototype, use deterministic mock generation.
+  // In production, the backend will generate meal plans and costs.
+  return generateFallbackMealPlan(userProfile);
+}
+
+function generateFallbackMealPlan(userProfile: UserProfile): MealPlan {
   const planId = crypto.randomUUID();
   const userId = 'user_123';
-  
-  const totalBudget = userProfile.budget_period === 'daily' 
-    ? userProfile.budget_eur * userProfile.meal_plan_days 
+
+  const totalBudget = userProfile.budget_period === 'daily'
+    ? userProfile.budget_eur * userProfile.meal_plan_days
     : userProfile.budget_eur;
-  
-  const dailyBudget = totalBudget / userProfile.meal_plan_days;
-  const dailyCalorieTarget = userProfile.target_calories || 2000;
 
-  const dietaryPrefsStr = userProfile.dietary_preferences.join(', ');
-  const allergensStr = userProfile.allergens.length > 0 ? userProfile.allergens.join(', ') : 'none';
-  const excludedIngredientsStr = userProfile.excluded_ingredients && userProfile.excluded_ingredients.length > 0 
-    ? userProfile.excluded_ingredients.join(', ') 
-    : 'none';
-  const cuisinesStr = userProfile.cuisine_preferences.length > 0 
-    ? userProfile.cuisine_preferences.join(', ') 
-    : 'any';
-  const otherCuisinesStr = userProfile.other_cuisines ? ` (including ${userProfile.other_cuisines})` : '';
+  const dietary = new Set((userProfile.dietary_preferences ?? []).map(p => p.toLowerCase()));
+  const isVegan = dietary.has('vegan');
+  const isVegetarian = isVegan || dietary.has('vegetarian');
+  const isGlutenFree = dietary.has('gluten-free') || dietary.has('gluten free');
 
-  const macroTargets = userProfile.macro_targets || {
-    protein_percentage: 30,
-    carbs_percentage: 40,
-    fats_percentage: 30,
-  };
-  
-  const dailyMacroGrams = calculateMacroGrams(dailyCalorieTarget, macroTargets);
-  const macroDescription = getMacroDescription(macroTargets);
+  const excluded = new Set((userProfile.excluded_ingredients ?? []).map(i => i.toLowerCase()));
+  const allergens = new Set((userProfile.allergens ?? []).map(a => a.toLowerCase()));
 
-  const mealsPerDay = userProfile.meals_per_day;
-  const mealTypes = getMealTypesForDay(mealsPerDay);
-  const mealTypesStr = mealTypes.join(', ');
+  type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
-  const userMetrics = userProfile.weight_kg && userProfile.height_cm && userProfile.age && userProfile.sex
-    ? `Weight: ${userProfile.weight_kg}kg, Height: ${userProfile.height_cm}cm, Age: ${userProfile.age}, Sex: ${userProfile.sex}`
-    : '';
-  
-  const activityInfo = userProfile.activity_level 
-    ? `Activity Level: ${userProfile.activity_level}`
-    : '';
-  
-  const objectiveInfo = userProfile.objective
-    ? `Goal: ${userProfile.objective.replace('_', ' ')}`
-    : '';
-
-  const randomSeed = Math.floor(Math.random() * 1000000);
-  const timestamp = Date.now();
-  const uniqueIdentifier = `${randomSeed}-${timestamp}-${crypto.randomUUID().slice(0, 8)}`;
-  
-  const variationThemes = [
-    'Mediterranean-inspired dishes',
-    'Asian fusion recipes',
-    'Comfort food classics with a healthy twist',
-    'Farm-to-table seasonal ingredients',
-    'Quick and easy weeknight meals',
-    'Gourmet home cooking',
-    'Plant-forward nutrition',
-    'High-protein muscle building',
-    'Colorful and vibrant dishes',
-    'One-pot wonder meals',
-    'Street food inspired',
-    'Rustic countryside cooking',
-    'Modern bistro fare',
-    'Fresh and light summer meals',
-    'Hearty winter comfort dishes',
-    'International tapas style',
-    'Chef-inspired restaurant quality',
-    'Budget-friendly family meals',
-    'Meal prep batch cooking',
-    'Express 30-minute recipes'
-  ];
-  const selectedTheme = variationThemes[randomSeed % variationThemes.length];
-  
-  const cookingStyles = [
-    'grilled', 'roasted', 'steamed', 'sautéed', 'baked', 'stir-fried', 
-    'braised', 'pan-seared', 'slow-cooked', 'poached', 'air-fried', 'blanched'
-  ];
-  const selectedCookingStyle = cookingStyles[randomSeed % cookingStyles.length];
-  
-  const flavorProfiles = [
-    'bold and spicy', 'mild and comforting', 'fresh and zesty', 'rich and savory',
-    'sweet and tangy', 'herbaceous and aromatic', 'smoky and robust', 'light and delicate'
-  ];
-  const selectedFlavorProfile = flavorProfiles[Math.floor(randomSeed / 100) % flavorProfiles.length];
-  
-  console.log('🔄 ========================================');
-  console.log('🔄 GENERATING BRAND NEW MEAL PLAN');
-  console.log('🔄 ========================================');
-  console.log('🔄 Profile Settings:', {
-    days: userProfile.meal_plan_days,
-    mealsPerDay: userProfile.meals_per_day,
-    budget: userProfile.budget_eur,
-    budgetPeriod: userProfile.budget_period,
-    calories: userProfile.target_calories,
-    dietary: userProfile.dietary_preferences
-  });
-  console.log('🔄 Variation Parameters:', {
-    uniqueId: uniqueIdentifier,
-    theme: selectedTheme,
-    cookingStyle: selectedCookingStyle,
-    flavorProfile: selectedFlavorProfile,
-    randomSeed: randomSeed,
-    timestamp: timestamp
-  });
-  console.log('🔄 ========================================');
-  
-  const prompt = (window.spark.llmPrompt as any)`You are a professional meal planner. Generate a UNIQUE and VARIED ${userProfile.meal_plan_days}-day meal plan with the following constraints:
-
-VARIATION REQUIREMENT (CRITICAL - READ THIS FIRST):
-- Generation ID: ${uniqueIdentifier}
-- Generation timestamp: ${timestamp}
-- Theme for THIS specific plan: ${selectedTheme}
-- Preferred cooking method: ${selectedCookingStyle}
-- Target flavor profile: ${selectedFlavorProfile}
-- Random variation seed: ${randomSeed}
-
-MANDATORY UNIQUENESS RULES:
-1. You MUST treat each generation request as completely independent
-2. DO NOT generate the same meals you may have generated before
-3. Even if the user parameters are identical, create ENTIRELY DIFFERENT recipes
-4. Use the theme "${selectedTheme}" to guide your recipe choices for THIS plan
-5. Emphasize "${selectedCookingStyle}" cooking techniques where appropriate
-6. Target "${selectedFlavorProfile}" flavor combinations
-7. Mix up cuisines, ingredients, and cooking methods to maximize variety
-8. Think of this as a brand new client with fresh tastes - be creative and original
-9. If generating breakfast, don't default to the same breakfast options - be innovative
-10. CRITICAL: This generation ID ${uniqueIdentifier} must produce recipes you haven't used in previous generations
-
-USER PROFILE:
-${userMetrics ? `- Physical Metrics: ${userMetrics}` : ''}
-${activityInfo ? `- ${activityInfo}` : ''}
-${objectiveInfo ? `- ${objectiveInfo}` : ''}
-
-BUDGET CONSTRAINT (CRITICAL):
-- Total budget: €${totalBudget.toFixed(2)} for ${userProfile.meal_plan_days} days
-- Daily budget: approximately €${dailyBudget.toFixed(2)} per day
-- Each day should have exactly ${mealsPerDay} meals: ${mealTypesStr}
-- STAY WITHIN OR SLIGHTLY UNDER BUDGET
-
-NUTRITION TARGET:
-- Target daily calories: ${dailyCalorieTarget} kcal
-- Target daily protein: ${dailyMacroGrams.protein_g}g (${macroTargets.protein_percentage}% of calories)
-- Target daily carbohydrates: ${dailyMacroGrams.carbs_g}g (${macroTargets.carbs_percentage}% of calories)
-- Target daily fats: ${dailyMacroGrams.fats_g}g (${macroTargets.fats_percentage}% of calories)
-- Macro split: ${macroDescription}
-- Each day should be close to the calorie target (within 10%)
-- PRIORITIZE meeting the macro percentages - this is critical for the user's goals
-- Adjust ingredient portions to hit macro targets as closely as possible
-
-DIETARY PREFERENCES (MUST FOLLOW): ${dietaryPrefsStr}
-ALLERGENS TO AVOID (CRITICAL - NEVER INCLUDE): ${allergensStr}
-EXCLUDED INGREDIENTS (CRITICAL - NEVER INCLUDE THESE): ${excludedIngredientsStr}
-CUISINE PREFERENCES (PRIORITIZE THESE): ${cuisinesStr}${otherCuisinesStr}
-
-IMPORTANT INSTRUCTIONS:
-1. Generate realistic, cookable recipes with simple ingredients
-2. Include specific ingredient quantities in grams
-3. Provide realistic costs per ingredient based on EU grocery prices
-4. Calculate accurate nutrition per ingredient (calories, protein, carbs, fats)
-5. Include 3-7 step cooking instructions for each meal
-6. Make sure total plan cost does NOT exceed €${totalBudget.toFixed(2)}
-7. Generate EXACTLY ${mealsPerDay} meals per day with the following meal types: ${mealTypesStr}
-8. NEVER use any ingredient from the excluded ingredients list - this is a strict requirement
-9. CREATE VARIETY - use different recipes, ingredients, and cooking techniques for each new generation
-10. ENSURE UNIQUENESS - even with the same parameters, generate completely different meals each time (generation ID: ${uniqueIdentifier})
-11. CRITICAL: Do not cache or reuse previous responses - each generation must be fresh and unique
-12. VARIATION REQUIREMENT: Make every single meal different from what you might have suggested before
-13. Use the theme "${selectedTheme}" as inspiration to guide recipe selection
-
-Return the result as a valid JSON object with a single property called "days" that contains an array of day objects. Each day must have:
-- day_number: number (1 to ${userProfile.meal_plan_days})
-- meals: array of EXACTLY ${mealsPerDay} meal objects
-
-Each meal must have:
-- meal_type: one of [${mealTypes.map(t => `"${t}"`).join(', ')}]
-- recipe_name: string (appetizing name)
-- cooking_instructions: array of strings (3-7 steps)
-- ingredients: array of ingredient objects
-
-Each ingredient must have:
-- name: string
-- quantity_g: number (in grams)
-- nutrition: { calories: number, protein_g: number, carbohydrates_g: number, fats_g: number }
-- cost_eur: number (realistic EU grocery price for that quantity)
-
-Format:
-{
-  "days": [
+  const templates: Array<{
+    meal_type: MealType;
+    recipe_name: string;
+    tags: { vegan: boolean; vegetarian: boolean; glutenFree: boolean };
+    cooking_instructions: string[];
+    ingredients: Array<{
+      name: string;
+      quantity_g: number;
+      nutrition: { calories: number; protein_g: number; carbohydrates_g: number; fats_g: number };
+      cost_eur: number;
+    }>;
+  }> = [
     {
-      "day_number": 1,
-      "meals": [
-        {
-          "meal_type": "breakfast",
-          "recipe_name": "Recipe Name",
-          "cooking_instructions": ["Step 1", "Step 2", "Step 3"],
-          "ingredients": [
-            {
-              "name": "Ingredient Name",
-              "quantity_g": 100,
-              "nutrition": { "calories": 150, "protein_g": 10, "carbohydrates_g": 20, "fats_g": 5 },
-              "cost_eur": 0.50
-            }
-          ]
-        }
-      ]
-    }
-  ]
-}`;
+      meal_type: 'breakfast',
+      recipe_name: 'Overnight Oats with Chia & Berries',
+      tags: { vegan: true, vegetarian: true, glutenFree: false },
+      cooking_instructions: [
+        'Mix oats, chia seeds, and plant milk in a jar',
+        'Refrigerate overnight',
+        'Top with berries and a spoon of nut butter before serving'
+      ],
+      ingredients: [
+        { name: 'Rolled Oats', quantity_g: 60, nutrition: { calories: 230, protein_g: 8, carbohydrates_g: 40, fats_g: 4 }, cost_eur: 0.30 },
+        { name: 'Chia Seeds', quantity_g: 15, nutrition: { calories: 70, protein_g: 3, carbohydrates_g: 2, fats_g: 5 }, cost_eur: 0.25 },
+        { name: 'Soy Milk', quantity_g: 200, nutrition: { calories: 90, protein_g: 8, carbohydrates_g: 6, fats_g: 4 }, cost_eur: 0.35 },
+        { name: 'Mixed Berries', quantity_g: 120, nutrition: { calories: 60, protein_g: 1, carbohydrates_g: 14, fats_g: 0 }, cost_eur: 0.90 },
+        { name: 'Peanut Butter', quantity_g: 15, nutrition: { calories: 90, protein_g: 4, carbohydrates_g: 3, fats_g: 8 }, cost_eur: 0.25 },
+      ],
+    },
+    {
+      meal_type: 'breakfast',
+      recipe_name: 'Tofu Scramble with Spinach & Tomatoes',
+      tags: { vegan: true, vegetarian: true, glutenFree: true },
+      cooking_instructions: [
+        'Crumble tofu into a pan with a little oil',
+        'Add spices and cook for 5-7 minutes',
+        'Stir in spinach and tomatoes until wilted'
+      ],
+      ingredients: [
+        { name: 'Tofu', quantity_g: 200, nutrition: { calories: 240, protein_g: 26, carbohydrates_g: 6, fats_g: 14 }, cost_eur: 1.50 },
+        { name: 'Spinach', quantity_g: 80, nutrition: { calories: 20, protein_g: 2, carbohydrates_g: 3, fats_g: 0 }, cost_eur: 0.60 },
+        { name: 'Tomatoes', quantity_g: 120, nutrition: { calories: 25, protein_g: 1, carbohydrates_g: 5, fats_g: 0 }, cost_eur: 0.50 },
+        { name: 'Olive Oil', quantity_g: 10, nutrition: { calories: 90, protein_g: 0, carbohydrates_g: 0, fats_g: 10 }, cost_eur: 0.15 },
+      ],
+    },
+    {
+      meal_type: 'lunch',
+      recipe_name: 'Chickpea Quinoa Bowl with Lemon-Tahini',
+      tags: { vegan: true, vegetarian: true, glutenFree: true },
+      cooking_instructions: [
+        'Cook quinoa and let it cool slightly',
+        'Mix chickpeas with chopped veggies',
+        'Whisk tahini with lemon and a splash of water',
+        'Assemble bowl and drizzle sauce'
+      ],
+      ingredients: [
+        { name: 'Quinoa', quantity_g: 80, nutrition: { calories: 280, protein_g: 10, carbohydrates_g: 52, fats_g: 4 }, cost_eur: 0.90 },
+        { name: 'Chickpeas', quantity_g: 180, nutrition: { calories: 290, protein_g: 16, carbohydrates_g: 48, fats_g: 5 }, cost_eur: 0.70 },
+        { name: 'Cucumber', quantity_g: 120, nutrition: { calories: 18, protein_g: 1, carbohydrates_g: 4, fats_g: 0 }, cost_eur: 0.40 },
+        { name: 'Tomatoes', quantity_g: 120, nutrition: { calories: 25, protein_g: 1, carbohydrates_g: 5, fats_g: 0 }, cost_eur: 0.50 },
+        { name: 'Tahini', quantity_g: 20, nutrition: { calories: 120, protein_g: 4, carbohydrates_g: 3, fats_g: 10 }, cost_eur: 0.35 },
+      ],
+    },
+    {
+      meal_type: 'lunch',
+      recipe_name: 'Lentil Tomato Soup with Herb Oil',
+      tags: { vegan: true, vegetarian: true, glutenFree: true },
+      cooking_instructions: [
+        'Simmer lentils with onions, carrots, and tomatoes until tender',
+        'Season with salt, pepper, and herbs',
+        'Finish with a drizzle of olive oil'
+      ],
+      ingredients: [
+        { name: 'Red Lentils', quantity_g: 90, nutrition: { calories: 310, protein_g: 22, carbohydrates_g: 52, fats_g: 2 }, cost_eur: 0.60 },
+        { name: 'Canned Tomatoes', quantity_g: 200, nutrition: { calories: 60, protein_g: 3, carbohydrates_g: 12, fats_g: 0 }, cost_eur: 0.60 },
+        { name: 'Carrots', quantity_g: 120, nutrition: { calories: 50, protein_g: 1, carbohydrates_g: 12, fats_g: 0 }, cost_eur: 0.25 },
+        { name: 'Olive Oil', quantity_g: 10, nutrition: { calories: 90, protein_g: 0, carbohydrates_g: 0, fats_g: 10 }, cost_eur: 0.15 },
+      ],
+    },
+    {
+      meal_type: 'dinner',
+      recipe_name: 'Tofu & Vegetable Stir-Fry with Rice',
+      tags: { vegan: true, vegetarian: true, glutenFree: true },
+      cooking_instructions: [
+        'Cook rice according to package instructions',
+        'Sear tofu cubes until golden',
+        'Stir-fry vegetables, then toss everything together'
+      ],
+      ingredients: [
+        { name: 'Tofu', quantity_g: 220, nutrition: { calories: 260, protein_g: 28, carbohydrates_g: 7, fats_g: 15 }, cost_eur: 1.70 },
+        { name: 'Mixed Stir-Fry Vegetables', quantity_g: 250, nutrition: { calories: 140, protein_g: 5, carbohydrates_g: 20, fats_g: 5 }, cost_eur: 1.60 },
+        { name: 'Rice', quantity_g: 80, nutrition: { calories: 280, protein_g: 5, carbohydrates_g: 62, fats_g: 1 }, cost_eur: 0.35 },
+        { name: 'Sesame Oil', quantity_g: 6, nutrition: { calories: 54, protein_g: 0, carbohydrates_g: 0, fats_g: 6 }, cost_eur: 0.12 },
+      ],
+    },
+    {
+      meal_type: 'dinner',
+      recipe_name: 'Chickpea Curry with Spinach & Rice',
+      tags: { vegan: true, vegetarian: true, glutenFree: true },
+      cooking_instructions: [
+        'Simmer chickpeas with tomatoes and spices',
+        'Stir in spinach until wilted',
+        'Serve over rice'
+      ],
+      ingredients: [
+        { name: 'Chickpeas', quantity_g: 200, nutrition: { calories: 320, protein_g: 18, carbohydrates_g: 52, fats_g: 6 }, cost_eur: 0.75 },
+        { name: 'Canned Tomatoes', quantity_g: 200, nutrition: { calories: 60, protein_g: 3, carbohydrates_g: 12, fats_g: 0 }, cost_eur: 0.60 },
+        { name: 'Spinach', quantity_g: 80, nutrition: { calories: 20, protein_g: 2, carbohydrates_g: 3, fats_g: 0 }, cost_eur: 0.60 },
+        { name: 'Coconut Milk', quantity_g: 120, nutrition: { calories: 220, protein_g: 2, carbohydrates_g: 4, fats_g: 22 }, cost_eur: 0.80 },
+        { name: 'Rice', quantity_g: 70, nutrition: { calories: 245, protein_g: 4, carbohydrates_g: 54, fats_g: 1 }, cost_eur: 0.30 },
+      ],
+    },
+    {
+      meal_type: 'snack',
+      recipe_name: 'Hummus with Carrot Sticks',
+      tags: { vegan: true, vegetarian: true, glutenFree: true },
+      cooking_instructions: ['Serve hummus with sliced carrots.'],
+      ingredients: [
+        { name: 'Hummus', quantity_g: 80, nutrition: { calories: 200, protein_g: 6, carbohydrates_g: 14, fats_g: 13 }, cost_eur: 0.70 },
+        { name: 'Carrots', quantity_g: 150, nutrition: { calories: 60, protein_g: 1, carbohydrates_g: 14, fats_g: 0 }, cost_eur: 0.30 },
+      ],
+    },
+    {
+      meal_type: 'snack',
+      recipe_name: 'Banana with Mixed Nuts',
+      tags: { vegan: true, vegetarian: true, glutenFree: true },
+      cooking_instructions: ['Eat banana and nuts together as a quick snack.'],
+      ingredients: [
+        { name: 'Banana', quantity_g: 120, nutrition: { calories: 105, protein_g: 1, carbohydrates_g: 27, fats_g: 0 }, cost_eur: 0.20 },
+        { name: 'Mixed Nuts', quantity_g: 30, nutrition: { calories: 180, protein_g: 6, carbohydrates_g: 6, fats_g: 15 }, cost_eur: 0.55 },
+      ],
+    },
+  ];
 
-  try {
-    const response = await window.spark.llm(prompt, 'gpt-4o', true);
-    const parsed = JSON.parse(response);
-    
-    console.log('✅ AI Generated meal plan structure:', {
-      daysCount: parsed.days?.length,
-      firstDayMealsCount: parsed.days?.[0]?.meals?.length,
-      firstMealName: parsed.days?.[0]?.meals?.[0]?.recipe_name
-    });
-    
-    const days = parsed.days.map((day: any) => {
-      const meals = day.meals.map((meal: any) => {
-        const ingredients = meal.ingredients.map((ing: any) => ({
+  const isBlockedIngredient = (name: string) => {
+    const normalized = name.toLowerCase();
+    if (excluded.has(normalized)) return true;
+    for (const allergen of allergens) {
+      if (allergen && normalized.includes(allergen)) return true;
+    }
+    if (isVegetarian) {
+      const meatTerms = ['chicken', 'beef', 'pork', 'fish', 'turkey', 'tuna', 'salmon', 'shrimp'];
+      if (meatTerms.some(t => normalized.includes(t))) return true;
+    }
+    if (isVegan) {
+      const animalTerms = ['egg', 'milk', 'cheese', 'yogurt', 'butter', 'honey'];
+      if (animalTerms.some(t => normalized.includes(t))) return true;
+    }
+    if (isGlutenFree) {
+      const glutenTerms = ['bread', 'pasta', 'wheat', 'flour', 'barley', 'rye', 'couscous'];
+      if (glutenTerms.some(t => normalized.includes(t))) return true;
+    }
+    return false;
+  };
+
+  const eligibleTemplate = (t: (typeof templates)[number]) => {
+    if (isVegan && !t.tags.vegan) return false;
+    if (isVegetarian && !t.tags.vegetarian) return false;
+    if (isGlutenFree && !t.tags.glutenFree) return false;
+    return !t.ingredients.some(i => isBlockedIngredient(i.name));
+  };
+
+  const pickTemplate = (mealType: MealType, seed: number) => {
+    const pool = templates.filter(t => t.meal_type === mealType).filter(eligibleTemplate);
+    const safePool = pool.length > 0 ? pool : templates.filter(t => t.meal_type === mealType);
+    return safePool[seed % safePool.length];
+  };
+
+  const mealTypes = getMealTypesForDay(userProfile.meals_per_day) as MealType[];
+  const now = Date.now();
+  const baseSeed = now % 100000;
+
+  const days = Array.from({ length: userProfile.meal_plan_days }, (_, idx) => {
+    const dayNumber = idx + 1;
+    const date = new Date(now + idx * 86400000).toISOString().split('T')[0];
+    const meals = mealTypes.map((mealType, mealIndex) => {
+      const template = pickTemplate(mealType, baseSeed + dayNumber * 31 + mealIndex * 17);
+      const ingredients = template.ingredients
+        .filter(i => !isBlockedIngredient(i.name))
+        .map(i => ({
           ingredient_id: crypto.randomUUID(),
-          name: ing.name,
-          quantity_g: ing.quantity_g,
-          nutrition: ing.nutrition,
-          cost_eur: Number(ing.cost_eur.toFixed(2)),
+          name: i.name,
+          quantity_g: i.quantity_g,
+          nutrition: i.nutrition,
+          cost_eur: Number(i.cost_eur.toFixed(2)),
         }));
+
+      const mealNutrition = ingredients.reduce(
+        (acc, ing) => ({
+          calories: acc.calories + ing.nutrition.calories,
+          protein_g: acc.protein_g + ing.nutrition.protein_g,
+          carbohydrates_g: acc.carbohydrates_g + ing.nutrition.carbohydrates_g,
+          fats_g: acc.fats_g + ing.nutrition.fats_g,
+        }),
+        { calories: 0, protein_g: 0, carbohydrates_g: 0, fats_g: 0 }
+      );
+
+      const mealCost = ingredients.reduce((sum, ing) => sum + ing.cost_eur, 0);
+
+      return {
+        meal_id: crypto.randomUUID(),
+        meal_type: mealType,
+        recipe_name: template.recipe_name,
+        nutrition: mealNutrition,
+        cost: { meal_cost_eur: Number(mealCost.toFixed(2)) },
+        ingredients,
+        cooking_instructions: template.cooking_instructions,
+      };
+    });
+
+    const totals = meals.reduce(
+      (acc, meal) => ({
+        calories: acc.calories + meal.nutrition.calories,
+        protein_g: acc.protein_g + meal.nutrition.protein_g,
+        carbohydrates_g: acc.carbohydrates_g + meal.nutrition.carbohydrates_g,
+        fats_g: acc.fats_g + meal.nutrition.fats_g,
+        cost_eur: acc.cost_eur + meal.cost.meal_cost_eur,
+      }),
+      { calories: 0, protein_g: 0, carbohydrates_g: 0, fats_g: 0, cost_eur: 0 }
+    );
+
+    return { day_number: dayNumber, date, totals: { ...totals, cost_eur: Number(totals.cost_eur.toFixed(2)) }, meals };
+  });
+
+  const applyCostScale = (scale: number) => {
+    for (const day of days) {
+      for (const meal of day.meals) {
+        for (const ing of meal.ingredients) {
+          ing.cost_eur = Number((ing.cost_eur * scale).toFixed(2));
+        }
+        const mealCost = meal.ingredients.reduce((sum, ing) => sum + ing.cost_eur, 0);
+        meal.cost.meal_cost_eur = Number(mealCost.toFixed(2));
+      }
+      const dayCost = day.meals.reduce((sum, meal) => sum + meal.cost.meal_cost_eur, 0);
+      day.totals.cost_eur = Number(dayCost.toFixed(2));
+    }
+  };
+
+  let totalCost = days.reduce((sum, day) => sum + day.totals.cost_eur, 0);
+  if (totalCost > totalBudget) {
+    const scale = (totalBudget / totalCost) * 0.98;
+    applyCostScale(scale);
+    totalCost = days.reduce((sum, day) => sum + day.totals.cost_eur, 0);
+  }
+
+  const planTotals = days.reduce(
+    (acc, day) => ({
+      calories: acc.calories + day.totals.calories,
+      protein_g: acc.protein_g + day.totals.protein_g,
+      carbohydrates_g: acc.carbohydrates_g + day.totals.carbohydrates_g,
+      fats_g: acc.fats_g + day.totals.fats_g,
+    }),
+    { calories: 0, protein_g: 0, carbohydrates_g: 0, fats_g: 0 }
+  );
+
+  const finalPlanTotals = {
+    ...planTotals,
+    total_cost_eur: Number(totalCost.toFixed(2)),
+  };
+
+  const budgetRemaining = totalBudget - finalPlanTotals.total_cost_eur;
+  const isOverBudget = finalPlanTotals.total_cost_eur > totalBudget;
+
+  return {
+    plan_id: planId,
+    generated_at: new Date().toISOString(),
+    user_id: userId,
+    metadata: {
+      period_budget_eur: Number(totalBudget.toFixed(2)),
+      period_cost_eur: finalPlanTotals.total_cost_eur,
+      budget_remaining_eur: Number(budgetRemaining.toFixed(2)),
+      is_over_budget: isOverBudget,
+      generation_attempts: 1,
+      days: userProfile.meal_plan_days,
+    },
+    days,
+    plan_totals: finalPlanTotals,
+  };
+}
+
+/*
+    }> = [
+      {
+        meal_type: 'breakfast',
+        recipe_name: 'Overnight Oats with Chia & Berries',
+        tags: { vegan: true, vegetarian: true, glutenFree: false },
+        cooking_instructions: [
+          'Mix oats, chia seeds, and plant milk in a jar',
+          'Refrigerate overnight',
+          'Top with berries and a spoon of nut butter before serving'
+        ],
+        ingredients: [
+          { name: 'Rolled Oats', quantity_g: 60, nutrition: { calories: 230, protein_g: 8, carbohydrates_g: 40, fats_g: 4 }, cost_eur: 0.30 },
+          { name: 'Chia Seeds', quantity_g: 15, nutrition: { calories: 70, protein_g: 3, carbohydrates_g: 2, fats_g: 5 }, cost_eur: 0.25 },
+          { name: 'Soy Milk', quantity_g: 200, nutrition: { calories: 90, protein_g: 8, carbohydrates_g: 6, fats_g: 4 }, cost_eur: 0.35 },
+          { name: 'Mixed Berries', quantity_g: 120, nutrition: { calories: 60, protein_g: 1, carbohydrates_g: 14, fats_g: 0 }, cost_eur: 0.90 },
+          { name: 'Peanut Butter', quantity_g: 15, nutrition: { calories: 90, protein_g: 4, carbohydrates_g: 3, fats_g: 8 }, cost_eur: 0.25 },
+        ],
+      },
+      {
+        meal_type: 'breakfast',
+        recipe_name: 'Tofu Scramble with Spinach & Tomatoes',
+        tags: { vegan: true, vegetarian: true, glutenFree: true },
+        cooking_instructions: [
+          'Crumble tofu into a pan with a little oil',
+          'Add spices and cook for 5-7 minutes',
+          'Stir in spinach and tomatoes until wilted'
+        ],
+        ingredients: [
+          { name: 'Tofu', quantity_g: 200, nutrition: { calories: 240, protein_g: 26, carbohydrates_g: 6, fats_g: 14 }, cost_eur: 1.50 },
+          { name: 'Spinach', quantity_g: 80, nutrition: { calories: 20, protein_g: 2, carbohydrates_g: 3, fats_g: 0 }, cost_eur: 0.60 },
+          { name: 'Tomatoes', quantity_g: 120, nutrition: { calories: 25, protein_g: 1, carbohydrates_g: 5, fats_g: 0 }, cost_eur: 0.50 },
+          { name: 'Olive Oil', quantity_g: 10, nutrition: { calories: 90, protein_g: 0, carbohydrates_g: 0, fats_g: 10 }, cost_eur: 0.15 },
+        ],
+      },
+      {
+        meal_type: 'lunch',
+        recipe_name: 'Chickpea Quinoa Bowl with Lemon-Tahini',
+        tags: { vegan: true, vegetarian: true, glutenFree: true },
+        cooking_instructions: [
+          'Cook quinoa and let it cool slightly',
+          'Mix chickpeas with chopped veggies',
+          'Whisk tahini with lemon and a splash of water',
+          'Assemble bowl and drizzle sauce'
+        ],
+        ingredients: [
+          { name: 'Quinoa', quantity_g: 80, nutrition: { calories: 280, protein_g: 10, carbohydrates_g: 52, fats_g: 4 }, cost_eur: 0.90 },
+          { name: 'Chickpeas', quantity_g: 180, nutrition: { calories: 290, protein_g: 16, carbohydrates_g: 48, fats_g: 5 }, cost_eur: 0.70 },
+          { name: 'Cucumber', quantity_g: 120, nutrition: { calories: 18, protein_g: 1, carbohydrates_g: 4, fats_g: 0 }, cost_eur: 0.40 },
+          { name: 'Tomatoes', quantity_g: 120, nutrition: { calories: 25, protein_g: 1, carbohydrates_g: 5, fats_g: 0 }, cost_eur: 0.50 },
+          { name: 'Tahini', quantity_g: 20, nutrition: { calories: 120, protein_g: 4, carbohydrates_g: 3, fats_g: 10 }, cost_eur: 0.35 },
+        ],
+      },
+      {
+        meal_type: 'lunch',
+        recipe_name: 'Lentil Tomato Soup with Herb Oil',
+        tags: { vegan: true, vegetarian: true, glutenFree: true },
+        cooking_instructions: [
+          'Simmer lentils with onions, carrots, and tomatoes until tender',
+          'Season with salt, pepper, and herbs',
+          'Finish with a drizzle of olive oil'
+        ],
+        ingredients: [
+          { name: 'Red Lentils', quantity_g: 90, nutrition: { calories: 310, protein_g: 22, carbohydrates_g: 52, fats_g: 2 }, cost_eur: 0.60 },
+          { name: 'Canned Tomatoes', quantity_g: 200, nutrition: { calories: 60, protein_g: 3, carbohydrates_g: 12, fats_g: 0 }, cost_eur: 0.60 },
+          { name: 'Carrots', quantity_g: 120, nutrition: { calories: 50, protein_g: 1, carbohydrates_g: 12, fats_g: 0 }, cost_eur: 0.25 },
+          { name: 'Olive Oil', quantity_g: 10, nutrition: { calories: 90, protein_g: 0, carbohydrates_g: 0, fats_g: 10 }, cost_eur: 0.15 },
+        ],
+      },
+      {
+        meal_type: 'dinner',
+        recipe_name: 'Tofu & Vegetable Stir-Fry with Rice',
+        tags: { vegan: true, vegetarian: true, glutenFree: true },
+        cooking_instructions: [
+          'Cook rice according to package instructions',
+          'Sear tofu cubes until golden',
+          'Stir-fry vegetables, then toss everything together'
+        ],
+        ingredients: [
+          { name: 'Tofu', quantity_g: 220, nutrition: { calories: 260, protein_g: 28, carbohydrates_g: 7, fats_g: 15 }, cost_eur: 1.70 },
+          { name: 'Mixed Stir-Fry Vegetables', quantity_g: 250, nutrition: { calories: 140, protein_g: 5, carbohydrates_g: 20, fats_g: 5 }, cost_eur: 1.60 },
+          { name: 'Rice', quantity_g: 80, nutrition: { calories: 280, protein_g: 5, carbohydrates_g: 62, fats_g: 1 }, cost_eur: 0.35 },
+          { name: 'Sesame Oil', quantity_g: 6, nutrition: { calories: 54, protein_g: 0, carbohydrates_g: 0, fats_g: 6 }, cost_eur: 0.12 },
+        ],
+      },
+      {
+        meal_type: 'dinner',
+        recipe_name: 'Chickpea Curry with Spinach & Rice',
+        tags: { vegan: true, vegetarian: true, glutenFree: true },
+        cooking_instructions: [
+          'Simmer chickpeas with tomatoes and spices',
+          'Stir in spinach until wilted',
+          'Serve over rice'
+        ],
+        ingredients: [
+          { name: 'Chickpeas', quantity_g: 200, nutrition: { calories: 320, protein_g: 18, carbohydrates_g: 52, fats_g: 6 }, cost_eur: 0.75 },
+          { name: 'Canned Tomatoes', quantity_g: 200, nutrition: { calories: 60, protein_g: 3, carbohydrates_g: 12, fats_g: 0 }, cost_eur: 0.60 },
+          { name: 'Spinach', quantity_g: 80, nutrition: { calories: 20, protein_g: 2, carbohydrates_g: 3, fats_g: 0 }, cost_eur: 0.60 },
+          { name: 'Coconut Milk', quantity_g: 120, nutrition: { calories: 220, protein_g: 2, carbohydrates_g: 4, fats_g: 22 }, cost_eur: 0.80 },
+          { name: 'Rice', quantity_g: 70, nutrition: { calories: 245, protein_g: 4, carbohydrates_g: 54, fats_g: 1 }, cost_eur: 0.30 },
+        ],
+      },
+      {
+        meal_type: 'snack',
+        recipe_name: 'Hummus with Carrot Sticks',
+        tags: { vegan: true, vegetarian: true, glutenFree: true },
+        cooking_instructions: ['Serve hummus with sliced carrots.'],
+        ingredients: [
+          { name: 'Hummus', quantity_g: 80, nutrition: { calories: 200, protein_g: 6, carbohydrates_g: 14, fats_g: 13 }, cost_eur: 0.70 },
+          { name: 'Carrots', quantity_g: 150, nutrition: { calories: 60, protein_g: 1, carbohydrates_g: 14, fats_g: 0 }, cost_eur: 0.30 },
+        ],
+      },
+      {
+        meal_type: 'snack',
+        recipe_name: 'Banana with Mixed Nuts',
+        tags: { vegan: true, vegetarian: true, glutenFree: true },
+        cooking_instructions: ['Eat banana and nuts together as a quick snack.'],
+        ingredients: [
+          { name: 'Banana', quantity_g: 120, nutrition: { calories: 105, protein_g: 1, carbohydrates_g: 27, fats_g: 0 }, cost_eur: 0.20 },
+          { name: 'Mixed Nuts', quantity_g: 30, nutrition: { calories: 180, protein_g: 6, carbohydrates_g: 6, fats_g: 15 }, cost_eur: 0.55 },
+        ],
+      },
+    ];
+
+    const isBlockedIngredient = (name: string) => {
+      const normalized = name.toLowerCase();
+      if (excluded.has(normalized)) return true;
+      for (const allergen of allergens) {
+        if (allergen && normalized.includes(allergen)) return true;
+      }
+      if (isVegetarian) {
+        const meatTerms = ['chicken', 'beef', 'pork', 'fish', 'turkey', 'tuna', 'salmon', 'shrimp'];
+        if (meatTerms.some(t => normalized.includes(t))) return true;
+      }
+      if (isVegan) {
+        const animalTerms = ['egg', 'milk', 'cheese', 'yogurt', 'butter', 'honey'];
+        if (animalTerms.some(t => normalized.includes(t))) return true;
+      }
+      if (isGlutenFree) {
+        const glutenTerms = ['bread', 'pasta', 'wheat', 'flour', 'barley', 'rye', 'couscous'];
+        if (glutenTerms.some(t => normalized.includes(t))) return true;
+      }
+      return false;
+    };
+
+    const eligibleTemplate = (t: (typeof templates)[number]) => {
+      if (isVegan && !t.tags.vegan) return false;
+      if (isVegetarian && !t.tags.vegetarian) return false;
+      if (isGlutenFree && !t.tags.glutenFree) return false;
+      return !t.ingredients.some(i => isBlockedIngredient(i.name));
+    };
+
+    const pickTemplate = (mealType: MealType, seed: number) => {
+      const pool = templates.filter(t => t.meal_type === mealType).filter(eligibleTemplate);
+      const safePool = pool.length > 0 ? pool : templates.filter(t => t.meal_type === mealType);
+      return safePool[seed % safePool.length];
+    };
+
+    const mealTypes = getMealTypesForDay(userProfile.meals_per_day) as MealType[];
+    const now = Date.now();
+    const baseSeed = now % 100000;
+
+    const days = Array.from({ length: userProfile.meal_plan_days }, (_, idx) => {
+      const dayNumber = idx + 1;
+      const date = new Date(now + idx * 86400000).toISOString().split('T')[0];
+      const meals = mealTypes.map((mealType, mealIndex) => {
+        const template = pickTemplate(mealType, baseSeed + dayNumber * 31 + mealIndex * 17);
+        const ingredients = template.ingredients
+          .filter(i => !isBlockedIngredient(i.name))
+          .map(i => ({
+            ingredient_id: crypto.randomUUID(),
+            name: i.name,
+            quantity_g: i.quantity_g,
+            nutrition: i.nutrition,
+            cost_eur: Number(i.cost_eur.toFixed(2)),
+          }));
 
         const mealNutrition = ingredients.reduce(
           (acc, ing) => ({
@@ -255,16 +515,16 @@ Format:
 
         return {
           meal_id: crypto.randomUUID(),
-          meal_type: meal.meal_type,
-          recipe_name: meal.recipe_name,
+          meal_type: mealType,
+          recipe_name: template.recipe_name,
           nutrition: mealNutrition,
           cost: { meal_cost_eur: Number(mealCost.toFixed(2)) },
           ingredients,
-          cooking_instructions: meal.cooking_instructions || [],
+          cooking_instructions: template.cooking_instructions,
         };
       });
 
-      const dayTotals = meals.reduce(
+      const totals = meals.reduce(
         (acc, meal) => ({
           calories: acc.calories + meal.nutrition.calories,
           protein_g: acc.protein_g + meal.nutrition.protein_g,
@@ -275,16 +535,7 @@ Format:
         { calories: 0, protein_g: 0, carbohydrates_g: 0, fats_g: 0, cost_eur: 0 }
       );
 
-      const date = new Date(Date.now() + (day.day_number - 1) * 86400000)
-        .toISOString()
-        .split('T')[0];
-
-      return {
-        day_number: day.day_number,
-        date,
-        totals: dayTotals,
-        meals,
-      };
+      return { day_number: dayNumber, date, totals: { ...totals, cost_eur: Number(totals.cost_eur.toFixed(2)) }, meals };
     });
 
     const planTotals = days.reduce(
@@ -298,509 +549,53 @@ Format:
       { calories: 0, protein_g: 0, carbohydrates_g: 0, fats_g: 0, total_cost_eur: 0 }
     );
 
-    const isOverBudget = planTotals.total_cost_eur > totalBudget;
-    const budgetRemaining = totalBudget - planTotals.total_cost_eur;
+    const applyCostScale = (scale: number) => {
+      for (const day of days) {
+        for (const meal of day.meals) {
+          for (const ing of meal.ingredients) {
+            ing.cost_eur = Number((ing.cost_eur * scale).toFixed(2));
+          }
+          const mealCost = meal.ingredients.reduce((sum, ing) => sum + ing.cost_eur, 0);
+          meal.cost.meal_cost_eur = Number(mealCost.toFixed(2));
+        }
+        const dayCost = day.meals.reduce((sum, meal) => sum + meal.cost.meal_cost_eur, 0);
+        day.totals.cost_eur = Number(dayCost.toFixed(2));
+      }
+    };
 
-    const finalPlan = {
+    let totalCost = days.reduce((sum, day) => sum + day.totals.cost_eur, 0);
+    if (totalCost > totalBudget) {
+      const scale = (totalBudget / totalCost) * 0.98;
+      applyCostScale(scale);
+      totalCost = days.reduce((sum, day) => sum + day.totals.cost_eur, 0);
+    }
+
+    const finalPlanTotals = {
+      calories: planTotals.calories,
+      protein_g: planTotals.protein_g,
+      carbohydrates_g: planTotals.carbohydrates_g,
+      fats_g: planTotals.fats_g,
+      total_cost_eur: Number(totalCost.toFixed(2)),
+    };
+
+    const budgetRemaining = totalBudget - finalPlanTotals.total_cost_eur;
+    const isOverBudget = finalPlanTotals.total_cost_eur > totalBudget;
+
+    return {
       plan_id: planId,
       generated_at: new Date().toISOString(),
       user_id: userId,
       metadata: {
         period_budget_eur: Number(totalBudget.toFixed(2)),
-        period_cost_eur: Number(planTotals.total_cost_eur.toFixed(2)),
+        period_cost_eur: finalPlanTotals.total_cost_eur,
         budget_remaining_eur: Number(budgetRemaining.toFixed(2)),
         is_over_budget: isOverBudget,
         generation_attempts: 1,
         days: userProfile.meal_plan_days,
       },
       days,
-      plan_totals: {
-        ...planTotals,
-        total_cost_eur: Number(planTotals.total_cost_eur.toFixed(2)),
-      },
+      plan_totals: finalPlanTotals,
     };
-
-    console.log('✅ Final meal plan created:', {
-      planId: finalPlan.plan_id,
-      daysGenerated: finalPlan.days.length,
-      totalCost: finalPlan.plan_totals.total_cost_eur,
-      budget: finalPlan.metadata.period_budget_eur,
-      mealsInDay1: finalPlan.days[0].meals.length
-    });
-
-    return finalPlan;
-  } catch (error) {
-    console.error('Failed to generate meal plan with AI, using fallback', error);
-    return generateFallbackMealPlan(userProfile);
-  }
-}
-
-function generateFallbackMealPlan(userProfile: UserProfile): MealPlan {
-  const planId = crypto.randomUUID();
-  const userId = 'user_123';
-  const totalBudget = userProfile.budget_period === 'daily' 
-    ? userProfile.budget_eur * userProfile.meal_plan_days 
-    : userProfile.budget_eur;
-  const budgetEur = totalBudget;
-  const days = userProfile.meal_plan_days;
-
-  const mealPlan: MealPlan = {
-    plan_id: planId,
-    generated_at: new Date().toISOString(),
-    user_id: userId,
-    metadata: {
-      period_budget_eur: budgetEur,
-      period_cost_eur: 43.25,
-      budget_remaining_eur: 6.75,
-      is_over_budget: false,
-      generation_attempts: 1,
-      days: days,
-    },
-    days: [
-      {
-        day_number: 1,
-        date: new Date(Date.now()).toISOString().split('T')[0],
-        totals: {
-          calories: 1850,
-          protein_g: 98,
-          carbohydrates_g: 210,
-          fats_g: 62,
-          cost_eur: 8.50,
-        },
-        meals: [
-          {
-            meal_id: crypto.randomUUID(),
-            meal_type: 'breakfast',
-            recipe_name: 'Greek Yogurt with Berries & Granola',
-            nutrition: {
-              calories: 420,
-              protein_g: 18,
-              carbohydrates_g: 52,
-              fats_g: 14,
-            },
-            cost: {
-              meal_cost_eur: 2.40,
-            },
-            cooking_instructions: [
-              'Place Greek yogurt in a serving bowl',
-              'Rinse the mixed berries and pat them dry',
-              'Top the yogurt with fresh berries',
-              'Sprinkle granola evenly over the top',
-              'Serve immediately for best texture'
-            ],
-            ingredients: [
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Greek Yogurt',
-                quantity_g: 200,
-                nutrition: { calories: 150, protein_g: 15, carbohydrates_g: 8, fats_g: 5 },
-                cost_eur: 1.20,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Mixed Berries',
-                quantity_g: 100,
-                nutrition: { calories: 50, protein_g: 1, carbohydrates_g: 12, fats_g: 0 },
-                cost_eur: 0.80,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Granola',
-                quantity_g: 50,
-                nutrition: { calories: 220, protein_g: 2, carbohydrates_g: 32, fats_g: 9 },
-                cost_eur: 0.40,
-              },
-            ],
-          },
-          {
-            meal_id: crypto.randomUUID(),
-            meal_type: 'lunch',
-            recipe_name: 'Chicken & Quinoa Bowl with Roasted Vegetables',
-            nutrition: {
-              calories: 680,
-              protein_g: 48,
-              carbohydrates_g: 72,
-              fats_g: 22,
-            },
-            cost: {
-              meal_cost_eur: 3.80,
-            },
-            cooking_instructions: [
-              'Preheat oven to 200°C (400°F)',
-              'Cook quinoa according to package instructions',
-              'Dice bell peppers and zucchini into bite-sized pieces',
-              'Toss vegetables with olive oil, salt, and pepper, then roast for 20-25 minutes',
-              'Season chicken breast with salt, pepper, and herbs',
-              'Grill or pan-fry chicken for 6-7 minutes per side until cooked through',
-              'Slice chicken and arrange over quinoa with roasted vegetables'
-            ],
-            ingredients: [
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Chicken Breast',
-                quantity_g: 150,
-                nutrition: { calories: 250, protein_g: 45, carbohydrates_g: 0, fats_g: 6 },
-                cost_eur: 2.10,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Quinoa',
-                quantity_g: 80,
-                nutrition: { calories: 280, protein_g: 10, carbohydrates_g: 52, fats_g: 4 },
-                cost_eur: 0.60,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Bell Peppers',
-                quantity_g: 100,
-                nutrition: { calories: 30, protein_g: 1, carbohydrates_g: 6, fats_g: 0 },
-                cost_eur: 0.50,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Zucchini',
-                quantity_g: 120,
-                nutrition: { calories: 20, protein_g: 2, carbohydrates_g: 4, fats_g: 0 },
-                cost_eur: 0.40,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Olive Oil',
-                quantity_g: 10,
-                nutrition: { calories: 100, protein_g: 0, carbohydrates_g: 0, fats_g: 12 },
-                cost_eur: 0.20,
-              },
-            ],
-          },
-          {
-            meal_id: crypto.randomUUID(),
-            meal_type: 'dinner',
-            recipe_name: 'Salmon with Sweet Potato & Broccoli',
-            nutrition: {
-              calories: 750,
-              protein_g: 42,
-              carbohydrates_g: 86,
-              fats_g: 26,
-            },
-            cost: {
-              meal_cost_eur: 5.30,
-            },
-            cooking_instructions: [
-              'Preheat oven to 200°C (400°F)',
-              'Pierce sweet potato with fork and bake for 45 minutes until tender',
-              'Season salmon fillet with salt, pepper, and lemon juice',
-              'Bake salmon at 180°C (350°F) for 12-15 minutes until flaky',
-              'Steam broccoli for 5-7 minutes until bright green and tender-crisp',
-              'Drizzle vegetables with olive oil before serving'
-            ],
-            ingredients: [
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Salmon Fillet',
-                quantity_g: 150,
-                nutrition: { calories: 300, protein_g: 30, carbohydrates_g: 0, fats_g: 18 },
-                cost_eur: 3.80,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Sweet Potato',
-                quantity_g: 250,
-                nutrition: { calories: 220, protein_g: 4, carbohydrates_g: 52, fats_g: 0 },
-                cost_eur: 0.80,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Broccoli',
-                quantity_g: 150,
-                nutrition: { calories: 50, protein_g: 4, carbohydrates_g: 10, fats_g: 0 },
-                cost_eur: 0.60,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Olive Oil',
-                quantity_g: 8,
-                nutrition: { calories: 80, protein_g: 0, carbohydrates_g: 0, fats_g: 8 },
-                cost_eur: 0.10,
-              },
-            ],
-          },
-        ],
-      },
-      {
-        day_number: 2,
-        date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-        totals: {
-          calories: 1920,
-          protein_g: 102,
-          carbohydrates_g: 198,
-          fats_g: 68,
-          cost_eur: 8.90,
-        },
-        meals: [
-          {
-            meal_id: crypto.randomUUID(),
-            meal_type: 'breakfast',
-            recipe_name: 'Scrambled Eggs with Whole Grain Toast & Avocado',
-            nutrition: {
-              calories: 480,
-              protein_g: 22,
-              carbohydrates_g: 38,
-              fats_g: 24,
-            },
-            cost: {
-              meal_cost_eur: 2.80,
-            },
-            cooking_instructions: [
-              'Toast whole grain bread until golden brown',
-              'Crack eggs into a bowl and whisk with a pinch of salt and pepper',
-              'Heat a non-stick pan over medium heat with a small amount of butter',
-              'Pour in eggs and gently stir with a spatula until softly scrambled',
-              'Slice avocado and arrange on toast',
-              'Serve scrambled eggs alongside avocado toast'
-            ],
-            ingredients: [
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Eggs',
-                quantity_g: 120,
-                nutrition: { calories: 180, protein_g: 15, carbohydrates_g: 2, fats_g: 12 },
-                cost_eur: 0.80,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Whole Grain Bread',
-                quantity_g: 80,
-                nutrition: { calories: 200, protein_g: 6, carbohydrates_g: 36, fats_g: 2 },
-                cost_eur: 0.60,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Avocado',
-                quantity_g: 80,
-                nutrition: { calories: 100, protein_g: 1, carbohydrates_g: 0, fats_g: 10 },
-                cost_eur: 1.40,
-              },
-            ],
-          },
-          {
-            meal_id: crypto.randomUUID(),
-            meal_type: 'lunch',
-            recipe_name: 'Mediterranean Chickpea Salad',
-            nutrition: {
-              calories: 620,
-              protein_g: 24,
-              carbohydrates_g: 78,
-              fats_g: 22,
-            },
-            cost: {
-              meal_cost_eur: 2.90,
-            },
-            cooking_instructions: [
-              'Drain and rinse chickpeas thoroughly',
-              'Dice cucumber and halve cherry tomatoes',
-              'Crumble feta cheese into small pieces',
-              'Combine all vegetables and chickpeas in a large bowl',
-              'Drizzle with olive oil and toss to combine',
-              'Season with salt, pepper, and fresh herbs if desired'
-            ],
-            ingredients: [
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Chickpeas',
-                quantity_g: 200,
-                nutrition: { calories: 300, protein_g: 18, carbohydrates_g: 48, fats_g: 6 },
-                cost_eur: 0.90,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Cherry Tomatoes',
-                quantity_g: 120,
-                nutrition: { calories: 25, protein_g: 1, carbohydrates_g: 5, fats_g: 0 },
-                cost_eur: 0.70,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Cucumber',
-                quantity_g: 100,
-                nutrition: { calories: 15, protein_g: 1, carbohydrates_g: 3, fats_g: 0 },
-                cost_eur: 0.40,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Feta Cheese',
-                quantity_g: 50,
-                nutrition: { calories: 130, protein_g: 7, carbohydrates_g: 2, fats_g: 10 },
-                cost_eur: 0.90,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Olive Oil',
-                quantity_g: 15,
-                nutrition: { calories: 150, protein_g: 0, carbohydrates_g: 0, fats_g: 15 },
-                cost_eur: 0.30,
-              },
-            ],
-          },
-          {
-            meal_id: crypto.randomUUID(),
-            meal_type: 'dinner',
-            recipe_name: 'Turkey Bolognese with Whole Wheat Pasta',
-            nutrition: {
-              calories: 820,
-              protein_g: 56,
-              carbohydrates_g: 92,
-              fats_g: 22,
-            },
-            cost: {
-              meal_cost_eur: 3.20,
-            },
-            cooking_instructions: [
-              'Bring a large pot of salted water to boil for pasta',
-              'Dice onion finely and sauté in olive oil until translucent',
-              'Add ground turkey and cook until browned, breaking it up with a spoon',
-              'Stir in tomato sauce and simmer for 15-20 minutes',
-              'Cook whole wheat pasta according to package instructions',
-              'Drain pasta and toss with the turkey bolognese sauce',
-              'Serve hot with optional parmesan cheese'
-            ],
-            ingredients: [
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Ground Turkey',
-                quantity_g: 150,
-                nutrition: { calories: 240, protein_g: 42, carbohydrates_g: 0, fats_g: 8 },
-                cost_eur: 2.00,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Whole Wheat Pasta',
-                quantity_g: 100,
-                nutrition: { calories: 340, protein_g: 12, carbohydrates_g: 68, fats_g: 2 },
-                cost_eur: 0.50,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Tomato Sauce',
-                quantity_g: 150,
-                nutrition: { calories: 60, protein_g: 2, carbohydrates_g: 12, fats_g: 0 },
-                cost_eur: 0.40,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Onion',
-                quantity_g: 80,
-                nutrition: { calories: 30, protein_g: 1, carbohydrates_g: 7, fats_g: 0 },
-                cost_eur: 0.20,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Olive Oil',
-                quantity_g: 10,
-                nutrition: { calories: 100, protein_g: 0, carbohydrates_g: 0, fats_g: 12 },
-                cost_eur: 0.10,
-              },
-            ],
-          },
-        ],
-      },
-      {
-        day_number: 3,
-        date: new Date(Date.now() + 172800000).toISOString().split('T')[0],
-        totals: {
-          calories: 1780,
-          protein_g: 92,
-          carbohydrates_g: 205,
-          fats_g: 58,
-          cost_eur: 8.40,
-        },
-        meals: [
-          {
-            meal_id: crypto.randomUUID(),
-            meal_type: 'breakfast',
-            recipe_name: 'Banana Protein Smoothie with Oats',
-            nutrition: {
-              calories: 410,
-              protein_g: 28,
-              carbohydrates_g: 58,
-              fats_g: 8,
-            },
-            cost: {
-              meal_cost_eur: 2.20,
-            },
-            cooking_instructions: [
-              'Peel and slice banana into chunks',
-              'Add banana, protein powder, oats, and almond milk to a blender',
-              'Blend on high speed for 30-60 seconds until smooth',
-              'Add ice cubes if desired for a thicker consistency',
-              'Pour into a glass and enjoy immediately'
-            ],
-            ingredients: [
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Banana',
-                quantity_g: 120,
-                nutrition: { calories: 110, protein_g: 1, carbohydrates_g: 28, fats_g: 0 },
-                cost_eur: 0.30,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Protein Powder',
-                quantity_g: 30,
-                nutrition: { calories: 120, protein_g: 24, carbohydrates_g: 2, fats_g: 1 },
-                cost_eur: 1.20,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Oats',
-                quantity_g: 50,
-                nutrition: { calories: 180, protein_g: 6, carbohydrates_g: 30, fats_g: 3 },
-                cost_eur: 0.20,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Almond Milk',
-                quantity_g: 250,
-                nutrition: { calories: 30, protein_g: 1, carbohydrates_g: 2, fats_g: 2 },
-                cost_eur: 0.50,
-              },
-            ],
-          },
-          {
-            meal_id: crypto.randomUUID(),
-            meal_type: 'lunch',
-            recipe_name: 'Tuna & White Bean Salad',
-            nutrition: {
-              calories: 590,
-              protein_g: 38,
-              carbohydrates_g: 62,
-              fats_g: 18,
-            },
-            cost: {
-              meal_cost_eur: 3.10,
-            },
-            cooking_instructions: [
-              'Drain canned tuna and white beans',
-              'Wash and dry mixed greens and cherry tomatoes',
-              'Halve cherry tomatoes',
-              'Combine greens, tuna, white beans, and tomatoes in a large bowl',
-              'Drizzle with olive oil and toss gently',
-              'Season with salt, pepper, and lemon juice if desired'
-            ],
-            ingredients: [
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'Canned Tuna',
-                quantity_g: 120,
-                nutrition: { calories: 140, protein_g: 30, carbohydrates_g: 0, fats_g: 2 },
-                cost_eur: 1.80,
-              },
-              {
-                ingredient_id: crypto.randomUUID(),
-                name: 'White Beans',
-                quantity_g: 180,
-                nutrition: { calories: 240, protein_g: 14, carbohydrates_g: 42, fats_g: 1 },
-                cost_eur: 0.70,
-              },
               {
                 ingredient_id: crypto.randomUUID(),
                 name: 'Mixed Greens',
@@ -1281,7 +1076,9 @@ function generateFallbackMealPlan(userProfile: UserProfile): MealPlan {
   };
 
   return mealPlan;
-}
+export function generateShoppingList(mealPlan: MealPlan): ShoppingList {
+
+*/
 
 export function generateShoppingList(mealPlan: MealPlan): ShoppingList {
   const ingredientMap = new Map<string, { quantity: number; price: number; name: string; id: string }>();

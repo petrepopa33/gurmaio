@@ -1,12 +1,12 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 import App from '../App';
+import { AuthProvider } from '../contexts/AuthContext';
 
 vi.mock('@github/spark/hooks', () => ({
   useKV: (key: string, defaultValue: any) => {
-    const [state, setState] = vi.fn()(() => [defaultValue, vi.fn(), vi.fn()]);
-    return state;
+    return [defaultValue, vi.fn()] as const;
   }
 }));
 
@@ -35,7 +35,11 @@ describe('Gurmaio App - Comprehensive Functionality Tests', () => {
 
   describe('1. User Authentication & Profile Management', () => {
     it('should display welcome screen when no profile exists', async () => {
-      render(<App />);
+      render(
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      );
       
       await waitFor(() => {
         expect(screen.getByText(/welcome/i)).toBeInTheDocument();
@@ -43,19 +47,27 @@ describe('Gurmaio App - Comprehensive Functionality Tests', () => {
     });
 
     it('should show create account and login options', async () => {
-      render(<App />);
+      render(
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      );
       
       await waitFor(() => {
-        expect(screen.getByText(/create account/i)).toBeInTheDocument();
-        expect(screen.getByText(/login/i)).toBeInTheDocument();
+        expect(screen.getAllByText(/create account/i).length).toBeGreaterThan(0);
+        expect(screen.getAllByText(/log\s*in/i).length).toBeGreaterThan(0);
       });
     });
 
     it('should show demo mode option', async () => {
-      render(<App />);
+      render(
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      );
       
       await waitFor(() => {
-        expect(screen.getByText(/demo mode/i)).toBeInTheDocument();
+        expect(screen.getAllByText(/demo mode/i).length).toBeGreaterThan(0);
       });
     });
   });

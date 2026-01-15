@@ -7,6 +7,13 @@ export interface StreakInfo {
   streakActive: boolean;
 }
 
+function formatLocalDate(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, '0');
+  const d = String(date.getDate()).padStart(2, '0');
+  return `${y}-${m}-${d}`;
+}
+
 export function calculateStreak(completedDays: DayProgress[]): StreakInfo {
   if (!completedDays || completedDays.length === 0) {
     return {
@@ -55,7 +62,7 @@ export function calculateStreak(completedDays: DayProgress[]): StreakInfo {
       checkDate = new Date(yesterday);
     }
     
-    while (dateSet.has(checkDate.toISOString().split('T')[0])) {
+    while (dateSet.has(formatLocalDate(checkDate))) {
       currentStreak++;
       checkDate.setDate(checkDate.getDate() - 1);
     }
