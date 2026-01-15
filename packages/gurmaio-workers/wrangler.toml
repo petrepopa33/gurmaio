@@ -1,0 +1,12 @@
+name = "gurmaio-workers"
+main = "src/index.ts"
+compatibility_date = "2025-01-01"
+
+# Recommended env vars (set via `wrangler secret put ...` for deploy):
+# SUPABASE_URL
+# SUPABASE_SERVICE_ROLE_KEY
+# ALLOWED_ORIGINS (optional, comma-separated)
+
+[vars]
+# Default to permissive for local dev; override in production.
+ALLOWED_ORIGINS = "*"
